@@ -1,21 +1,66 @@
-/* AlQuran service worker — build 20261111.190918
-   App shell is cached on install and served cache-first, so the app opens with no internet indefinitely.
-   A new build is detected when this file changes; the page then offers "Update". */
-const BUILD = '20261111.190918';
+/* AlQuran service worker — build 20261111.194616
+   Saves the whole app (page, Quran data, icons) on install, with retries, and serves it cache-first,
+   so AlQuran opens with no internet indefinitely. Every online launch the page asks it to check and
+   repair the offline copy. A new build is detected when this file changes. */
+const BUILD = '20261111.194616';
 const CACHE = 'alquran-' + BUILD;
 const RUNTIME = 'alquran-runtime';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png', './data/ara-quranuthmanihaf.bin', './data/eng-muftitaqiusmani.bin', './data/eng-ummmuhammad.bin', './data/eng-abdullahyusufal.bin', './data/eng-mohammedmarmadu.bin', './data/fra-muhammadhamidul.bin', './data/deu-asfbubenheimand.bin', './data/kur-burhanmuhammada.bin', './data/kur-muhammadsalehba.bin', './data/ara-quran-la.bin', './data/ara-kingfahadquranc.bin', './data/ara-quransimple.bin'];
+const abs = u => new URL(u, self.registration.scope).href;
+const INDEX = () => abs('./index.html');
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))));
-});
+async function tell(msg) { for (const c of await self.clients.matchAll({ type: 'window', includeUncontrolled: true })) c.postMessage(msg); }
+let saving = null;
+function precache() {
+  if (saving) return saving;
+  saving = (async () => {
+    const c = await caches.open(CACHE); let done = 0;
+    for (const u of SHELL) {
+      const url = abs(u);
+      if (await c.match(url)) { done++; continue; }
+      let ok = false, err = '';
+      for (let i = 0; i < 4 && !ok; i++) {
+        try { const r = await fetch(new Request(url, { cache: 'reload' })); if (r.ok && !r.redirected) { await c.put(url, r); ok = true; } else err = 'HTTP ' + r.status; }
+        catch (e) { err = e.message; await new Promise(r => setTimeout(r, 700 * (i + 1))); }
+      }
+      if (!ok) { await tell({ type: 'offline-progress', done, total: SHELL.length, error: u + ': ' + err }); throw new Error('Could not save ' + u); }
+      done++; await tell({ type: 'offline-progress', done, total: SHELL.length });
+    }
+    await tell({ type: 'offline-ready', build: BUILD, total: SHELL.length });
+    return done;
+  })().finally(() => { saving = null; });
+  return saving;
+}
+async function status() {
+  const c = await caches.open(CACHE); let n = 0;
+  for (const u of SHELL) if (await c.match(abs(u))) n++;
+  return { type: 'offline-status', build: BUILD, cached: n, total: SHELL.length };
+}
+
+self.addEventListener('install', e => { e.waitUntil(precache()); });
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith('alquran-') && k !== CACHE && k !== RUNTIME) await caches.delete(k);
+    const st = await status();
+    if (st.cached === st.total) for (const k of await caches.keys()) if (k.startsWith('alquran-') && k !== CACHE && k !== RUNTIME) await caches.delete(k);
     await self.clients.claim();
   })());
 });
-self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });
+self.addEventListener('message', e => {
+  const d = e.data;
+  if (d === 'skipWaiting') self.skipWaiting();
+  if (d === 'ensure') e.waitUntil(precache().catch(() => {}));
+  if (d === 'status') e.waitUntil(status().then(s => e.source && e.source.postMessage(s)));
+});
+
+async function cachedPage() {
+  const own = await caches.open(CACHE);
+  return (await own.match(INDEX())) || (await own.match(abs('./'))) || (await caches.match(INDEX(), { ignoreSearch: true })) || (await caches.match(abs('./'), { ignoreSearch: true }));
+}
+const OFFLINE_HTML = `<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AlQuran</title>
+<body style="font-family:-apple-system,system-ui,sans-serif;background:#0b3527;color:#f3ead0;display:grid;place-items:center;min-height:100vh;margin:0;text-align:center;padding:24px">
+<div><div style="font-size:42px">📖</div><h2 style="margin:8px 0">AlQuran isn't saved on this phone yet</h2>
+<p style="opacity:.85;line-height:1.5">Connect to the internet once and open AlQuran.<br>Keep it open until you see <b>“Works offline ✓”</b>.<br>After that it works without internet.</p>
+<button onclick="location.reload()" style="margin-top:12px;padding:12px 20px;border-radius:12px;border:0;background:#d8b56a;color:#0b3527;font-weight:700;font-size:16px">Try again</button></div></body>`;
 
 self.addEventListener('fetch', e => {
   const req = e.request;
@@ -23,19 +68,20 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (req.mode === 'navigate') {
     e.respondWith((async () => {
-      const hit = await caches.match('./index.html', { ignoreSearch: true });
+      const hit = await cachedPage();
       if (hit) return hit;
-      try { return await fetch(req); } catch (err) { return new Response('<h1>AlQuran is offline</h1><p>Open it once with internet to finish installing.</p>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } }); }
+      try { const r = await fetch(req); return r; }
+      catch (err) { return new Response(OFFLINE_HTML, { headers: { 'Content-Type': 'text/html; charset=utf-8' } }); }
     })());
     return;
   }
   if (url.origin === self.location.origin) {
     if (url.pathname.endsWith('/sw.js')) return;
     e.respondWith((async () => {
-      const hit = await caches.match(req, { ignoreSearch: true });
+      const hit = (await caches.match(req, { ignoreSearch: true })) || (await caches.match(url.origin + url.pathname, { ignoreSearch: true }));
       if (hit) return hit;
       const res = await fetch(req);
-      if (res.ok) { const c = await caches.open(RUNTIME); c.put(req, res.clone()); }
+      if (res.ok) { const c = await caches.open(CACHE); c.put(url.origin + url.pathname, res.clone()); }
       return res;
     })());
     return;
@@ -47,7 +93,6 @@ self.addEventListener('fetch', e => {
       return hit || net;
     })());
   }
-  /* recitation audio streams from the network; downloaded surahs are played from IndexedDB by the page */
 });
 
 self.addEventListener('notificationclick', e => {
