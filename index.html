@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261111.194616";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261111.201947";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -464,6 +464,13 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 
 .offb{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.12);color:#f3ead0}
 .offb.ok{background:rgba(47,179,111,.22);color:#c9f1d9}.offb.saving{background:rgba(216,181,106,.22);color:#f3dfae}.offb.bad{background:rgba(220,90,70,.25);color:#ffd2c9}
+
+#pzBadge{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%) scale(.9);background:rgba(11,53,39,.92);color:#f3ead0;padding:6px 16px;border-radius:99px;z-index:95;opacity:0;transition:opacity .15s,transform .15s;pointer-events:none;display:flex;gap:10px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+#pzBadge.on{opacity:1;transform:translateX(-50%) scale(1)}
+#pzBadge b{font-size:16px;font-variant-numeric:tabular-nums}
+html{touch-action:manipulation}
+#qBody,#zList{transform-origin:50% 0}
+.mushaf .mtext,.ayah .atext{overflow-wrap:break-word}
 </style>
 </head>
 <body>
@@ -1415,8 +1422,8 @@ function openDrawer() {
   <div class="grp"><label class="f">Arabic font</label><select data-k="font">
     ${[['UthmanicHafs', 'KFGQPC Uthmanic Hafs (Madinah Mushaf)'], ['Amiri Quran', 'Amiri Quran'], ['Scheherazade New', 'Scheherazade New'], ['Noto Naskh Arabic', 'Noto Naskh Arabic']].map(([v, l]) => `<option value="${v}" ${S.font === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <div class="ar" style="font-size:28px;text-align:center;margin-top:10px;line-height:2" id="fontPrev">ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</div></div>
-  <div class="grp"><label class="f">Arabic size · <span id="qsV">${S.qsize}</span>px</label><input type="range" min="22" max="64" value="${S.qsize}" data-k="qsize">
-    <label class="f" style="margin-top:12px">Translation size · <span id="tsV">${S.tsize}</span>px</label><input type="range" min="13" max="28" value="${S.tsize}" data-k="tsize"></div>
+  <div class="grp"><label class="f">Arabic size · <span id="qsV">${S.qsize}</span>px</label><input type="range" min="18" max="72" value="${S.qsize}" data-k="qsize">
+    <label class="f" style="margin-top:12px">Translation size · <span id="tsV">${S.tsize}</span>px</label><input type="range" min="12" max="30" value="${S.tsize}" data-k="tsize"></div>
   <div class="grp"><label class="f">Translations</label>
     ${Object.entries(EDITIONS).map(([k, E]) => `<div class="opt"><div style="flex:1"><b>${E.label}</b>
       <select data-tr="${k}" style="margin-top:4px">${E.options.map(([v, l]) => `<option value="${v}" ${S.tr[k] === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>${sw('show.' + k, S.show[k])}</div>`).join('')}
@@ -2936,6 +2943,97 @@ function deviceInit() {
 }
 
 init();
+
+/* =====================================================================
+   PINCH TO ZOOM TEXT (like Quran Explorer): two fingers resize the Quran /
+   azkar text; on release the lines re-wrap to the screen width and the ayah
+   under your fingers stays where it was. Header and menu never zoom.
+   ===================================================================== */
+const PZ = { on: false, d0: 0, s: 1, el: null, kind: null, mid: null, anchor: null, base: 0, suppress: 0 };
+const pzDist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+const PZ_LIM = { quran: [18, 72], azkar: [16, 48] };
+function pzKind(t) {
+  if (!t || !t.closest) return null;
+  if (t.closest('#v-quran') && R.range) return 'quran';
+  if (t.closest('#v-azkar') && $('#zList')) return 'azkar';
+  return null;
+}
+function pzAnchorOf(x, y) {
+  const hit = document.elementFromPoint(x, y);
+  let el = hit && hit.closest('.ma,.ayah,.zitem');
+  if (!el) {   /* fingers between lines or ayat: hold the nearest ayah instead */
+    let best = null, bd = 1e9;
+    $$('#qBody .ma, #qBody .ayah, #zList .zitem').forEach(n => { const r = n.getBoundingClientRect(); if (r.bottom < -200 || r.top > innerHeight + 200) return; const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < bd) { bd = d; best = n; } });
+    el = best;
+  }
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { sel: el.id ? '#' + el.id : el.classList.contains('zitem') ? `.zitem[data-i="${el.dataset.i}"]` : null, el, top: r.top, y };
+}
+/* put the ayah back where it was on screen when the fingers lifted (its top, scaled around the pinch point) */
+function pzRestore(an, s) {
+  if (!an) return;
+  const want = an.y + (an.top - an.y) * (s || 1);
+  const go = () => { const el = (an.sel && document.querySelector(an.sel)) || (an.el.isConnected ? an.el : null); if (!el) return; window.scrollBy(0, el.getBoundingClientRect().top - want); };
+  requestAnimationFrame(() => requestAnimationFrame(() => { go(); setTimeout(go, 120); }));
+}
+function pzBadge(size) {
+  let b = $('#pzBadge');
+  if (!b) { b = document.createElement('div'); b.id = 'pzBadge'; document.body.appendChild(b); }
+  if (size == null) { b.classList.remove('on'); return; }
+  b.innerHTML = `<span class="ar" style="font-size:20px">بِسۡمِ</span> <b>${size}</b>`; b.classList.add('on');
+}
+function pzCur(kind) { return kind === 'quran' ? S.qsize : S.azkarSize; }
+function pzApply(kind, size, anchor, s) {
+  const [lo, hi] = PZ_LIM[kind], n = Math.round(Math.max(lo, Math.min(hi, size)));
+  if (kind === 'quran') {
+    const ratio = n / S.qsize; S.qsize = n; S.tsize = Math.round(Math.max(12, Math.min(30, S.tsize * ratio))); applyLook();
+  } else { S.azkarSize = n; drawAzList(); }
+  save(); pzRestore(anchor, s);
+  const sl = $('[data-k="qsize"]'); if (sl) { sl.value = S.qsize; const v = $('#qsV'); if (v) v.textContent = S.qsize; }
+}
+document.addEventListener('touchstart', e => {
+  if (e.touches.length !== 2) return;
+  const kind = pzKind(e.target) || pzKind(e.touches[0].target); if (!kind) return;
+  const [a, b] = e.touches, mx = (a.clientX + b.clientX) / 2, my = (a.clientY + b.clientY) / 2;
+  PZ.on = true; PZ.kind = kind; PZ.d0 = pzDist(a, b) || 1; PZ.s = 1; PZ.base = pzCur(kind);
+  PZ.el = kind === 'quran' ? $('#qBody') : $('#zList'); PZ.mid = { x: mx, y: my }; PZ.anchor = pzAnchorOf(mx, my);
+  const r = PZ.el.getBoundingClientRect();
+  PZ.el.style.transformOrigin = `${mx - r.left}px ${my - r.top}px`; PZ.el.style.willChange = 'transform'; PZ.el.style.transition = 'none';
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('touchmove', e => {
+  if (!PZ.on) return;
+  if (e.touches.length < 2) return;
+  e.preventDefault();
+  const [lo, hi] = PZ_LIM[PZ.kind];
+  let s = pzDist(e.touches[0], e.touches[1]) / PZ.d0;
+  s = Math.max(lo / PZ.base, Math.min(hi / PZ.base, s)); PZ.s = s;
+  PZ.el.style.transform = `scale(${s})`;
+  pzBadge(Math.round(PZ.base * s));
+}, { passive: false });
+function pzEnd(e) {
+  if (!PZ.on || (e && e.touches && e.touches.length >= 2)) return;
+  PZ.on = false; PZ.suppress = Date.now() + 450;
+  const el = PZ.el, s = PZ.s; el.style.transform = ''; el.style.willChange = ''; el.style.transformOrigin = '';
+  pzBadge(null);
+  if (Math.abs(s - 1) > 0.02) { pzApply(PZ.kind, PZ.base * s, PZ.anchor, s); LOG('ui', `Pinch text size → ${PZ.kind === 'quran' ? S.qsize : S.azkarSize}`); }
+}
+document.addEventListener('touchend', pzEnd, { passive: true });
+document.addEventListener('touchcancel', pzEnd, { passive: true });
+document.addEventListener('click', e => { if (Date.now() < PZ.suppress) { e.stopPropagation(); e.preventDefault(); } }, true);
+/* stop the phone's own page zoom (it zoomed the header and menu too and pushed text off-screen) */
+['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+/* trackpad pinch / Ctrl + mouse wheel on computers */
+let pzWheelT, pzWheelAnchor = null, pzWheelSize = null;
+document.addEventListener('wheel', e => {
+  if (!e.ctrlKey) return; const kind = pzKind(e.target); if (!kind) return;
+  e.preventDefault();
+  if (pzWheelSize == null) { pzWheelSize = pzCur(kind); pzWheelAnchor = pzAnchorOf(e.clientX, e.clientY); }
+  const [lo, hi] = PZ_LIM[kind]; pzWheelSize = Math.max(lo, Math.min(hi, pzWheelSize * Math.exp(-e.deltaY * 0.01)));
+  pzBadge(Math.round(pzWheelSize));
+  clearTimeout(pzWheelT); pzWheelT = setTimeout(() => { pzApply(kind, pzWheelSize, pzWheelAnchor, 1); pzWheelSize = null; pzBadge(null); }, 180);
+}, { passive: false });
 
 </script>
 </body>
