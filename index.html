@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261111.154118";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261111.190918";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@ a{color:var(--g6)}
 .nav a.on{background:linear-gradient(90deg,rgba(216,181,106,.22),rgba(216,181,106,.06));color:#fff}
 .nav a.on::before{content:'';position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--gold2)}
 .side .foot{margin-top:auto;font-size:11.5px;color:rgba(239,231,207,.45);padding:12px 8px 0;line-height:1.5}
-main{margin-left:var(--side);min-height:100vh;padding:26px 34px 120px}
+main{margin-left:var(--side);min-height:100vh;padding:26px 34px calc(var(--plh,0px) + 60px)}
 .view{display:none;max-width:980px;margin:0 auto;animation:fade .25s ease}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -408,7 +408,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 /* ---------- responsive ---------- */
 @media (max-width:900px){
   .side{display:none}
-  main{margin-left:0;padding:14px 14px 150px}
+  main{margin-left:0;padding:14px 14px calc(var(--navh,64px) + var(--plh,0px) + 40px)}
   .topbar{padding-top:calc(10px + env(safe-area-inset-top))!important;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:25;padding:10px 14px;margin:-14px -14px 14px;background:var(--g9);color:#f3e8c8}
   .topbar b{font-family:var(--serif);font-size:21px;flex:1}
   .topbar .logo{width:30px;height:30px}
@@ -422,7 +422,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   .langs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;margin:0 -2px}
   .langs .lt{display:none}
   .lchip{flex:none}
-  .player{left:8px;right:8px;bottom:70px;padding:8px 10px;gap:6px}
+  .player{left:8px;right:8px;bottom:calc(var(--navh,64px) + 8px);padding:8px 10px;gap:6px}
   .player .hide-s{display:none}
   .g2,.g3,.qwrap,.tz{grid-template-columns:1fr}
   .ptimes{grid-template-columns:repeat(3,1fr)}
@@ -434,7 +434,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   h1.vt{font-size:28px}
   .hero{padding:22px}
   .hero .np .big{font-size:42px}
-  .toast{bottom:170px}
+  .toast{bottom:calc(var(--navh,64px) + var(--plh,0px) + 22px)}
   .srbox{position:static;padding:14px}
   .kb{padding:8px 4px}
   .kbr{gap:3px}
@@ -442,7 +442,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   .kbr button{height:40px;font-size:17px}
   .bottom a{font-size:9.5px}
   .bottom a svg{width:21px;height:21px}
-  .sheet{left:0;bottom:62px}
+  .sheet{left:0;bottom:var(--navh,62px)}
   .sheet .sin{max-height:66vh;padding:10px 14px 14px;border-radius:20px 20px 0 0}
 }
 @media print{
@@ -460,6 +460,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 .brand small{white-space:nowrap}
 [data-theme=dark] .seg button.on{background:#24372f;color:#ead9a8}
 [data-theme=dark] .seg{background:#111a16}
+.player .info span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -2803,14 +2804,16 @@ function drawOfflineAudio(progressOnly) {
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.__installEvt = e; if (curView === 'device') RENDER.device(); });
 window.addEventListener('appinstalled', () => { LOG('install', 'App installed'); toast('AlQuran installed ✓'); });
 let swReg = null, swRefreshing = false;
+window.__swFresh = Date.now();
 function setupSW() {
   if (!window.__PWA__ || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  const autoApply = w => { if (Date.now() - (window.__swFresh || 0) < 20000 && !(A.on && !A.el.paused)) { LOG('install', 'Auto-updating to the new version'); toast('Updating AlQuran…'); w.postMessage('skipWaiting'); return true; } return false; };
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
     swReg = reg; const hadCtrl = !!navigator.serviceWorker.controller;
     const watch = w => w && w.addEventListener('statechange', () => {
-      if (w.state === 'installed') { if (hadCtrl) showBanner('update', `${icon('download')} <span>A new version of AlQuran is ready.</span>`, [['Update', () => { w.postMessage('skipWaiting'); }], ['Later', () => {}]]); else { toast('AlQuran is ready to work offline ✓'); LOG('install', 'Offline cache ready (' + BUILD_ID + ')'); } }
+      if (w.state === 'installed') { if (hadCtrl && autoApply(w)) return; if (hadCtrl) showBanner('update', `${icon('download')} <span>A new version of AlQuran is ready.</span>`, [['Update', () => { w.postMessage('skipWaiting'); }], ['Later', () => {}]]); else { toast('AlQuran is ready to work offline ✓'); LOG('install', 'Offline cache ready (' + BUILD_ID + ')'); } }
     });
-    if (reg.waiting && hadCtrl) showBanner('update', `${icon('download')} <span>A new version of AlQuran is ready.</span>`, [['Update', () => reg.waiting.postMessage('skipWaiting')], ['Later', () => {}]]);
+    if (reg.waiting && hadCtrl && !autoApply(reg.waiting)) showBanner('update', `${icon('download')} <span>A new version of AlQuran is ready.</span>`, [['Update', () => reg.waiting.postMessage('skipWaiting')], ['Later', () => {}]]);
     watch(reg.installing); reg.addEventListener('updatefound', () => watch(reg.installing));
   }).catch(e => LOG('error', 'Service worker: ' + e.message));
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (swRefreshing) return; swRefreshing = true; location.reload(); });
@@ -2876,14 +2879,25 @@ RENDER.more = () => {
 /* =====================================================================
    START-UP for the device layer
    ===================================================================== */
+/* measure the bottom menu and the player on the real device (iPhone home-bar area differs per phone) */
+function measureChrome() {
+  const r = document.documentElement.style, nav = $('#bottom'), pl = $('#player');
+  const nh = nav && getComputedStyle(nav).display !== 'none' ? Math.ceil(nav.getBoundingClientRect().height) : 0;
+  const ph = pl && pl.classList.contains('on') ? Math.ceil(pl.getBoundingClientRect().height) + 10 : 0;
+  r.setProperty('--navh', nh + 'px'); r.setProperty('--plh', ph + 'px');
+}
 function deviceInit() {
+  measureChrome();
+  try { const ro = new ResizeObserver(measureChrome); ro.observe($('#bottom')); ro.observe($('#player')); } catch (e) {}
+  try { new MutationObserver(measureChrome).observe($('#player'), { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+  window.addEventListener('resize', measureChrome); window.addEventListener('orientationchange', () => setTimeout(measureChrome, 300));
   setupSW();
   if (!LS.ok) setTimeout(() => showBanner('nostore', `${icon('shield')} <span>This browser mode blocks saving, so changes last only until you close AlQuran.</span>`, [['OK', () => {}]]), 800);
   setTimeout(() => { bkAutoCheck('start'); bkCheckDataLoss(); }, 1500);
   setInterval(() => { remTick(); }, 15000);
   loadPT().catch(() => {}).then(() => remTick());
   setInterval(() => bkAutoCheck('timer'), 30 * 6e4);
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { remTick(); bkAutoCheck('resume'); if (swReg) swReg.update().catch(() => {}); } applyWake(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { window.__swFresh = Date.now(); remTick(); bkAutoCheck('resume'); if (swReg) swReg.update().then(() => { if (swReg.waiting && navigator.serviceWorker.controller && !(A.on && !A.el.paused)) { toast('Updating AlQuran…'); swReg.waiting.postMessage('skipWaiting'); } }).catch(() => {}); } applyWake(); });
   window.addEventListener('hashchange', () => setTimeout(applyWake, 50));
   ['play', 'pause'].forEach(ev => A.el.addEventListener(ev, applyWake));
   try { if (navigator.storage && navigator.storage.persist && IS_STANDALONE()) navigator.storage.persist(); } catch (e) {}

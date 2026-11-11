@@ -1,7 +1,7 @@
-/* AlQuran service worker — build 20261111.154118
+/* AlQuran service worker — build 20261111.190918
    App shell is cached on install and served cache-first, so the app opens with no internet indefinitely.
    A new build is detected when this file changes; the page then offers "Update". */
-const BUILD = '20261111.154118';
+const BUILD = '20261111.190918';
 const CACHE = 'alquran-' + BUILD;
 const RUNTIME = 'alquran-runtime';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
