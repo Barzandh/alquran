@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.231500";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.232500";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -743,8 +743,8 @@ const EDITIONS = {
   fr: { label: 'Français', name: 'Français', short: 'French', dir: 'ltr', options: [['fra-muhammadhamidul', 'Muhammad Hamidullah']] },
   de: { label: 'Deutsch', name: 'Deutsch', short: 'German', dir: 'ltr', options: [['deu-asfbubenheimand', 'Bubenheim & Elyas']] },
   ku: { label: 'کوردی', name: 'کوردی', short: 'Kurdish', dir: 'rtl', options: [['kur-burhanmuhammada', 'بورهان محەمەد ئەمین (تەفسیری ئاسان)'], ['kur-muhammadsalehba', 'محەمەد ساڵح بامۆکی']] },
-  sa: { label: 'التفسير', name: 'التفسير', short: 'Tafsir', dir: 'rtl', tafsir: true, options: [
-    ['ara-saddi', 'تفسير السعدي — تيسير الكريم الرحمن'], ['ara-tabari', 'تفسير الطبري — جامع البيان عن تأويل آي القرآن']] },
+  sa: { label: 'تفسير السعدي', name: 'تفسير السعدي', short: "Tafsir al-Sa'di", dir: 'rtl', tafsir: true, options: [['ara-saddi', 'تيسير الكريم الرحمن — للشيخ عبد الرحمن بن ناصر السعدي']] },
+  tb: { label: 'تفسير الطبري', name: 'تفسير الطبري', short: 'Tafsir al-Tabari', dir: 'rtl', tafsir: true, options: [['ara-tabari', 'جامع البيان عن تأويل آي القرآن — للإمام ابن جرير الطبري']] },
 };
 const EXTRA_EDITIONS = { translit: 'lat-hafs', translitOld: 'ara-quran-la', tafsir: 'ara-kingfahadquranc' };
 /* Latin reading of the Quran (for readers who don't know Arabic letters).
@@ -994,8 +994,8 @@ const LOGO = `<svg class="logo" viewBox="0 0 48 48"><g fill="none" stroke="#d8b5
 /* ============ SETTINGS ============ */
 const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
-  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada', sa: 'ara-saddi' },
-  show: { en: true, fr: false, de: false, ku: true, sa: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, tafsir: false,
+  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari' },
+  show: { en: true, fr: false, de: false, ku: true, sa: false, tb: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, tafsir: false,
   reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: /^ar\b/i.test(navigator.language || '') ? 'ar' : 'en', view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
@@ -1005,6 +1005,7 @@ const S = (() => {
   const s = LS.get('settings', {});
   const o = Object.assign({}, DEF, s);
   ['tr', 'show', 'adj'].forEach(k => o[k] = Object.assign({}, DEF[k], s[k] || {}));
+  if (s.tr && s.tr.sa === 'ara-tabari') { o.show.tb = true; o.show.sa = false; }   /* build 231500 kept both tafsirs under one switch */
   Object.keys(EDITIONS).forEach(k => { if (!EDITIONS[k].options.some(x => x[0] === o.tr[k])) o.tr[k] = DEF.tr[k]; });
   if (!o.fullScript) { o.view = 'mushaf'; o.fullScript = 1; }
   return o;
@@ -1090,7 +1091,7 @@ const activeTr = () => {
    and the others carry '^N-M'. full = the whole explanation (ayah sheet); otherwise a short pointer (ayah list). */
 function trValue(k, arr, g, full) {
   const v = arr[g - 1];
-  if (k !== 'sa' || v == null) return v;
+  if ((k !== 'sa' && k !== 'tb') || v == null) return v;
   let m = /^\^(\d+)-(\d+)$/.exec(v);
   if (m) {
     const lbl = `﴾تفسير الآيات ${toAr(m[1])}–${toAr(m[2])}﴿`;
@@ -1333,7 +1334,7 @@ function ayahHTML(it, i, trs, bmset) {
       <button data-act="bm" title="Bookmark" class="${bm ? 'on' : ''}">${icon(bm ? 'bmf' : 'bm')}</button>
       <button data-act="copy" title="Copy">${icon('copy')}</button></div>
     <div class="atext">${esc(it.ar)}${it.sj ? '<span class="sajda">۩ Sajda</span>' : ''} <span class="amark">${toAr(it.n)}</span></div>
-    <div class="trs">${trs.map(t => { const v = it.trs[t.ed]; if (v == null) return ''; const rtl = t.lang === 'ku' || t.lang === 'tafsir' || t.lang === 'sa'; if (t.lang === 'sa') return `<div class="tr taf${v.length > 700 ? ' clamp' : ''}" dir="rtl"><span class="tl">${esc(trLabel(t))}</span>${tafHTML(v)}${v.length > 700 ? '<button class="tafmore" data-tafmore>…اقرأ المزيد</button>' : ''}</div>`; if (t.lang === 'translit') return `<div class="tr translit" dir="ltr"><span class="tl">${esc(trLabel(t))}</span>${latHTML(v)}</div>`; return `<div class="tr" dir="${rtl ? 'rtl' : 'ltr'}"><span class="tl">${esc(trLabel(t))}</span>${esc(v)}</div>`; }).join('')}</div>
+    <div class="trs">${trs.map(t => { const v = it.trs[t.ed]; if (v == null) return ''; const rtl = t.lang === 'ku' || t.lang === 'tafsir' || t.lang === 'sa' || t.lang === 'tb'; if (t.lang === 'sa' || t.lang === 'tb') return `<div class="tr taf${v.length > 700 ? ' clamp' : ''}" dir="rtl"><span class="tl">${esc(trLabel(t))}</span>${tafHTML(v)}${v.length > 700 ? '<button class="tafmore" data-tafmore>…اقرأ المزيد</button>' : ''}</div>`; if (t.lang === 'translit') return `<div class="tr translit" dir="ltr"><span class="tl">${esc(trLabel(t))}</span>${latHTML(v)}</div>`; return `<div class="tr" dir="${rtl ? 'rtl' : 'ltr'}"><span class="tl">${esc(trLabel(t))}</span>${esc(v)}</div>`; }).join('')}</div>
   </div>`;
 }
 function readingHTML() {
@@ -1475,7 +1476,6 @@ async function openSheet(i) {
       <button class="btn icon sm ghost" data-sh="close" title="Close">${icon('x')}</button></div></div>
     <div class="sar">${esc(it.ar)} <span class="amark">${toAr(it.n)}</span></div>
     <div class="langs" style="padding:0 0 10px"><button class="lchip ${S.translit ? 'on' : ''}" data-shl="translit"><i>${S.translit ? '✓' : '+'}</i>Latin</button>${langs.map(k => `<button class="lchip ${S.show[k] ? 'on' : ''}" data-shl="${k}"><i>${S.show[k] ? '✓' : '+'}</i>${EDITIONS[k].name}</button>`).join('')}</div>
-    ${S.show.sa ? `<div class="seg tafseg" data-noi18n>${EDITIONS.sa.options.map(([v, l]) => `<button data-tafsel="${v}" class="${S.tr.sa === v ? 'on' : ''}">${esc(l.split(' — ')[0])}</button>`).join('')}</div>` : ''}
     <div id="shTr">${on.length || S.translit ? '<div class="loading" style="padding:16px"><div class="spin"></div></div>' : '<div class="muted" style="padding:6px 0 10px">Choose a language above to see the translation.</div>'}</div>
     <div class="row shact"><button class="btn sm pri" data-sh="play">${icon('play')} Play from here</button>
       <button class="btn sm" data-sh="bm">${icon(bm ? 'bmf' : 'bm')} ${bm ? 'Bookmarked' : 'Bookmark'}</button>
