@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.064040";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.090459";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -500,6 +500,39 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 html{touch-action:manipulation}
 #qBody,#zList{transform-origin:50% 0}
 .mushaf .mtext,.ayah .atext{overflow-wrap:break-word}
+
+/* ===== language switch + Arabic interface (right-to-left) ===== */
+.langsw{display:inline-flex;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.langsw button{border:0;background:transparent;color:var(--ink2);font:600 14px/1 var(--ui);padding:9px 16px;border-radius:9px;cursor:pointer}
+.langsw button[data-lang=ar]{font-family:'Noto Naskh Arabic','Geeza Pro',Tahoma,system-ui,sans-serif;font-size:15px}
+.langsw button.on{background:var(--g7);color:#fff}
+[data-theme=dark] .langsw button.on{background:var(--gold);color:#1b1b1b}
+html[lang=ar]{--ui:system-ui,-apple-system,'SF Arabic','Geeza Pro','Noto Sans Arabic','Segoe UI',Tahoma,sans-serif;--serif:'Noto Naskh Arabic','Amiri','Geeza Pro',Tahoma,serif}
+html[lang=ar] body{font-size:15.5px}
+html[lang=ar] h1.vt .arui,html[lang=ar] .nav a .na,html[lang=ar] .brand small,html[lang=ar] .ze,html[lang=ar] .sitem[data-s]:not([data-n]) .nm b{display:none}
+html[lang=ar] .muted,html[lang=ar] small{letter-spacing:0}
+html[dir=rtl] .switch{direction:ltr}
+html[dir=rtl] input[type=range]{direction:ltr}
+html[dir=rtl] .tr[dir=ltr],html[dir=rtl] .translit{text-align:left}
+html[dir=rtl] .remhow ul,html[dir=rtl] .steps{padding-left:0;padding-right:20px}
+html[dir=rtl] .nav a.on::before{left:auto;right:-14px}
+html[dir=rtl] .zitem.done::after{left:auto;right:-9px}
+html[dir=rtl] .hero .pat{right:auto;left:-60px}
+html[dir=rtl] .pt.next::after{right:auto;left:-22px;transform:rotate(-45deg)}
+html[dir=rtl] .drawer{right:auto;left:0;transform:translateX(-100%);box-shadow:10px 0 40px rgba(0,0,0,.18)}
+html[dir=rtl] .drawer.on{transform:none}
+html[dir=rtl] svg.flip,html[dir=rtl] .btn svg.ic-next,html[dir=rtl] .btn svg.ic-prev{transform:scaleX(-1)}
+@media (min-width:901px){
+  html[dir=rtl] .side{inset:0 0 0 auto}
+  html[dir=rtl] main{margin-left:0;margin-right:var(--side)}
+  html[dir=rtl] .sheet{left:0;right:var(--side)}
+  html[dir=rtl] .player,html[dir=rtl] .asbar{left:18px;right:calc(var(--side) + 18px)}
+  html[dir=rtl] .asfab{left:calc(50% - var(--side) / 2)}
+}
+html[lang=ar] .i18n-dup{display:none!important}
+html[lang=ar] .pt.next::after{content:'التالية';letter-spacing:0;font-size:10px}
+html[lang=ar] .pt .t{white-space:nowrap}
+html[lang=ar] .pt .t small{font-size:.55em;margin-inline-start:3px}
 </style>
 </head>
 <body>
@@ -919,7 +952,7 @@ const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
   tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada' },
   show: { en: true, fr: false, de: false, ku: true }, translit: false, tafsir: false,
-  reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, view: 'mushaf', repeat: 1, continuous: true,
+  reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: /^ar\b/i.test(navigator.language || '') ? 'ar' : 'en', view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
   azkarEn: true, azkarSize: 24, vibrate: true, sound: false, wake: false, remSound: 'chime',
@@ -1049,7 +1082,7 @@ RENDER.home = async () => {
   <div class="hero">
     <svg class="pat" viewBox="0 0 100 100"><g fill="none" stroke="#d8b56a" stroke-width=".6">${Array.from({ length: 6 }, (_, i) => `<rect x="${20 + i * 3}" y="${20 + i * 3}" width="${60 - i * 6}" height="${60 - i * 6}" transform="rotate(${i % 2 ? 45 : 0} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="46"/></g></svg>
     <div class="hij">${esc(hijri(new Date(), 'ar'))}</div>
-    <div class="greg">${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(new Date(), 'en'))}</div>
+    <div class="greg">${new Date().toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(new Date(), 'en'))}</div>
     <div class="np" id="homeNext"></div>
     <div id="offBadge" style="margin-top:14px"></div>
   </div>
@@ -1450,6 +1483,7 @@ function updatePlayer() {
 function openDrawer() {
   const d = $('#drawer'), sw = (k, on, extra = '') => `<label class="switch"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''} ${extra}><span></span></label>`;
   d.innerHTML = `<header><b>Reading settings</b><button class="btn icon ghost" id="dClose">${icon('x')}</button></header><div class="body">
+  <div class="grp"><label class="f">Language · اللغة</label>${langSwitch()}</div>
   <div class="grp"><label class="f">Theme</label><div class="seg" id="dTheme">${['light', 'sepia', 'dark'].map(t => `<button data-t="${t}" class="${S.theme === t ? 'on' : ''}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div></div>
   <div class="grp"><label class="f">Arabic font</label><select data-k="font">
     ${[['UthmanicHafs', 'KFGQPC Uthmanic Hafs (Madinah Mushaf)'], ['Amiri Quran', 'Amiri Quran'], ['Scheherazade New', 'Scheherazade New'], ['Noto Naskh Arabic', 'Noto Naskh Arabic']].map(([v, l]) => `<option value="${v}" ${S.font === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -1607,12 +1641,13 @@ function dayTimes(y, m, d) {
 }
 function fmtT(dt, tz = locTZ()) {
   if (!dt) return '—';
-  try { return new Intl.DateTimeFormat(S.h24 ? 'en-GB' : 'en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: !S.h24 }).format(dt); }
+  try { return new Intl.DateTimeFormat(UI_LOC() || (S.h24 ? 'en-GB' : 'en-US'), { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: !S.h24 }).format(dt); }
   catch (e) { return dt.toTimeString().slice(0, 5); }
 }
 function hijri(date, lang) {
   try {
     if (lang === 'ar') return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-arab', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    if (S.lang === 'ar') return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-arab', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
     return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
   } catch (e) { return ''; }
 }
@@ -1685,15 +1720,15 @@ RENDER.prayer = async () => {
   let rows = '';
   for (let i = 1; i <= days; i++) {
     const tt = dayTimes(my, mm, i), dt = new Date(Date.UTC(my, mm - 1, i, 12));
-    rows += `<tr class="${my === y && mm === m && i === d ? 'today' : ''}"><td>${dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' })}</td><td class="hj">${esc(new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-arab', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(dt))}</td>${PRAYERS.map(p => `<td>${fmtT(tt[p[0]], tz)}</td>`).join('')}</tr>`;
+    rows += `<tr class="${my === y && mm === m && i === d ? 'today' : ''}"><td>${dt.toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'short', day: 'numeric', timeZone: 'UTC' })}</td><td class="hj">${esc(new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-arab', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(dt))}</td>${PRAYERS.map(p => `<td>${fmtT(tt[p[0]], tz)}</td>`).join('')}</tr>`;
   }
   const M = PT.METHODS;
   el.innerHTML = head + locCard() + `
   <div class="row" style="justify-content:space-between;margin:18px 0 10px"><div id="pCd" style="font-size:17px"></div><div class="muted" style="font-size:13px">${officialOn() ? 'Official timetable · ' + esc(OPT.data.byId[S.loc.fid][1]) : esc(M[S.method].name) + ' · Asr ' + (S.asr === 'Hanafi' ? 'Hanafi' : 'Standard')}</div></div>
-  <div class="ptimes">${PRAYERS.map(([k, en, ar, ic]) => `<div class="pt" data-k="${k}">${icon(ic)}<div class="n">${en}</div><div class="na">${ar}</div><div class="t">${fmtT(t[k], tz).replace(/\s?([AP]M)/, '<small>$1</small>')}</div></div>`).join('')}</div>
+  <div class="ptimes">${PRAYERS.map(([k, en, ar, ic]) => `<div class="pt" data-k="${k}">${icon(ic)}<div class="n">${en}</div><div class="na">${ar}</div><div class="t">${fmtT(t[k], tz).replace(/\s?([AP]M|ص|م)$/, '<small>$1</small>')}</div></div>`).join('')}</div>
   <div class="grid g2" style="margin-top:16px">
     <div class="card noprint"><div class="orn">${officialOn() ? 'Source' : 'Calculation'}</div>
-      ${S.loc.fid ? `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:10px 12px;border-radius:12px;background:var(--goldbg);margin-bottom:12px"><span><b>Official timetable</b><br><small class="muted">The fixed times used by mosques in ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? OPT.data.byId[S.loc.fid][1] : 'this city')} — the same kind of table Kurdish prayer apps use</small></span><label class="switch"><input type="checkbox" data-ps="ptOfficial" ${S.ptOfficial !== false ? 'checked' : ''}><span></span></label></div>` : ''}
+      ${S.loc.fid ? `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:10px 12px;border-radius:12px;background:var(--goldbg);margin-bottom:12px"><span><b>Official timetable</b><br><small class="muted">${S.lang === 'ar' ? `المواقيت الثابتة التي تعتمدها مساجد ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? L(OPT.data.byId[S.loc.fid][1]) : 'هذه المدينة')} — مثل الجداول في تطبيقات المواقيت الكردية` : `The fixed times used by mosques in ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? OPT.data.byId[S.loc.fid][1] : 'this city')} — the same kind of table Kurdish prayer apps use`}</small></span><label class="switch"><input type="checkbox" data-ps="ptOfficial" ${S.ptOfficial !== false ? 'checked' : ''}><span></span></label></div>` : ''}
       <div style="${officialOn() ? 'display:none' : ''}">
       <label class="f">Method</label><select data-ps="method">${Object.entries(M).map(([k, v]) => `<option value="${k}" ${S.method === k ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
       <div class="grid g2" style="margin-top:12px;gap:10px">
@@ -1713,7 +1748,7 @@ RENDER.prayer = async () => {
     </div>
   </div>
   <div class="card" style="margin-top:16px"><div class="row" style="justify-content:space-between;margin-bottom:10px">
-    <b style="font-family:var(--serif);font-size:22px">${new Date(Date.UTC(my, mm - 1, 15)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })} · ${esc(S.loc.name)}</b>
+    <b style="font-family:var(--serif);font-size:22px">${new Date(Date.UTC(my, mm - 1, 15)).toLocaleDateString(UI_LOC() || 'en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })} · ${esc(S.loc.name)}</b>
     <div class="row noprint"><button class="btn sm" data-pm="-1">${icon('left')}</button><button class="btn sm" data-pm="0">Today</button><button class="btn sm" data-pm="1">${icon('right')}</button><button class="btn sm" data-pm="print">${icon('print')} Print</button></div></div>
     <div style="overflow:auto"><table class="month"><thead><tr><th>Date</th><th>Hijri</th>${PRAYERS.map(p => `<th>${p[1]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
   bindLoc(el, () => { pMonth = null; RENDER.prayer(); });
@@ -2214,6 +2249,369 @@ RENDER.search = () => {
 function openSearch(q) { if (typeof q === 'string') { SR.q = q; const i = $('#srQ'); if (i) i.value = q; } go('search'); if (SR.q) runSearch(); }
 
 /* =====================================================================
+   ARABIC INTERFACE (العربية)
+   The app is written in English; in Arabic mode this layer translates the
+   interface as it is drawn (text, buttons, titles, messages), turns the
+   layout right-to-left and writes numbers in Arabic-Indic digits.
+   Quran text, translations, tafsir and dhikr are never touched.
+   ===================================================================== */
+const I18N_SKIP = '.ar,.trs,.tr,.zt,.ze,.ma,.mtext,.amark,.arui,.sar,.tl,script,style,select.noi18n,.devlog,#v-dev,.res .tr,[data-noi18n],.qtext,.srres,.hl,.ztext,.tbtext,.tbt';
+
+/* ---- glossary: words that appear inside longer sentences ---- */
+const AR_WORDS = {
+  Fajr: 'الفجر', Sunrise: 'الشروق', Dhuhr: 'الظهر', Asr: 'العصر', Maghrib: 'المغرب', Isha: 'العشاء', Midnight: 'منتصف الليل', Jumu_ah: 'الجمعة',
+  Monday: 'الاثنين', Tuesday: 'الثلاثاء', Wednesday: 'الأربعاء', Thursday: 'الخميس', Friday: 'الجمعة', Saturday: 'السبت', Sunday: 'الأحد',
+  Mon: 'الاثنين', Tue: 'الثلاثاء', Wed: 'الأربعاء', Thu: 'الخميس', Fri: 'الجمعة', Sat: 'السبت', Sun: 'الأحد',
+  January: 'كانون الثاني', February: 'شباط', March: 'آذار', April: 'نيسان', May: 'أيار', June: 'حزيران', July: 'تموز', August: 'آب', September: 'أيلول', October: 'تشرين الأول', November: 'تشرين الثاني', December: 'كانون الأول',
+  Jan: 'كانون الثاني', Feb: 'شباط', Mar: 'آذار', Apr: 'نيسان', Jun: 'حزيران', Jul: 'تموز', Aug: 'آب', Sep: 'أيلول', Oct: 'تشرين الأول', Nov: 'تشرين الثاني', Dec: 'كانون الأول',
+  Muharram: 'محرم', Safar: 'صفر', "Rabiʻ I": 'ربيع الأول', "Rabiʻ II": 'ربيع الآخر', 'Rabi I': 'ربيع الأول', 'Rabi II': 'ربيع الآخر', 'Jumada I': 'جمادى الأولى', 'Jumada II': 'جمادى الآخرة',
+  Rajab: 'رجب', "Shaʻban": 'شعبان', Shaban: 'شعبان', Ramadan: 'رمضان', Shawwal: 'شوال', "Dhuʻl-Qiʻdah": 'ذو القعدة', "Dhuʻl-Hijjah": 'ذو الحجة', 'Dhu al-Qadah': 'ذو القعدة', 'Dhu al-Hijjah': 'ذو الحجة',
+  English: 'الإنجليزية', 'Français': 'الفرنسية', Deutsch: 'الألمانية', 'کوردی': 'الكردية', Kurdish: 'الكردية', French: 'الفرنسية', German: 'الألمانية',
+  Meccan: 'مكية', Medinan: 'مدنية', Murattal: 'مرتل', Mujawwad: 'مجود',
+  'Al-Minshawi — Murattal': 'المنشاوي — مرتل', 'Al-Minshawi — Mujawwad': 'المنشاوي — مجود', 'Al-Minshawi — Teaching (with children)': 'المنشاوي — المعلم (مع الأطفال)',
+  'al-Bukhari': 'البخاري', Muslim: 'مسلم', 'Abu Dawud': 'أبو داود', 'at-Tirmidhi': 'الترمذي', 'Ibn Majah': 'ابن ماجه', 'an-Nasa’i': 'النسائي', Ahmad: 'أحمد', 'at-Tabarani': 'الطبراني', 'al-Hakim': 'الحاكم', 'Ibn Hibban': 'ابن حبان', 'Sayyid al-Istighfar': 'سيد الاستغفار',
+  morning: 'الصباح', evening: 'المساء', sleep: 'النوم', waking: 'الاستيقاظ', prayer: 'الصلاة',
+};
+const AR_PLACES = { Erbil: 'أربيل', Baghdad: 'بغداد', Sulaymaniyah: 'السليمانية', Duhok: 'دهوك', Kirkuk: 'كركوك', Makkah: 'مكة المكرمة', Madinah: 'المدينة المنورة', Mosul: 'الموصل', Basrah: 'البصرة', Halabja: 'حلبجة', Zakho: 'زاخو', Soran: 'سوران', Ranya: 'رانية', Najaf: 'النجف', Karbala: 'كربلاء', Kuwait: 'الكويت', Dubai: 'دبي' };
+const AR_PRAYER = { Fajr: 'الفجر', Sunrise: 'الشروق', Dhuhr: 'الظهر', Asr: 'العصر', Maghrib: 'المغرب', Isha: 'العشاء' };
+
+/* ---- whole strings ---- */
+const AR = {
+  // navigation & titles
+  'Home': 'الرئيسية', 'Quran': 'القرآن', 'Prayer': 'الصلاة', 'Azkar': 'الأذكار', 'More': 'المزيد', 'Search': 'البحث', 'Khatma': 'الختمة', 'Qibla': 'القبلة',
+  'Tasbih': 'التسبيح', 'Reminders': 'التذكيرات', 'Backups': 'النسخ الاحتياطية', 'Settings': 'الإعدادات', 'Developer': 'المطوّر', 'Tools': 'أدوات',
+  'Prayer times': 'مواقيت الصلاة', 'Prayer Times': 'مواقيت الصلاة', 'Qibla Direction': 'اتجاه القبلة', 'Phone & offline': 'الهاتف والعمل دون إنترنت',
+  'Surah index': 'فهرس السور', 'Surahs': 'السور', 'surahs': 'سور', 'Juz': 'الجزء', 'Index': 'الفهرس', 'Bookmarks': 'العلامات', 'Recent': 'الأخيرة',
+  'The Noble Quran': 'القرآن الكريم', 'AlQuran': 'القرآن', 'Search the Quran': 'البحث في القرآن', 'Search the whole Quran': 'البحث في القرآن كله',
+  'Tasbih & my athkar': 'التسبيح وأذكاري', 'Counter & my athkar': 'العدّاد وأذكاري', 'My Athkar': 'أذكاري', 'My own dhikr': 'ذكري الخاص', 'My reminders': 'تذكيراتي',
+  'Reading settings': 'إعدادات القراءة', 'Permissions': 'الأذونات', 'Self-test & diagnostics': 'الفحص الذاتي والتشخيص',
+  // home
+  'Verse of the day': 'آية اليوم', 'Open the Quran': 'افتح القرآن', 'Continue reading': 'متابعة القراءة', 'Next prayer': 'الصلاة القادمة',
+  'Quran text & translations built in — works offline': 'نص القرآن والترجمات مدمجة — يعمل دون إنترنت',
+  'Uthmani Hafs script · Al-Minshawi recitation · English, French, German & Kurdish translations — works offline': 'الرسم العثماني برواية حفص · تلاوة المنشاوي · ترجمات إنجليزية وفرنسية وألمانية وكردية — يعمل دون إنترنت',
+  'Recitation: Sh. Muhammad Siddiq al-Minshawi': 'التلاوة: الشيخ محمد صديق المنشاوي',
+  'Quran text, translations, tafsir, search': 'نص القرآن والترجمات والتفسير والبحث', 'Location, prayer method, theme, translations': 'الموقع وطريقة الحساب والمظهر والترجمات',
+  'Azkar, tasbih, khatma, reminders, backups': 'الأذكار والتسبيح والختمة والتذكيرات والنسخ الاحتياطي', 'Install, permissions, audio': 'التثبيت والأذونات والصوت',
+  'Opens with no connection (offline app)': 'يفتح دون اتصال (تطبيق دون إنترنت)', 'Al-Minshawi recitation': 'تلاوة المنشاوي', 'Download below': 'التنزيل في الأسفل',
+  'Works without internet': 'يعمل دون إنترنت', 'Getting ready': 'جارٍ التجهيز', 'Offline ✓': 'دون إنترنت ✓', 'Offline': 'دون إنترنت',
+  'Today': 'اليوم', 'TODAY': 'اليوم', 'Today\'s Khatma wird': 'ورد الختمة اليوم', "Today's ticked azkar": 'أذكار اليوم المُنجزة', 'Azkar progress': 'تقدّم الأذكار',
+  'Your reading plan': 'خطة قراءتك', 'Plan a complete reading of the Quran': 'خطط لختمة كاملة للقرآن', 'Set up': 'إعداد',
+  // quran index & reader
+  'Filter surahs…': 'ابحث عن سورة…', 'Surah…': 'السورة…', 'Juz…': 'الجزء…', 'Page': 'الصفحة', 'Go': 'انتقال', 'Start from page': 'ابدأ من الصفحة',
+  'Full Quran script — tap an ayah for its translation': 'نص القرآن كاملاً — المس الآية لترجمتها', 'Tap any ayah to see its translation ·': 'المس أي آية لترى ترجمتها ·',
+  'Translation': 'الترجمة', 'Translations': 'الترجمات', 'Translation on': 'الترجمة مفعّلة', 'Show meaning': 'إظهار المعنى', 'Hide all translations': 'إخفاء كل الترجمات',
+  'Show or hide translations under every ayah': 'إظهار الترجمات تحت كل آية أو إخفاؤها', 'Showing Arabic only': 'عرض العربية فقط', 'Arabic only': 'العربية فقط',
+  'Choose a language above to see the translation.': 'اختر لغة في الأعلى لعرض الترجمة.', 'Transliteration': 'النطق بالحروف اللاتينية', 'Arabic tafsir (al-Muyassar)': 'التفسير الميسر',
+  'Play': 'تشغيل', 'Pause': 'إيقاف مؤقت', 'Play / pause': 'تشغيل / إيقاف', 'Play from here': 'التشغيل من هنا', 'Next ayah': 'الآية التالية', 'Previous ayah': 'الآية السابقة',
+  'Bookmark': 'علامة', 'Copy': 'نسخ', 'Share': 'مشاركة', 'Close': 'إغلاق', 'Bookmark removed': 'أُزيلت العلامة', 'Bookmarked': 'أُضيفت علامة', 'Copied': 'تم النسخ',
+  'Recitation': 'التلاوة', 'Reciter': 'القارئ', 'Repeat each ayah': 'تكرار كل آية', 'Continue to next ayah / surah': 'المتابعة إلى الآية / السورة التالية',
+  'Recite Basmala before each surah': 'قراءة البسملة قبل كل سورة', 'Auto-scroll to the recited ayah': 'التمرير التلقائي إلى الآية المتلوّة', 'Keep screen on': 'إبقاء الشاشة مضاءة',
+  'Arabic font': 'الخط العربي', 'Arabic size ·': 'حجم الخط العربي ·', 'Translation size ·': 'حجم خط الترجمة ·', 'Theme': 'المظهر', 'Light': 'فاتح', 'Sepia': 'بني فاتح', 'Dark': 'داكن',
+  'Reading': 'القراءة', 'View': 'العرض', 'Mushaf': 'المصحف', 'List': 'قائمة', 'Mushaf pages': 'صفحات المصحف', 'Ayah list': 'قائمة الآيات',
+  'Recitation finished': 'انتهت التلاوة', 'Tap play to start audio': 'اضغط تشغيل لبدء الصوت', 'Audio unavailable — check your internet connection': 'الصوت غير متاح — تحقق من اتصال الإنترنت',
+  'Repeat off': 'التكرار متوقف', 'Repeat ayah: ∞': 'تكرار الآية: ∞', 'Open a surah first': 'افتح سورة أولاً', 'No bookmarks yet.': 'لا توجد علامات بعد.',
+  'KFGQPC Uthmanic Hafs (Madinah Mushaf)': 'خط مجمع الملك فهد — حفص (مصحف المدينة)',
+  'Mark wird as done': 'تسجيل الورد كمقروء', 'Mark as done': 'تسجيل كمقروء', 'Wird marked as done — بارك الله فيك': 'سُجّل الورد كمقروء — بارك الله فيك',
+  // auto-scroll / pinch
+  'Auto-scroll': 'التمرير التلقائي', 'Auto-scroll — the page moves by itself': 'التمرير التلقائي — تتحرك الصفحة وحدها', 'Start auto-scroll': 'بدء التمرير التلقائي',
+  'Pause auto-scroll': 'إيقاف التمرير التلقائي', 'Close auto-scroll': 'إغلاق التمرير التلقائي', 'min / juz': 'دقيقة / جزء', 'Slower': 'أبطأ', 'Faster': 'أسرع',
+  'Slower (more minutes per juz)': 'أبطأ (دقائق أكثر لكل جزء)', 'Faster (fewer minutes per juz)': 'أسرع (دقائق أقل لكل جزء)',
+  'End of the Quran — صدق الله العظيم': 'صدق الله العظيم — نهاية المصحف', 'End of today’s wird': 'نهاية ورد اليوم',
+  // search
+  'Search in': 'البحث في', 'Any word, any language': 'أي كلمة بأي لغة', 'Whole word': 'كلمة كاملة', 'Starts with': 'تبدأ بـ', 'Part of word': 'جزء من كلمة', 'part of word': 'جزء من كلمة',
+  'Match': 'المطابقة', 'All': 'الكل', 'Arabic keyboard': 'لوحة مفاتيح عربية', 'Clear': 'مسح', 'space': 'مسافة', 'Recent searches': 'عمليات البحث الأخيرة',
+  'Search a word in the whole Quran… ابحث في القرآن': 'ابحث عن كلمة في القرآن كله…', 'ابحث… / Search a word': 'ابحث…',
+  'Type a word in Arabic — with or without harakat — or in English, French, German or Kurdish. Every ayah of the Quran is searched on your device.': 'اكتب كلمة بالعربية — بالتشكيل أو بدونه — أو بالإنجليزية أو الفرنسية أو الألمانية أو الكردية. يتم البحث في كل آيات القرآن على جهازك.',
+  'occurrences of': 'مرة لكلمة', 'occurrence of': 'مرة لكلمة', 'in': 'في', 'ayat': 'آية', 'ayat ·': 'آية ·',
+  // khatma
+  'Plan a complete reading of the Quran and follow your daily wird': 'خطط لختمة كاملة للقرآن وتابع وردك اليومي', 'Finish the Quran in': 'أتمّ القرآن خلال', 'Start date': 'تاريخ البدء',
+  'Start khatma': 'ابدأ الختمة', 'New khatma': 'ختمة جديدة', 'End khatma': 'إنهاء الختمة', 'Current plan and completed khatmas': 'الخطة الحالية والختمات المكتملة',
+  'Khatma started — may Allah make it easy': 'بدأت الختمة — يسّرها الله', 'End this khatma? Your progress on it will be cleared.': 'إنهاء هذه الختمة؟ سيُمسح تقدّمك فيها.',
+  'Tap a day to open its pages. Mark the wird done from the reader or here.': 'المس يوماً لفتح صفحاته. سجّل الورد كمقروء من القارئ أو من هنا.',
+  'You have completed the Quran — May Allah accept it from you.': 'لقد أتممت القرآن — تقبّل الله منك.', 'Plan finished — review days': 'انتهت الخطة — أيام للمراجعة',
+  'Spread the unread pages over the remaining days (at least 1)?': 'توزيع الصفحات غير المقروءة على الأيام المتبقية (يوم واحد على الأقل)؟', 'Catch up': 'تعويض', 'Reschedule': 'إعادة الجدولة',
+  'days': 'أيام', 'Done': 'تم', 'Missed': 'فائت', 'Upcoming': 'قادم', 'Completed khatmas': 'الختمات المكتملة', 'One-seventh': 'سُبع',
+  // prayer
+  'Next prayer ·': 'الصلاة القادمة ·', 'Location': 'الموقع', 'Use my location': 'استخدم موقعي', 'Choose city…': 'اختر المدينة…', 'Custom location': 'موقع مخصص', 'Set your location': 'حدّد موقعك',
+  'Calculation': 'الحساب', 'Method': 'الطريقة', 'Asr method': 'حساب العصر', 'Standard (Shafi\'i, Maliki, Hanbali)': 'الجمهور (الشافعي والمالكي والحنبلي)', 'Hanafi': 'الحنفي',
+  'High latitudes': 'خطوط العرض العليا', 'Middle of night': 'منتصف الليل', 'One-seventh of night': 'سُبع الليل', 'Angle-based': 'حسب الزاوية', 'None': 'بدون',
+  'Adjustments (minutes)': 'تعديلات (بالدقائق)', 'Official timetable': 'الجدول الرسمي', 'Official timetable ·': 'الجدول الرسمي ·', 'Calculated': 'محسوب', 'Astronomical prayer calculation': 'حساب فلكي للمواقيت',
+  'Prayer times computed on your device': 'مواقيت محسوبة على جهازك', 'Prayer times & official timetables': 'مواقيت الصلاة والجداول الرسمية', 'Day length': 'طول النهار',
+  'Kurdistan Region & Iraq — official timetable': 'إقليم كردستان والعراق — الجدول الرسمي', 'Eastern Kurdistan (Iran) — official timetable': 'شرق كردستان (إيران) — الجدول الرسمي',
+  'Kuwait — official timetable': 'الكويت — الجدول الرسمي', 'UAE — official timetable': 'الإمارات — الجدول الرسمي', 'Germany — official timetable': 'ألمانيا — الجدول الرسمي',
+  'France — official timetable': 'فرنسا — الجدول الرسمي', 'United Kingdom — official timetable': 'المملكة المتحدة — الجدول الرسمي', 'Using the official timetable of': 'باستخدام الجدول الرسمي لـ',
+  'Latitude': 'خط العرض', 'Longitude': 'خط الطول', 'Time zone e.g. Asia/Baghdad': 'المنطقة الزمنية مثل Asia/Baghdad', 'Save': 'حفظ', 'Cancel': 'إلغاء', 'Name': 'الاسم',
+  'Finding your location…': 'جارٍ تحديد موقعك…', 'Location set': 'تم تحديد الموقع', 'Could not get location': 'تعذّر تحديد الموقع', 'Could not get location — choose a city instead': 'تعذّر تحديد الموقع — اختر مدينة بدلاً من ذلك',
+  'Location is blocked — see the steps shown': 'الموقع محظور — اتبع الخطوات الظاهرة', 'Location is not available in this browser': 'الموقع غير متاح في هذا المتصفح',
+  'Location isn’t allowed here — please choose your city from the list': 'الموقع غير مسموح هنا — اختر مدينتك من القائمة', 'Unknown time zone': 'منطقة زمنية غير معروفة',
+  'No location set': 'لم يُحدَّد موقع', 'Set your city on the Prayer page first': 'حدّد مدينتك في صفحة الصلاة أولاً', 'Month': 'الشهر', 'Print': 'طباعة', 'Printing isn’t available here': 'الطباعة غير متاحة هنا',
+  '24-hour clock': 'نظام 24 ساعة', 'Hijri': 'الهجري', 'Hijri date': 'التاريخ الهجري', 'Date': 'التاريخ', 'AM': 'ص', 'PM': 'م', 'NEXT': 'التالية', 'now': 'الآن', 'Now': 'الآن',
+  'Sunrise soon — Fajr time ends': 'الشروق قريب — ينتهي وقت الفجر', 'Last third of the night': 'الثلث الأخير من الليل', 'Midnight': 'منتصف الليل',
+  'Muslim World League': 'رابطة العالم الإسلامي', 'Egyptian General Authority of Survey': 'الهيئة المصرية العامة للمساحة', 'Umm al-Qura, Makkah': 'أم القرى، مكة المكرمة',
+  'University of Islamic Sciences, Karachi': 'جامعة العلوم الإسلامية، كراتشي', 'ISNA — North America': 'الجمعية الإسلامية لأمريكا الشمالية', 'Institute of Geophysics, Tehran': 'معهد الجيوفيزياء، طهران',
+  'Gulf Region': 'منطقة الخليج', 'Kuwait': 'الكويت', 'Qatar': 'قطر', 'Dubai': 'دبي', 'MUIS — Singapore': 'سنغافورة (MUIS)', 'Diyanet — Turkey': 'تركيا (ديانت)', 'Shia Ithna-Ashari (Jafari)': 'الشيعة الإثنا عشرية (الجعفري)',
+  'Muslim World League · Asr Standard': 'رابطة العالم الإسلامي · العصر حسب الجمهور',
+  // qibla
+  'Direction of the Kaaba, Masjid al-Haram, Makkah': 'اتجاه الكعبة المشرفة، المسجد الحرام، مكة المكرمة', 'Qibla bearing': 'زاوية القبلة', 'Distance to the Kaaba': 'المسافة إلى الكعبة',
+  'Enable live compass': 'تفعيل البوصلة الحية', 'Hold your phone flat, then enable the live compass.': 'ضع هاتفك بشكل مستوٍ ثم فعّل البوصلة الحية.', 'Direction & compass': 'الاتجاه والبوصلة',
+  'No compass sensor detected on this device — use the bearing in degrees with a physical compass, or open this page on your phone.': 'لم يُعثر على مستشعر بوصلة في هذا الجهاز — استخدم الزاوية بالدرجات مع بوصلة حقيقية، أو افتح هذه الصفحة على هاتفك.',
+  'Compass allowed': 'البوصلة مسموحة', 'Compass not allowed': 'البوصلة غير مسموحة', 'Compass not available here': 'البوصلة غير متاحة هنا', 'Compass permission denied': 'رُفض إذن البوصلة',
+  // azkar
+  'Morning': 'الصباح', 'Evening': 'المساء', 'After Prayer': 'بعد الصلاة', 'Before Sleep': 'قبل النوم', 'Waking Up': 'الاستيقاظ', 'Morning Azkar': 'أذكار الصباح', 'Morning azkar': 'أذكار الصباح',
+  'Evening azkar': 'أذكار المساء', 'Sleep azkar': 'أذكار النوم', 'After-prayer sequence': 'أذكار ما بعد الصلاة', 'once': 'مرة', 'Reset': 'إعادة ضبط', 'Add': 'إضافة', 'Edit': 'تعديل', 'Delete': 'حذف',
+  'From Hisn al-Muslim. Tap a card to count — progress resets each day.': 'من حصن المسلم. المس البطاقة للعدّ — يبدأ التقدّم من جديد كل يوم.',
+  'Add your own athkar and du\'as with your own repeat count. They also appear in the Tasbih.': 'أضف أذكارك وأدعيتك الخاصة بعدد التكرار الذي تريده. تظهر أيضاً في التسبيح.',
+  'Add my first dhikr': 'أضف ذكري الأول', 'Add my dhikr': 'إضافة ذكر خاص', 'Edit my dhikr': 'تعديل الذكر الخاص', 'Dhikr text (any language)': 'نص الذكر (بأي لغة)', 'Meaning / note (optional)': 'المعنى / ملاحظة (اختياري)',
+  'Repeat count': 'عدد التكرار', 'Delete this dhikr?': 'حذف هذا الذكر؟', 'Sequence complete — تقبّل الله': 'اكتملت الأذكار — تقبّل الله', 'Show English meaning': 'إظهار المعنى بالإنجليزية', 'Text size': 'حجم الخط',
+  'Surat al-Falaq, three times.': 'سورة الفلق، ثلاث مرات.', 'Surat al-Ikhlas, three times — suffices for everything.': 'سورة الإخلاص، ثلاث مرات — تكفيك من كل شيء.', 'Surat an-Nas, three times.': 'سورة الناس، ثلاث مرات.',
+  'Ayat al-Kursi: whoever recites it is protected until evening (or morning).': 'آية الكرسي: من قرأها حُفظ حتى يمسي (أو يصبح).',
+  // tasbih
+  'Tap the bead or press Space to count. Pick a dhikr or add your own athkar.': 'المس الخرزة أو اضغط المسافة للعدّ. اختر ذكراً أو أضف أذكارك.', 'Choose dhikr': 'اختر الذكر',
+  'Free counting — no dhikr text': 'عدّ حر — دون نص ذكر', 'free count': 'عدّ حر', 'Target': 'الهدف', 'Target count': 'العدد المستهدف', 'No target': 'دون هدف', 'Custom target': 'هدف مخصص', 'Custom…': 'مخصص…',
+  'Sound': 'الصوت', 'Vibration': 'الاهتزاز', 'Click sound': 'صوت نقرة', 'Bell': 'جرس', 'Chime': 'رنين', 'Silent': 'صامت', 'THIS DHIKR · ALL TIME': 'هذا الذكر · الإجمالي', 'ALL DHIKR': 'كل الأذكار',
+  'Counts, totals and your own dhikr': 'الأعداد والمجاميع وأذكارك', 'SubhanAllah': 'سبحان الله', 'Alhamdulillah': 'الحمد لله', 'Allahu Akbar': 'الله أكبر', 'own athkar': 'أذكاري',
+  'Tasbih and reminder taps.': 'لمسات التسبيح والتذكيرات.',
+  // reminders
+  'Prayer, azkar and Quran reminders. Turn on what you want, then add them to your Calendar for alarms that ring even when AlQuran is closed.': 'تذكيرات الصلاة والأذكار والقرآن. فعّل ما تريد، ثم أضفها إلى التقويم لتنبيهات ترنّ حتى عندما يكون التطبيق مغلقاً.',
+  'Prayer, azkar & calendar alarms': 'تنبيهات الصلاة والأذكار والتقويم', 'How alerts reach you': 'كيف تصلك التنبيهات', 'App open:': 'التطبيق مفتوح:', 'App closed:': 'التطبيق مغلق:',
+  'sound + alert on screen. ✓': 'صوت + تنبيه على الشاشة. ✓', 'below — your phone\'s Calendar rings the alarm, even offline.': 'في الأسفل — تقويم هاتفك يرنّ بالتنبيه، حتى دون إنترنت.',
+  'browsers can’t schedule alerts by themselves, so use': 'المتصفحات لا تستطيع جدولة التنبيهات بنفسها، لذا استخدم', 'an iPhone web app can’t wake itself up, so': 'تطبيق الويب على iPhone لا يستطيع إيقاظ نفسه، لذا',
+  'Notifications:': 'الإشعارات:', 'Notifications': 'الإشعارات', 'Allow': 'سماح', 'Allowed': 'مسموح', 'Not asked': 'لم يُطلب', 'not asked yet': 'لم يُطلب بعد', 'Request': 'طلب', 'Status': 'الحالة',
+  'blocked — see Phone & offline': 'محظور — انظر صفحة الهاتف والعمل دون إنترنت', 'install the app to the Home Screen first': 'ثبّت التطبيق على الشاشة الرئيسية أولاً',
+  'Shows reminders as notifications while AlQuran is open or just in the background.': 'يعرض التذكيرات كإشعارات أثناء فتح التطبيق أو بعد الخروج منه بقليل.',
+  'Add to Calendar': 'إضافة إلى التقويم', 'Add to Calendar — alarms when the app is closed': 'إضافة إلى التقويم — تنبيهات والتطبيق مغلق', 'Alarms (Calendar)': 'التنبيهات (التقويم)',
+  'The reliable way to get prayer and azkar alarms when the app is closed.': 'الطريقة الموثوقة لتلقي تنبيهات الصلاة والأذكار والتطبيق مغلق.', 'Prayer reminders for the next': 'تذكيرات الصلاة للأيام',
+  'Creates calendar events with an alert for every reminder that is on. Prayer-time reminders change daily, so they\'re added for the days you choose — add them again when they run out. Fixed-time reminders repeat by themselves.': 'ينشئ أحداثاً في التقويم مع تنبيه لكل تذكير مفعّل. مواقيت الصلاة تتغير يومياً، لذا تُضاف للأيام التي تختارها — أضفها مرة أخرى عند انتهائها. التذكيرات ذات الوقت الثابت تتكرر وحدها.',
+  'Save .ics file': 'حفظ ملف ‎.ics', 'Open the downloaded .ics file to add the events to your calendar.': 'افتح ملف ‎.ics الذي تم تنزيله لإضافة الأحداث إلى تقويمك.',
+  'iPhone: tap “Add to Calendar”, then “Add All”. If the file opens elsewhere, save it, open it from the Files app, and tap “Add All”.': 'iPhone: المس «إضافة إلى التقويم» ثم «إضافة الكل». إن فُتح الملف في مكان آخر فاحفظه وافتحه من تطبيق الملفات والمس «إضافة الكل».',
+  'Add your own reminder — any title, time and days.': 'أضف تذكيرك الخاص — أي عنوان ووقت وأيام.', 'New reminder': 'تذكير جديد', 'Reminder added': 'أُضيف التذكير', 'Delete this reminder?': 'حذف هذا التذكير؟',
+  'Your reminder settings': 'إعدادات تذكيراتك', 'Test alert': 'تجربة التنبيه', 'Test reminder': 'تجربة التذكير', 'This is how your reminders will look and sound.': 'هكذا ستبدو تذكيراتك وتُسمع.',
+  'Test reminder in 10 seconds — you can lock the phone or switch apps': 'تذكير تجريبي بعد 10 ثوانٍ — يمكنك قفل الهاتف أو التبديل إلى تطبيق آخر',
+  'Turn on at least one reminder first': 'فعّل تذكيراً واحداً على الأقل أولاً', 'Pick at least one day': 'اختر يوماً واحداً على الأقل', 'Nothing to add': 'لا شيء لإضافته',
+  'At Fajr': 'عند الفجر', 'At Sunrise': 'عند الشروق', 'At Dhuhr': 'عند الظهر', 'At Asr': 'عند العصر', 'At Maghrib': 'عند المغرب', 'At Isha': 'عند العشاء',
+  'Before Fajr — wake up': 'قبل الفجر — للاستيقاظ', 'Jumu\'ah — get ready': 'الجمعة — استعد', 'Friday — Surat Al-Kahf': 'الجمعة — سورة الكهف', 'Surat Al-Mulk before sleep': 'سورة الملك قبل النوم',
+  'Surat Al-Kahf': 'سورة الكهف', 'Surat Al-Mulk': 'سورة الملك', 'Surat Al-Waqi\'ah': 'سورة الواقعة', 'Surat Ya-Sin': 'سورة يس', 'e.g. Read Surat Al-Waqi\'ah': 'مثلاً: قراءة سورة الواقعة',
+  'Title': 'العنوان', 'Time': 'الوقت', 'Days': 'الأيام', 'Every day': 'كل يوم', 'Weekdays': 'أيام الأسبوع', 'Custom days': 'أيام مخصصة', 'Open': 'فتح', 'Opens': 'يفتح', 'When': 'متى', 'Where': 'المكان',
+  'Snooze': 'غفوة', 'Snooze 10 min': 'غفوة 10 دقائق', 'Dismiss': 'تجاهل', 'Missed while closed:': 'فاتت أثناء الإغلاق:', 'Missed reminders': 'تذكيرات فائتة', 'History': 'السجل',
+  'Next: tomorrow (when you open the app)': 'التالي: غداً (عند فتح التطبيق)', 'skipped — wird already read': 'تم التخطي — الورد مقروء', 'reminders on': 'تذكيرات مفعّلة', 'test': 'تجربة',
+  'notified by Android': 'أُشعر عبر أندرويد', 'missed': 'فائت', 'fired': 'نُفّذ', 'Developer test reminder': 'تذكير تجريبي للمطوّر', 'next sleep azkar': 'أذكار النوم القادمة', 'this city': 'هذه المدينة',
+  'Calendar file is valid': 'ملف التقويم صالح', 'Calendar alarms can’t be added from inside the Claude app — open AlQuran in Safari or from your Home Screen': 'لا يمكن إضافة تنبيهات التقويم من داخل تطبيق Claude — افتح التطبيق في Safari أو من الشاشة الرئيسية',
+  'Saving calendar files isn’t allowed here': 'حفظ ملفات التقويم غير مسموح هنا',
+  // backups
+  'Keep data safe': 'حافظ على بياناتك', 'Your bookmarks, khatma, tasbih, athkar, reminders and settings — copied automatically on your schedule.': 'علاماتك وختمتك وتسبيحك وأذكارك وتذكيراتك وإعداداتك — تُنسخ تلقائياً حسب جدولك.',
+  'Automatic backup': 'النسخ الاحتياطي التلقائي', 'Automatic copies & restore': 'نسخ تلقائية واستعادة', 'Keep automatic copies': 'الاحتفاظ بنسخ تلقائية', 'How often': 'كم مرة', 'Never': 'أبداً',
+  'Every open': 'عند كل فتح', 'Every time you open AlQuran': 'في كل مرة تفتح فيها التطبيق', 'Daily': 'يومياً', 'Weekly': 'أسبوعياً', 'Monthly': 'شهرياً', 'Copies kept': 'عدد النسخ المحفوظة', 'Include': 'تضمين',
+  'Schedule': 'الجدول', 'Last backup': 'آخر نسخة', 'Back up now': 'انسخ الآن', 'Save now': 'احفظ الآن', 'Saved copies': 'النسخ المحفوظة', 'Pin': 'تثبيت', 'Restore…': 'استعادة…', 'Restore': 'استعادة',
+  'Restore from file': 'الاستعادة من ملف', 'Restore backup': 'استعادة النسخة', 'Save to Files': 'الحفظ في الملفات', 'Paste backup text instead…': 'لصق نص النسخة بدلاً من ذلك…', 'Paste backup text': 'لصق نص النسخة',
+  'Remind me to save to Files': 'ذكّرني بالحفظ في الملفات', 'Unchanged data isn\'t copied twice. Pinned copies are never removed automatically.': 'البيانات غير المتغيرة لا تُنسخ مرتين. النسخ المثبتة لا تُحذف تلقائياً أبداً.',
+  'Copies inside the app disappear if you delete the app or clear Safari data. Save a copy to Files / iCloud Drive now and then.': 'النسخ داخل التطبيق تختفي إذا حذفت التطبيق أو مسحت بيانات Safari. احفظ نسخة في الملفات / iCloud Drive بين حين وآخر.',
+  'Bookmarks, last position, recent searches': 'العلامات وآخر موضع وعمليات البحث الأخيرة', 'Backup created (auto)': 'نسخة احتياطية (تلقائية)', 'Backup created': 'نسخة احتياطية', 'Safety copy': 'نسخة أمان',
+  'Choose what to restore': 'اختر ما تريد استعادته', 'The chosen parts of your current data are replaced. A safety copy of your current data is saved first, so you can undo this.': 'تُستبدل الأجزاء المختارة من بياناتك الحالية. تُحفظ نسخة أمان من بياناتك الحالية أولاً لتتمكن من التراجع.',
+  'Delete this backup copy?': 'حذف هذه النسخة الاحتياطية؟', 'Backup file saved': 'تم حفظ ملف النسخة', 'Backup file exported': 'تم تصدير ملف النسخة', 'Backup saved on this phone': 'حُفظت النسخة على هذا الهاتف',
+  'Backup saved in Downloads › AlQuran': 'حُفظت النسخة في التنزيلات › AlQuran', 'Choose where to keep the backup file': 'اختر مكان حفظ ملف النسخة', 'Choose “Save to Files” to keep it in iCloud Drive': 'اختر «حفظ في الملفات» لحفظها في iCloud Drive',
+  'Nothing to back up': 'لا شيء لنسخه', 'This backup is empty.': 'هذه النسخة فارغة.', 'This file is not an AlQuran backup.': 'هذا الملف ليس نسخة احتياطية للتطبيق.', 'This is not a valid backup file (not JSON).': 'هذا ليس ملف نسخة صالحاً.',
+  'This file was changed after it was made (checksum mismatch). Restore only if you trust it.': 'تم تغيير هذا الملف بعد إنشائه (اختلاف المجموع الاختباري). استعده فقط إن كنت تثق به.',
+  'This backup was made by a newer version of AlQuran. Please update the app first.': 'هذه النسخة من إصدار أحدث من التطبيق. حدّث التطبيق أولاً.', 'Time to save a backup copy to Files / iCloud.': 'حان وقت حفظ نسخة احتياطية في الملفات / iCloud.',
+  'Automatic backup is off': 'النسخ التلقائي متوقف', 'Automatic backup skipped — nothing changed': 'تم تخطي النسخ التلقائي — لم يتغير شيء', 'Restored ✓': 'تمت الاستعادة ✓', 'Restored': 'تمت الاستعادة',
+  'Saving files isn’t allowed here': 'حفظ الملفات غير مسموح هنا', 'Saving files isn’t allowed here — the backup was copied as text instead': 'حفظ الملفات غير مسموح هنا — نُسخت النسخة كنص بدلاً من ذلك',
+  'Phone storage is full — this change is kept only until you close the app': 'ذاكرة الهاتف ممتلئة — هذا التغيير يبقى فقط حتى تغلق التطبيق', 'Corrupted value ignored': 'تم تجاهل قيمة تالفة',
+  'No copies yet. Tap': 'لا توجد نسخ بعد. المس', 'None yet': 'لا شيء بعد', 'settings only': 'الإعدادات فقط', 'Bookmarks': 'العلامات', 'Settings ': 'الإعدادات ',
+  // device / permissions / install / offline audio
+  'Permissions, installing AlQuran as an app, and offline recitation — with steps for iPhone.': 'الأذونات وتثبيت التطبيق والتلاوة دون إنترنت — مع الخطوات لـ iPhone.',
+  'Install AlQuran': 'تثبيت التطبيق', 'Install as an app': 'التثبيت كتطبيق', 'Install AlQuran to use it like an app, offline.': 'ثبّت التطبيق لاستخدامه كتطبيق، دون إنترنت.', 'Installed app': 'تطبيق مثبّت',
+  'AlQuran is installed. It opens from your Home Screen and works without internet.': 'التطبيق مثبّت. يفتح من الشاشة الرئيسية ويعمل دون إنترنت.', 'In browser': 'في المتصفح', 'App installed': 'تم تثبيت التطبيق',
+  'Or use the browser menu → “Install app” / “Add to Home screen”.': 'أو استخدم قائمة المتصفح ← «تثبيت التطبيق» / «إضافة إلى الشاشة الرئيسية».', 'Add to Home Screen': 'إضافة إلى الشاشة الرئيسية',
+  'Location': 'الموقع', 'For prayer times and Qibla near you. Optional — you can pick a city instead.': 'لمواقيت الصلاة والقبلة قربك. اختياري — يمكنك اختيار مدينة بدلاً من ذلك.',
+  'Motion & compass': 'الحركة والبوصلة', 'Lets the Qibla compass turn with your phone.': 'يجعل بوصلة القبلة تدور مع هاتفك.', 'While reading, reciting, azkar or tasbih.': 'أثناء القراءة والتلاوة والأذكار والتسبيح.',
+  'Storage': 'التخزين', 'Storage protected': 'التخزين محمي', 'The browser decides — installing the app usually allows it.': 'المتصفح يقرر — تثبيت التطبيق يسمح بذلك عادةً.', 'Not available': 'غير متاح', 'not supported': 'غير مدعوم', 'not supported here': 'غير مدعوم هنا',
+  'iPhone asks once. If you refused, close and reopen AlQuran, then tap Allow again.': 'يسأل iPhone مرة واحدة. إن رفضت، أغلق التطبيق وافتحه ثم المس «سماح» مرة أخرى.',
+  'iPhone allows notifications only for apps added to the Home Screen (iOS 16.4 or newer).': 'يسمح iPhone بالإشعارات فقط للتطبيقات المضافة إلى الشاشة الرئيسية (iOS 16.4 أو أحدث).',
+  'Add AlQuran to your Home Screen first — iPhone allows notifications only for installed web apps (iOS 16.4+)': 'أضف التطبيق إلى الشاشة الرئيسية أولاً — يسمح iPhone بالإشعارات فقط لتطبيقات الويب المثبتة (iOS 16.4+)',
+  'Open AlQuran from your Home Screen — then allow notifications below.': 'افتح التطبيق من الشاشة الرئيسية — ثم اسمح بالإشعارات في الأسفل.', 'Notifications are on. السلام عليكم': 'الإشعارات مفعّلة. السلام عليكم',
+  'Notifications aren’t supported here': 'الإشعارات غير مدعومة هنا', 'Allow notifications for AlQuran in Android Settings › Apps › AlQuran': 'اسمح بإشعارات التطبيق من إعدادات أندرويد › التطبيقات › AlQuran',
+  'Offline recitation — Al-Minshawi': 'التلاوة دون إنترنت — المنشاوي', 'Download': 'تنزيل', 'Download all': 'تنزيل الكل', 'Stop': 'إيقاف', 'Saved on this phone': 'محفوظ على هذا الهاتف', 'Nothing downloaded yet.': 'لم يُنزَّل شيء بعد.',
+  'Delete all': 'حذف الكل', 'Delete all for this recitation': 'حذف الكل لهذه التلاوة', 'Download stopped': 'توقف التنزيل', 'Saved for offline listening ✓': 'حُفظ للاستماع دون إنترنت ✓', 'Deleted': 'تم الحذف',
+  '✓ The whole Quran is saved for this recitation': '✓ القرآن كله محفوظ لهذه التلاوة', 'You are offline — connect to download': 'أنت غير متصل — اتصل بالإنترنت للتنزيل', 'Whole Quran': 'القرآن كاملاً', "Juz 'Amma": 'جزء عمّ',
+  'Al-Fatihah': 'الفاتحة', 'Ya-Sin': 'يس', 'Al-Kahf': 'الكهف', 'Al-Mulk': 'الملك', "Al-Waqi'ah": 'الواقعة', 'Ar-Rahman': 'الرحمن',
+  'Works offline ✓': 'يعمل دون إنترنت ✓', 'Checking the offline copy…': 'جارٍ فحص النسخة دون إنترنت…', '⬇ Preparing offline copy…': '⬇ جارٍ تجهيز النسخة دون إنترنت…', 'AlQuran is ready to work offline ✓': 'التطبيق جاهز للعمل دون إنترنت ✓',
+  'Connect to the internet to repair': 'اتصل بالإنترنت للإصلاح', 'Updating AlQuran…': 'جارٍ تحديث التطبيق…', 'Auto-updating to the new version': 'تحديث تلقائي إلى الإصدار الجديد', 'A new version of AlQuran is ready.': 'إصدار جديد من التطبيق جاهز.',
+  'AlQuran installed ✓': 'تم تثبيت التطبيق ✓', 'Install first': 'ثبّت أولاً', 'Needs hosting': 'يحتاج استضافة', 'needs https hosting': 'يحتاج استضافة https',
+  'This part of the Quran isn’t saved on this phone yet — open AlQuran once with internet and wait for “Works offline ✓”.': 'هذا الجزء من القرآن غير محفوظ على هذا الهاتف بعد — افتح التطبيق مرة مع الإنترنت وانتظر «يعمل دون إنترنت ✓».',
+  'You are viewing AlQuran inside another app. Open the hosted AlQuran link in Safari (iPhone) or Chrome (Android) to install it.': 'أنت تعرض التطبيق داخل تطبيق آخر. افتح رابط التطبيق في Safari (iPhone) أو Chrome (أندرويد) لتثبيته.',
+  'Audio can’t play inside this viewer — open alquran.html in Chrome or Safari to hear Al-Minshawi': 'لا يمكن تشغيل الصوت داخل هذا العارض — افتح التطبيق في Chrome أو Safari لسماع المنشاوي',
+  'Download AlQuran.apk': 'تنزيل AlQuran.apk', 'For Android phones': 'لهواتف أندرويد', 'For this phone': 'لهذا الهاتف', '🤖 Android app (APK)': '🤖 تطبيق أندرويد (APK)', '🤖 Android app': '🤖 تطبيق أندرويد',
+  'A real Android app: works offline from the first launch, reminders as Android notifications even when closed, saves backups to Downloads.': 'تطبيق أندرويد حقيقي: يعمل دون إنترنت من أول تشغيل، والتذكيرات كإشعارات أندرويد حتى وهو مغلق، ويحفظ النسخ الاحتياطية في التنزيلات.',
+  'After downloading, open the file. If Android asks, allow “Install unknown apps” for your browser, then tap Install.': 'بعد التنزيل افتح الملف. إن سألك أندرويد فاسمح «بتثبيت التطبيقات غير المعروفة» لمتصفحك ثم المس «تثبيت».',
+  'Exact alarm times': 'تنبيهات بالوقت الدقيق', 'Download the latest version': 'تنزيل أحدث إصدار', 'On': 'مفعّل', 'Off': 'متوقف', 'ON': 'تشغيل', 'OFF': 'إيقاف', 'OK': 'حسناً', 'Yes': 'نعم', 'No': 'لا',
+  'Everything is inside the app — it works with no internet. Reminders ring as real Android notifications even when AlQuran is closed (open the app at least once a week to keep them scheduled).': 'كل شيء داخل التطبيق — يعمل دون إنترنت. التذكيرات ترنّ كإشعارات أندرويد حقيقية حتى والتطبيق مغلق (افتح التطبيق مرة في الأسبوع على الأقل لتبقى مجدولة).',
+  'The Quran text (King Fahd Complex, Uthmani Hafs), the KFGQPC Uthmanic Hafs font and all translations are built into this file and work offline. Audio of Sheikh Muhammad Siddiq al-Minshawi streams from everyayah.com when you are online.': 'نص القرآن (مجمع الملك فهد، الرسم العثماني برواية حفص) وخط مجمع الملك فهد وكل الترجمات مدمجة ويعمل دون إنترنت. تلاوة الشيخ محمد صديق المنشاوي تُبثّ عند الاتصال.',
+  // misc
+  'Night': 'الليل', 'Nothing': 'لا شيء', 'Note (optional)': 'ملاحظة (اختياري)', 'clockwise from true North': 'باتجاه عقارب الساعة من الشمال الحقيقي',
+  N: 'شمال', NNE: 'شمال شمال شرق', NE: 'شمال شرق', ENE: 'شرق شمال شرق', E: 'شرق', ESE: 'شرق جنوب شرق', SE: 'جنوب شرق', SSE: 'جنوب جنوب شرق', S: 'جنوب', SSW: 'جنوب جنوب غرب', SW: 'جنوب غرب', WSW: 'غرب جنوب غرب', W: 'غرب', WNW: 'غرب شمال غرب', NW: 'شمال غرب', NNW: 'شمال شمال غرب',
+  '✓ Works offline': '✓ يعمل دون إنترنت', '✓ Offline copy complete': '✓ اكتملت النسخة دون إنترنت', 'Check & repair': 'فحص وإصلاح', 'Blocked': 'محظور', 'Ready': 'جاهز', 'Ask when needed': 'يُطلب عند الحاجة',
+  'Source': 'المصدر', 'Snooze': 'غفوة', '✓ AlQuran now works without internet': '✓ التطبيق يعمل الآن دون إنترنت',
+  'Language': 'اللغة', 'Language · اللغة': 'اللغة', 'Interface language': 'لغة الواجهة', 'Yes, delete': 'نعم، احذف', 'Back': 'رجوع', 'Next': 'التالي', 'Previous': 'السابق', 'Auto': 'تلقائي', 'Manual': 'يدوي',
+  'Copy not allowed here': 'النسخ غير مسموح هنا', 'Could not load': 'تعذّر التحميل', 'Embedded viewer': 'عارض مضمّن', 'Show more': 'عرض المزيد', 'Loading…': 'جارٍ التحميل…', 'loading…': 'جارٍ التحميل…',
+  'mercy': 'رحمة', 'patience': 'صبر', 'px': 'بكسل', 'Yesterday': 'أمس',
+};
+/* ---- sentences with numbers / names: # = number, @ = name from the glossary ---- */
+const AR_T = {
+  'Hide @': 'إخفاء @', 'Show @': 'إظهار @', '# min': '# دقيقة', '# min after @': 'بعد @ بـ # دقيقة', '# min before @': 'قبل @ بـ # دقيقة', '#h #m': '# س # د', '# days': '# يوم', '# km': '# كم',
+  '# today': '# اليوم', '# on this device': '# على هذا الجهاز', '# pages per day': '# صفحة يومياً', '# of # surahs fully saved': '# من # سورة محفوظة بالكامل',
+  '# of # surahs fully saved — “Download all” only fetches what is missing': '# من # سورة محفوظة بالكامل — «تنزيل الكل» يجلب الناقص فقط',
+  '# surahs · # translations': '# سورة · # ترجمات', '# minutes to scroll through one juz': '# دقيقة لتمرير جزء واحد', '#° from North': '#° من الشمال', '# ayat': '# آية', '# ayat ·': '# آية ·',
+  'Download all (#)': 'تنزيل الكل (#)', 'Juz #': 'الجزء #', 'Page #': 'الصفحة #', 'page # · juz #': 'الصفحة # · الجزء #', 'Target #': 'الهدف #', 'of # · round #': 'من # · الدورة #',
+  'Bookmarks (#)': 'العلامات (#)', 'Show more (# left)': 'عرض المزيد (# متبقية)', 'Last #': 'آخر #', '@ #': '@ #', 'Today #': 'اليوم #', 'Yesterday #': 'أمس #', 'at #': 'الساعة #',
+  '@ · # ayat · @': '# آية · @', 'Starts @ #:# · page #': 'تبدأ من @ #:# · الصفحة #', '@ #:#': '@ #:#', '@ #:# — @': '@ #:# — @',
+  '≈ # juz · about # min of reading': '≈ # جزء · نحو # دقيقة من القراءة', '≈ # juz · about # minutes of reading': '≈ # جزء · نحو # دقيقة من القراءة',
+  'Surah # · # / # ayat · #%': 'السورة # · # / # آية · #%', '# / # ayat · #%': '# / # آية · #%', '# / # ayat': '# / # آية',
+  'Find any word in all # ayat — Arabic with or without harakat, or in a translation.': 'ابحث عن أي كلمة في جميع الآيات الـ# — بالعربية بالتشكيل أو بدونه، أو في ترجمة.',
+  'Plan a complete reading of the Quran and follow your daily wird (# pages, Madinah Mushaf).': 'خطط لختمة كاملة للقرآن وتابع وردك اليومي (# صفحة، مصحف المدينة).',
+  'Download surahs once (needs internet), then listen anywhere. About # MB per minute of recitation; the whole Quran is roughly #–# GB.': 'نزّل السور مرة واحدة (يحتاج إنترنت)، ثم استمع في أي مكان. نحو # ميغابايت لكل دقيقة تلاوة؛ القرآن كله نحو #–# غيغابايت.',
+  'Move the phone in a figure-# to calibrate. Keep away from metal and magnets. The live compass needs a phone with a magnetometer; on a computer, use the degrees above.': 'حرّك الهاتف على شكل الرقم # للمعايرة. ابتعد عن المعادن والمغناطيس. البوصلة الحية تحتاج هاتفاً فيه مستشعر مغناطيسي؛ على الحاسوب استخدم الدرجات في الأعلى.',
+  'Test reminder in # s': 'تذكير تجريبي بعد # ث', 'Test reminder in # seconds — you can lock the phone or switch apps': 'تذكير تجريبي بعد # ثوانٍ — يمكنك قفل الهاتف أو التبديل إلى تطبيق آخر',
+  '# SubhanAllah → # Alhamdulillah → # Allahu Akbar': '# سبحان الله ← # الحمد لله ← # الله أكبر', '# B': '# بايت', '# KB': '# ك.ب', '# MB': '# م.ب', '# GB': '# غ.ب', '# KB / # MB': '# ك.ب / # م.ب', '# B · settings only': '# بايت · الإعدادات فقط',
+  'Backup created (auto) · # B': 'نسخة احتياطية (تلقائية) · # بايت', 'Backup created (auto) · # KB': 'نسخة احتياطية (تلقائية) · # ك.ب', '#-hour clock': 'نظام # ساعة',
+  'Next prayer · @': 'الصلاة القادمة · @', '@ in #h #m': '@ بعد # س # د', '@ in # min': '@ بعد # دقيقة', 'in #h #m': 'بعد # س # د', 'in # min': 'بعد # دقيقة',
+  '@ # · @': '@ # · @', '@, # @ # · @ # # AH': '@، # @ # · # @ # هـ', '@ # # AH': '# @ # هـ', '# @ # AH': '# @ # هـ', '@ # @ #': '@ # @ #',
+  'Asks the browser not to clear AlQuran\'s storage. # KB used of # MB.': 'يطلب من المتصفح عدم مسح بيانات التطبيق. # ك.ب مستخدمة من # م.ب.',
+  '# calendar events ready': '# حدث تقويم جاهز', '# calendar event ready': 'حدث تقويم واحد جاهز', 'Offline copy complete (# files)': 'اكتملت النسخة دون إنترنت (# ملف)',
+  'Done — # ayat failed (check connection) — tap again to retry': 'تم — فشلت # آية (تحقق من الاتصال) — المس مرة أخرى لإعادة المحاولة', 'Android alarms set: #': 'تنبيهات أندرويد المجدولة: #',
+  '@ — official timetable': '@ — الجدول الرسمي', 'Official timetable · @': 'الجدول الرسمي · @', 'Location set: @': 'تم تحديد الموقع: @', '#°, #° · @': '#°، #° · @',
+};
+
+/* ---- engine ---- */
+const AR_DIG = '٠١٢٣٤٥٦٧٨٩';
+const arNum = s => String(s).replace(/[0-9]/g, d => AR_DIG[d]).replace(/,(?=[٠-٩])/g, '٬').replace(/\.(?=[٠-٩])/g, '٫');
+let I18N_SURAH = null, I18N_WORDRE = null, I18N_MEMO = new Map();
+function i18nPrep() {
+  if (I18N_SURAH) return;
+  I18N_SURAH = {}; SURAHS.forEach(s => { I18N_SURAH[s.en] = s.ar; });
+  const words = [...Object.keys(AR_WORDS), ...Object.keys(I18N_SURAH)].sort((a, b) => b.length - a.length).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  I18N_WORDRE = new RegExp('(?<![A-Za-z\'’-])(' + words.join('|') + ')(?![A-Za-z\'’-])', 'g');
+}
+const wordAr = w => AR_WORDS[w] || I18N_SURAH[w] || w;
+function trCore(t) {
+  if (AR[t] != null) return AR[t];
+  let m;
+  if ((m = t.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/))) return arNum(`${m[1]}:${m[2]}`) + ' ' + (m[3] === 'AM' ? 'ص' : 'م');
+  if ((m = t.match(/^(\d{1,3})\. (.+?)(?: — .+)?$/)) && I18N_SURAH[m[2]]) return arNum(m[1]) + '. ' + I18N_SURAH[m[2]];
+  if ((m = t.match(/^(.+?) · (\d+) ayat · (Meccan|Medinan)$/))) return arNum(m[2]) + ' آية · ' + AR_WORDS[m[3]];
+  if (I18N_SURAH[t]) return I18N_SURAH[t];
+  if (AR_WORDS[t]) return AR_WORDS[t];
+  if (AR_PLACES[t]) return AR_PLACES[t];
+  if (/^[A-Za-z'’ ,—-]+$/.test(t) && t.split(/, | — /).every(p => AR_WORDS[p])) return t.split(/(, | — )/).map(p => AR_WORDS[p] || (p === ', ' ? '، ' : p)).join('');
+  // template: numbers → #, glossary names → @
+  const nums = [], words = [];
+  let key = t.replace(/[0-9٠-٩][0-9٠-٩,.٬٫:]*[0-9٠-٩]|[0-9٠-٩]/g, n => { nums.push(n); return '#'; });
+  key = key.replace(I18N_WORDRE, w => { words.push(w); return '@'; });
+  const tpl = AR_T[key];
+  if (tpl == null) {
+    if (!nums.length && words.length && /^[@\s·,—\-–/|()]*$/.test(key)) { let wi = 0; return key.replace(/@/g, () => wordAr(words[wi++])).replace(/,/g, '،'); }
+    if (/:$/.test(t) && AR[t.slice(0, -1)] != null) return AR[t.slice(0, -1)] + ':';
+    for (const sep of [' · ', ' — ', ' – ', ': ']) {
+      if (!t.includes(sep)) continue;
+      const parts = t.split(sep), tr = parts.map(p => p.trim() ? trCore(p.trim()) : p);
+      if (tr.some(x => x != null)) return parts.map((p, i) => tr[i] ?? arNum(p)).join(sep);
+    }
+    let hit = false;
+    const mixed = t.replace(/[A-Za-z][A-Za-z'’&,.() -]*[A-Za-z.)]|[A-Za-z]/g, ph => { const k = ph.trim(), r = AR[k] ?? AR_WORDS[k] ?? (k === 'at' ? 'الساعة' : null); if (r != null) { hit = true; return r; } return ph; });
+    if (hit) return arNum(mixed);
+    return null;
+  }
+  // fill in order of appearance in the English (numbers keep order, names keep order)
+  let ni = 0, wi = 0;
+  return tpl.replace(/[#@]/g, c => c === '#' ? arNum(nums[ni++] ?? '') : wordAr(words[wi++] ?? ''));
+}
+function trText(raw) {
+  if (I18N_MEMO.has(raw)) return I18N_MEMO.get(raw);
+  i18nPrep();
+  const lead = raw.match(/^\s*/)[0], trail = raw.match(/\s*$/)[0], t = raw.trim().replace(/\s+/g, ' ');
+  let out = null;
+  if (t && /[A-Za-z]/.test(t)) { const r = trCore(t); if (r != null) out = lead + r + trail; }
+  else if (/[0-9]/.test(t)) out = arNum(raw);
+  if (I18N_MEMO.size > 5000) I18N_MEMO.clear();
+  I18N_MEMO.set(raw, out);
+  return out;
+}
+/** for strings that leave the page (notifications, Android alarms, document title) */
+const L = s => (S.lang === 'ar' && s ? (trText(String(s)) ?? s) : s);
+
+const I18N_ATTR = ['title', 'placeholder', 'aria-label'];
+let I18N_BUSY = false;
+function i18nNode(root) {
+  if (S.lang !== 'ar' || !root) return;
+  I18N_BUSY = true;
+  try {
+    const skip = el => el.nodeType === 1 && el.matches && el.matches(I18N_SKIP);
+    if (root.nodeType === 3) { const p = root.parentElement; if (p && !p.closest(I18N_SKIP)) i18nText(root); return; }
+    if (root.nodeType !== 1 || root.closest(I18N_SKIP)) return;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeType === 1 && skip(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    let n = root;
+    do {
+      if (n.nodeType === 3) i18nText(n);
+      else I18N_ATTR.forEach(a => { const v = n.getAttribute(a); if (v && /[A-Za-z0-9]/.test(v) && n.getAttribute('data-en-' + a) == null) { const r = trText(v); if (r != null && r !== v) { n.setAttribute('data-en-' + a, v); n.setAttribute(a, r); } } });
+    } while ((n = w.nextNode()));
+    i18nDedupe(root);
+    if (root.querySelectorAll) root.querySelectorAll('textarea[placeholder]').forEach(ta => { const v = ta.getAttribute('placeholder'); if (ta.getAttribute('data-en-placeholder') == null) { const r = trText(v); if (r != null && r !== v) { ta.setAttribute('data-en-placeholder', v); ta.setAttribute('placeholder', r); } } });
+  } finally { I18N_BUSY = false; }
+}
+const i18nNorm = s => (s || '').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\s·.,،:]/g, '');
+function i18nDedupe(root) {
+  const els = root.nodeType === 1 ? [...(root.matches('.arui,.na') ? [root] : []), ...root.querySelectorAll('.arui,.pt .na')] : [];
+  els.forEach(el => {
+    const par = el.parentElement; if (!par || el.closest('.zt,.ar,.langsw,.asfab')) return;
+    const txt = i18nNorm(el.textContent); if (!txt) return;
+    const sibTr = [...par.childNodes].some(n => n !== el && (n.nodeType === 3 ? n.__ar : n.nodeType === 1 && !n.classList.contains('arui') && [...n.childNodes].some(c => c.__ar)));
+    const ctx = i18nNorm((par.parentElement || par).textContent.replace(el.textContent, ''));
+    if (sibTr || (txt.length > 1 && ctx.includes(txt))) el.classList.add('i18n-dup');
+  });
+}
+function i18nText(n) {
+  const v = n.nodeValue; if (!v || n.__ar === v) return;
+  const r = trText(v);
+  if (r != null && r !== v) { n.__en = v; n.__ar = r; n.nodeValue = r; }
+}
+function i18nRestore() {
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+  document.querySelectorAll('.i18n-dup').forEach(e => e.classList.remove('i18n-dup'));
+  let n; while ((n = w.nextNode())) {
+    if (n.nodeType === 3) { if (n.__en != null && n.nodeValue === n.__ar) n.nodeValue = n.__en; n.__en = n.__ar = undefined; }
+    else I18N_ATTR.forEach(a => { const v = n.getAttribute('data-en-' + a); if (v != null) { n.setAttribute(a, v); n.removeAttribute('data-en-' + a); } });
+  }
+}
+const I18N_OBS = new MutationObserver(recs => {
+  if (I18N_BUSY || S.lang !== 'ar') return;
+  for (const r of recs) {
+    if (r.type === 'characterData') i18nNode(r.target);
+    else if (r.type === 'attributes') { if (r.target.getAttribute('data-en-' + r.attributeName) == null || !/[؀-ۿ]/.test(r.target.getAttribute(r.attributeName))) { r.target.removeAttribute('data-en-' + r.attributeName); i18nNode(r.target); } }
+    else r.addedNodes.forEach(i18nNode);
+  }
+});
+function applyLang(rerender) {
+  const ar = S.lang === 'ar';
+  document.documentElement.lang = ar ? 'ar' : 'en';
+  document.documentElement.dir = ar ? 'rtl' : 'ltr';
+  document.title = ar ? 'القرآن الكريم — مواقيت الصلاة والأذكار' : 'AlQuran — Quran, Prayer & Azkar';
+  I18N_OBS.disconnect();
+  if (ar) { I18N_OBS.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: I18N_ATTR }); i18nNode(document.body); }
+  else i18nRestore();
+  if (rerender && typeof route === 'function') { try { route(curView); } catch (e) {} }
+}
+function setLang(l) {
+  if (S.lang === l) return;
+  S.lang = l; save(); I18N_MEMO.clear();
+  applyLang(true);
+  try { if (typeof apkSchedule === 'function') apkSchedule(true); } catch (e) {}
+}
+/* the English/العربية switch shown in Settings and on the More page */
+const langSwitch = () => `<div class="langsw" data-noi18n role="group" aria-label="Language · اللغة"><button type="button" data-lang="en" class="${S.lang !== 'ar' ? 'on' : ''}">English</button><button type="button" data-lang="ar" class="${S.lang === 'ar' ? 'on' : ''}">العربية</button></div>`;
+document.addEventListener('click', e => { const b = e.target.closest('[data-lang]'); if (!b) return; e.preventDefault(); setLang(b.dataset.lang); document.querySelectorAll('.langsw button').forEach(x => x.classList.toggle('on', x.dataset.lang === S.lang)); });
+/* locale for dates and times */
+const UI_LOC = () => (S.lang === 'ar' ? 'ar-IQ' : null);
+applyLang(false);
+
+/* =====================================================================
    AlQuran — device layer: storage DB, backups, reminders, calendar alarms,
    permissions, offline audio, install/update (PWA), developer tools
    ===================================================================== */
@@ -2266,7 +2664,7 @@ const IDB = (() => {
 /* ---------- small helpers ---------- */
 const fnv = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
 const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
-const fmtWhen = t => { const d = new Date(t), now = new Date(), y = new Date(now.getTime() - 864e5); const hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: !S.h24 }); if (d.toDateString() === now.toDateString()) return 'Today ' + hm; if (d.toDateString() === y.toDateString()) return 'Yesterday ' + hm; return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined }) + ' ' + hm; };
+const fmtWhen = t => { const d = new Date(t), now = new Date(), y = new Date(now.getTime() - 864e5); const hm = d.toLocaleTimeString(UI_LOC() || [], { hour: '2-digit', minute: '2-digit', hour12: !S.h24 }); if (d.toDateString() === now.toDateString()) return L('Today') + ' ' + hm; if (d.toDateString() === y.toDateString()) return L('Yesterday') + ' ' + hm; return d.toLocaleDateString(UI_LOC() || 'en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined }) + ' ' + hm; };
 async function saveFile(name, text, mime) {
   if (IS_APK) { try { return NATIVE.saveFile(name, mime, text) || 'failed'; } catch (e) { return 'failed'; } }   /* Android: saved to Downloads/AlQuran */
   if (IN_FRAME && window.claude && typeof window.claude.use === 'function') {   /* inside the Claude app viewer */
@@ -2501,6 +2899,8 @@ function remList() {
 }
 const remSave = list => LS.set('reminders', list.map(r => { const o = { id: r.id, kind: r.kind, on: !!r.on }; ['offset', 'time', 'title', 'note', 'link'].forEach(k => { if (r[k] != null && (r.kind === 'custom' || k === 'offset' || k === 'time')) o[k] = r[k]; }); if (r.days !== undefined) o.days = r.days; return o; }));
 const DAYN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYN_AR = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+const dayShort = (i, n) => S.lang === 'ar' ? DAYN_AR[i] : DAYN[i].slice(0, n);
 /* occurrence of reminder r on calendar day (y,m,d); anchored → location's prayer times; fixed → phone's local time */
 function remOccur(r, y, m, d) {
   const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
@@ -2524,6 +2924,7 @@ function remNext(r, from = new Date()) {
 function remBody(r, at) {
   if (r.kind === 'prayer' && r.anchor) {
     const P = PRAYERS.find(p => p[0] === r.anchor), base = new Date(at.getTime() - (r.offset || 0) * 6e4);
+    if (S.lang === 'ar') return r.offset ? `${P[2]} الساعة ${fmtT(base)} — بعد ${toAr(Math.abs(r.offset))} دقيقة` : `حان وقت صلاة ${P[2]} · ${fmtT(base)}${S.loc ? ' · ' + S.loc.name : ''}`;
     return r.offset ? `${P[1]} at ${fmtT(base)} — in ${Math.abs(r.offset)} min` : `It's time for ${P[1]} · ${fmtT(base)}${S.loc ? ' · ' + S.loc.name : ''}`;
   }
   if (r.kind === 'khatma') { const K = LS.get('khatma', null); if (K) { const d = Math.min(khDayIndex(K), K.days - 1); const [a, b] = khRange(K, d); return `Day ${d + 1}: pages ${a}–${b}`; } }
@@ -2546,6 +2947,7 @@ function remSound(kind) {
 async function notify(title, body, link, tag) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return false;
   const opt = { body, tag, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', data: { link }, renotify: true };
+  title = L(title); if (opt && opt.body) opt.body = L(opt.body);
   try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) { await reg.showNotification(title, opt); return true; } } catch (e) {}
   try { new Notification(title, opt); return true; } catch (e) { return false; }
 }
@@ -2639,7 +3041,7 @@ RENDER.reminders = () => {
     <div style="flex:1;min-width:0"><b>${esc(r.title)}</b> ${r.ar ? `<span class="arui muted">${r.ar}</span>` : ''}
       <div class="row" style="gap:6px;margin-top:6px">
         ${r.anchor ? `<select data-r="offset" style="width:auto;padding:5px 8px;font-size:13px">${OFFSETS.map(o => `<option value="${o}" ${o === (r.offset || 0) ? 'selected' : ''}>${offTxt(o, r.anchor)}</option>`).join('')}</select>` : `<input type="time" data-r="time" value="${r.time}" style="width:auto;padding:5px 8px;font-size:13px">`}
-        ${r.kind !== 'prayer' || r.days ? `<div class="days">${DAYN.map((d, i) => `<button data-day="${i}" class="${!r.days || !r.days.length || r.days.includes(i) ? 'on' : ''}">${d[0]}</button>`).join('')}</div>` : ''}
+        ${r.kind !== 'prayer' || r.days ? `<div class="days">${DAYN.map((d, i) => `<button data-day="${i}" class="${!r.days || !r.days.length || r.days.includes(i) ? 'on' : ''}">${dayShort(i, 1)}</button>`).join('')}</div>` : ''}
         ${r.kind === 'custom' ? `<button class="btn sm ghost" data-r="del">${icon('trash')}</button>` : ''}</div>
       <small class="muted">${r.on ? (nx ? 'Next: ' + fmtWhen(nx) : r.anchor && !S.loc ? '⚠ Set your city on the Prayer page first' : '—') : 'Off'}</small></div></div>`; };
   el.innerHTML = `<h1 class="vt">Reminders <span class="arui">التنبيهات</span></h1><p class="sub">Prayer, azkar and Quran reminders. Turn on what you want, then add them to your Calendar for alarms that ring even when AlQuran is closed.</p>
@@ -2695,7 +3097,7 @@ function remForm() {
   openModal(`<b style="font-family:var(--serif);font-size:24px">New reminder</b><form id="rmf" style="margin-top:12px">
     <label class="f">Title</label><input type="text" name="title" required placeholder="e.g. Read Surat Al-Waqi'ah" dir="auto">
     <label class="f" style="margin-top:10px">Time</label><input type="time" name="time" value="21:00" required>
-    <label class="f" style="margin-top:10px">Days</label><div class="days" id="rmd">${DAYN.map((d, i) => `<button type="button" data-day="${i}" class="on">${d.slice(0, 2)}</button>`).join('')}</div>
+    <label class="f" style="margin-top:10px">Days</label><div class="days" id="rmd">${DAYN.map((d, i) => `<button type="button" data-day="${i}" class="on">${dayShort(i, 2)}</button>`).join('')}</div>
     <label class="f" style="margin-top:10px">Note (optional)</label><input type="text" name="note" dir="auto">
     <label class="f" style="margin-top:10px">Opens</label><select name="link"><option value="">Nothing</option><option value="quran">Quran</option><option value="azkar:morning">Morning azkar</option><option value="azkar:evening">Evening azkar</option><option value="tasbih">Tasbih</option><option value="khatma">Khatma</option><option value="surah:18">Surat Al-Kahf</option><option value="surah:36">Surat Ya-Sin</option><option value="surah:56">Surat Al-Waqi'ah</option><option value="surah:67">Surat Al-Mulk</option></select>
     <div class="row" style="justify-content:flex-end;margin-top:16px"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">${icon('check')} Save</button></div></form>`, box => {
@@ -2759,13 +3161,14 @@ RENDER.device = async () => {
   <div class="card" id="instCard"><div class="row" style="justify-content:space-between"><b style="font-size:17px">${icon('phone').replace('<svg', '<svg style="width:20px;vertical-align:-4px;color:var(--gold)"')} Install as an app</b>${pchip(inst ? 'granted' : 'prompt').replace(inst ? 'Allowed' : 'Not asked', inst ? 'Installed' : 'In browser')}</div>
     ${inst ? '<p class="muted" style="margin:8px 0 0">AlQuran is installed. It opens from your Home Screen and works without internet.</p>' :
     IN_FRAME ? '<p class="muted" style="margin:8px 0 0">You are viewing AlQuran inside another app. Open the hosted AlQuran link in Safari (iPhone) or Chrome (Android) to install it.</p>' :
-    IS_IOS ? `<ol class="steps"><li>Open this page in <b>Safari</b> (in Chrome on iPhone, the Share button works too on iOS 16.4+).</li><li>Tap <b>Share</b> <span class="kbdi">${icon('share')}</span> at the bottom.</li><li>Scroll and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open AlQuran from your Home Screen — then allow notifications below.</li></ol>`
+    IS_IOS && S.lang === 'ar' ? `<ol class="steps" data-noi18n><li>افتح هذه الصفحة في <b>Safari</b> (في Chrome على iPhone يعمل زر المشاركة أيضاً منذ iOS 16.4).</li><li>المس <b>مشاركة</b> <span class="kbdi">${icon('share')}</span> في الأسفل.</li><li>مرّر والمس <b>إضافة إلى الشاشة الرئيسية</b> ثم <b>إضافة</b>.</li><li>افتح التطبيق من الشاشة الرئيسية — ثم اسمح بالإشعارات في الأسفل.</li></ol>`
+    : IS_IOS ? `<ol class="steps"><li>Open this page in <b>Safari</b> (in Chrome on iPhone, the Share button works too on iOS 16.4+).</li><li>Tap <b>Share</b> <span class="kbdi">${icon('share')}</span> at the bottom.</li><li>Scroll and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open AlQuran from your Home Screen — then allow notifications below.</li></ol>`
     : `<p class="muted" style="margin:8px 0">Install AlQuran to use it like an app, offline.</p><button class="btn pri" id="instBtn" ${window.__installEvt ? '' : 'disabled'}>${icon('download')} Install AlQuran</button> <small class="muted">${window.__installEvt ? '' : 'Or use the browser menu → “Install app” / “Add to Home screen”.'}</small>`}
   </div>
   <div class="card" style="margin-top:14px"><div class="orn">Permissions</div>
     ${[
-    ['pin', 'Location', 'For prayer times and Qibla near you. Optional — you can pick a city instead.', st.geo, st.geo === 'denied' ? (IS_IOS ? 'Settings → Privacy & Security → Location Services → <b>Safari Websites</b> → While Using the App. Then reopen AlQuran.' : 'Browser site settings → Location → Allow.') : '', st.geo !== 'unsupported' ? 'geo' : ''],
-    ['bell', 'Notifications', 'Shows reminders as notifications while AlQuran is open or just in the background.', st.notif, st.notif === 'denied' ? (IS_IOS ? 'Settings → Notifications → <b>AlQuran</b> → Allow Notifications.' : 'Browser site settings → Notifications → Allow.') : st.notif === 'install-first' ? 'iPhone allows notifications only for apps added to the Home Screen (iOS 16.4 or newer).' : '', st.notif === 'default' ? 'notif' : ''],
+    ['pin', 'Location', 'For prayer times and Qibla near you. Optional — you can pick a city instead.', st.geo, st.geo === 'denied' ? (S.lang === 'ar' ? (IS_IOS ? '<span data-noi18n>الإعدادات ← الخصوصية والأمن ← خدمات الموقع ← <b>مواقع Safari</b> ← أثناء استخدام التطبيق. ثم أعد فتح التطبيق.</span>' : '<span data-noi18n>إعدادات الموقع في المتصفح ← الموقع ← سماح.</span>') : IS_IOS ? 'Settings → Privacy & Security → Location Services → <b>Safari Websites</b> → While Using the App. Then reopen AlQuran.' : 'Browser site settings → Location → Allow.') : '', st.geo !== 'unsupported' ? 'geo' : ''],
+    ['bell', 'Notifications', 'Shows reminders as notifications while AlQuran is open or just in the background.', st.notif, st.notif === 'denied' ? (S.lang === 'ar' ? (IS_IOS ? '<span data-noi18n>الإعدادات ← الإشعارات ← <b>AlQuran</b> ← السماح بالإشعارات.</span>' : '<span data-noi18n>إعدادات الموقع في المتصفح ← الإشعارات ← سماح.</span>') : IS_IOS ? 'Settings → Notifications → <b>AlQuran</b> → Allow Notifications.' : 'Browser site settings → Notifications → Allow.') : st.notif === 'install-first' ? 'iPhone allows notifications only for apps added to the Home Screen (iOS 16.4 or newer).' : '', st.notif === 'default' ? 'notif' : ''],
     ['qibla', 'Motion & compass', 'Lets the Qibla compass turn with your phone.', st.motion, st.motion === 'prompt' ? 'iPhone asks once. If you refused, close and reopen AlQuran, then tap Allow again.' : '', st.motion === 'prompt' ? 'motion' : ''],
     ['cal', 'Alarms (Calendar)', 'The reliable way to get prayer and azkar alarms when the app is closed.', 'granted', '', 'cal'],
     ['shield', 'Keep data safe', `Asks the browser not to clear AlQuran's storage. ${quotaTxt}.`, st.persist, st.persist === false ? (IS_IOS ? 'On iPhone, data of apps added to the Home Screen is kept. Keep backups in Files too.' : 'The browser decides — installing the app usually allows it.') : '', st.persist === false ? 'persist' : ''],
@@ -2993,6 +3396,7 @@ RENDER.more = () => {
   const tiles = [['search', 'Search the Quran', 'Any word, any language'], ['khatma', 'Khatma', 'Your reading plan'], ['qibla', 'Qibla', 'Direction & compass'], ['tasbih', 'Tasbih', 'Counter & my athkar'],
     ['reminders', 'Reminders', 'Prayer, azkar & calendar alarms'], ['backup', 'Backups', 'Automatic copies & restore'], ['device', 'Phone & offline', 'Install, permissions, audio'], ['dev', 'Developer', 'Self-test & diagnostics']];
   $('#v-more').innerHTML = `<h1 class="vt">More <span class="arui">المزيد</span></h1><p class="sub">AlQuran ${APP_VERSION}</p>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px"><b>Language · اللغة</b>${langSwitch()}</div>
     <div class="grid g2">${tiles.map(([k, t, d]) => `<a class="card qcard" href="#${k}" style="text-decoration:none;color:inherit"><div class="ic">${icon((VIEWS.find(v => v[0] === k) || [])[3])}</div><div><b>${t}</b><span>${d}</span></div></a>`).join('')}</div>`;
 };
 
@@ -3039,10 +3443,10 @@ function apkSchedule(force) {
       const at = remOccur(r, y, m, d); if (!at || at <= now) continue;
       if (r.kind === 'khatma') { if (!K) continue; if (at.toDateString() === today) { const di = khDayIndex(K); if (di < 0 || di >= K.days || (K.done || {})[di]) continue; } }
       let body = ''; try { body = remBody(r, at); } catch (e) {}
-      out.push({ key: r.id + '@' + at.toISOString().slice(0, 16), at: at.getTime(), title: ico(r) + r.title, body, link: r.link || (r.kind === 'prayer' ? 'prayer' : ''), kind: r.kind });
+      out.push({ key: r.id + '@' + at.toISOString().slice(0, 16), at: at.getTime(), title: ico(r) + L(r.title), body: L(body), link: r.link || (r.kind === 'prayer' ? 'prayer' : ''), kind: r.kind });
     }
   }
-  LS.get('snoozes', []).forEach(sz => { const r = remList().find(x => x.id === sz.id); if (r && sz.at > now.getTime()) out.push({ key: 'snooze:' + r.id + '@' + sz.at, at: sz.at, title: '⏰ ' + r.title, body: 'Snoozed reminder', link: r.link || '', kind: r.kind }); });
+  LS.get('snoozes', []).forEach(sz => { const r = remList().find(x => x.id === sz.id); if (r && sz.at > now.getTime()) out.push({ key: 'snooze:' + r.id + '@' + sz.at, at: sz.at, title: '⏰ ' + L(r.title), body: L('Snoozed reminder'), link: r.link || '', kind: r.kind }); });
   out.sort((a, b) => a.at - b.at);
   const list = out.slice(0, 200), key = JSON.stringify(list);
   if (!force && key === apkSchedKey) return;
