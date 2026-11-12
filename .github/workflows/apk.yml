@@ -1,0 +1,69 @@
+name: Android APK
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'data/**', 'android/**', '.github/workflows/apk.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: apk
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Put the web app inside the APK
+        run: |
+          W=android/app/src/main/assets/www
+          rm -rf "$W"; mkdir -p "$W"
+          cp -r index.html data icons manifest.webmanifest "$W/"
+          echo "WEB_BUILD=$(grep -o "BUILD = '[0-9.]*'" sw.js | grep -o '[0-9.]*')" >> "$GITHUB_ENV"
+      - name: Check the app compiles
+        run: gradle -p android assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+      - name: Make the signing key from your ALQURAN_KEY secret
+        env:
+          ALQURAN_KEY: ${{ secrets.ALQURAN_KEY }}
+        run: |
+          if [ ${#ALQURAN_KEY} -lt 16 ]; then
+            echo "::error title=Signing password missing::Add a repository secret named ALQURAN_KEY (at least 16 characters) in Settings > Secrets and variables > Actions, then run this workflow again."
+            exit 1
+          fi
+          pip install --quiet cryptography
+          python3 android/sign/derive_key.py "$RUNNER_TEMP/alquran.p12"
+          echo "ALQURAN_KEYSTORE=$RUNNER_TEMP/alquran.p12" >> "$GITHUB_ENV"
+      - name: Build the APK
+        env:
+          ALQURAN_KEY: ${{ secrets.ALQURAN_KEY }}
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 2.0.${{ github.run_number }}
+        run: gradle -p android assembleRelease --no-daemon --stacktrace 2>&1 | tee -a build.log
+      - name: Publish the download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk AlQuran.apk
+          ls -l AlQuran.apk
+          gh release create "android-${{ github.run_number }}" AlQuran.apk \
+            --title "AlQuran for Android 2.0.${{ github.run_number }}" \
+            --notes "Android app built from web build ${WEB_BUILD}. Download AlQuran.apk below, open it on your phone and tap Install (allow 'Install unknown apps' for your browser if asked)." \
+            --latest
+      - name: Keep the build log if something failed
+        if: failure()
+        run: |
+          git config user.name "AlQuran CI"; git config user.email "ci@users.noreply.github.com"
+          cp build.log /tmp/build.log 2>/dev/null || echo "no log" > /tmp/build.log
+          git checkout --orphan ci-log
+          git rm -rf -q --cached . >/dev/null
+          cp /tmp/build.log build.log
+          git add -f build.log
+          git commit -q -m "APK build log (run ${{ github.run_number }})"
+          git push -f origin ci-log

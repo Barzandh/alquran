@@ -1,0 +1,32 @@
+plugins { id 'com.android.application' }
+
+def vCode = (System.getenv('VERSION_CODE') ?: '1') as Integer
+def vName = System.getenv('VERSION_NAME') ?: '2.0.0'
+
+android {
+  namespace 'com.barzandh.alquran'
+  compileSdk 34
+  defaultConfig {
+    applicationId 'com.barzandh.alquran'
+    minSdk 24
+    targetSdk 34
+    versionCode vCode
+    versionName vName
+  }
+  signingConfigs {
+    release {
+      // the key is made on the build server from the ALQURAN_KEY repository secret (see sign/derive_key.py)
+      storeFile file(System.getenv('ALQURAN_KEYSTORE') ?: 'missing.p12')
+      storeType 'pkcs12'
+      storePassword System.getenv('ALQURAN_KEY') ?: ''
+      keyAlias 'alquran'
+      keyPassword System.getenv('ALQURAN_KEY') ?: ''
+    }
+  }
+  buildTypes {
+    release { minifyEnabled false; signingConfig signingConfigs.release }
+  }
+  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+  androidResources { noCompress 'bin', 'woff2', 'png' }
+  lint { abortOnError false; checkReleaseBuilds false }
+}

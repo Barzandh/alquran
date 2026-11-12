@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.025541";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.034331";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2221,7 +2221,11 @@ const APP_VERSION = '2.0.0-dev';
 const BUILD_ID = (window.__BUILD__ || 'local');
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const IOS_VER = (() => { const m = navigator.userAgent.match(/OS (\d+)_(\d+)/); return m ? +m[1] + m[2] / 10 : 0; })();
-const IS_STANDALONE = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const NATIVE = (() => { try { return window.AlQuranAndroid || null; } catch (e) { return null; } })();   /* present only inside the Android app (APK) */
+const IS_APK = !!NATIVE;
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+const APK_URL = 'https://github.com/Barzandh/alquran/releases/latest/download/AlQuran.apk';
+const IS_STANDALONE = () => { if (IS_APK) return true; try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
 const IN_FRAME = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
 
 /* ---------- event log (ring buffer, visible in Developer) ---------- */
@@ -2262,6 +2266,7 @@ const fnv = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^=
 const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
 const fmtWhen = t => { const d = new Date(t), now = new Date(), y = new Date(now.getTime() - 864e5); const hm = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: !S.h24 }); if (d.toDateString() === now.toDateString()) return 'Today ' + hm; if (d.toDateString() === y.toDateString()) return 'Yesterday ' + hm; return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined }) + ' ' + hm; };
 async function saveFile(name, text, mime) {
+  if (IS_APK) { try { return NATIVE.saveFile(name, mime, text) || 'failed'; } catch (e) { return 'failed'; } }   /* Android: saved to Downloads/AlQuran */
   if (IN_FRAME && window.claude && typeof window.claude.use === 'function') {   /* inside the Claude app viewer */
     let dl = null; try { dl = await window.claude.use('downloads'); } catch (e) {}
     if (!dl) return 'failed';
@@ -2367,7 +2372,7 @@ async function bkExport(b) {
   if (!b) b = (await bkList())[0];
   const d = new Date(b.created), name = `alquran-backup-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}.json`;
   const r = await saveFile(name, bkFileText(b), 'application/json');
-  if (r === 'shared' || r === 'downloaded') { const c = bkCfg(); c.lastFile = Date.now(); bkSetCfg(c); hideBanner('bkfile'); toast(r === 'shared' ? 'Choose “Save to Files” to keep it in iCloud Drive' : 'Backup file saved'); LOG('backup', 'Backup file exported'); }
+  if (r === 'shared' || r === 'downloaded') { const c = bkCfg(); c.lastFile = Date.now(); bkSetCfg(c); hideBanner('bkfile'); toast(r === 'shared' ? (IS_APK ? 'Choose where to keep the backup file' : 'Choose “Save to Files” to keep it in iCloud Drive') : IS_APK ? 'Backup saved in Downloads › AlQuran' : 'Backup file saved'); LOG('backup', 'Backup file exported'); }
   else if (r === 'failed') { try { await navigator.clipboard.writeText(bkFileText(b)); toast('Saving files isn’t allowed here — the backup was copied as text instead'); } catch (e) { toast('Saving files isn’t allowed here'); } }
   return r;
 }
@@ -2548,6 +2553,7 @@ function openLink(link) {
   if (t === 'azkar') { AZ.cat = v; go('azkar'); } else if (t === 'surah') openSurah(+v); else go(t);
 }
 async function remFire(r, at, test) {
+  if (IS_APK && !test) { try { if (!NATIVE.isForeground()) { remLogAdd({ t: Date.now(), id: r.id, title: r.title, at: at.getTime(), ev: 'notified by Android', sys: true }); return; } } catch (e) {} }
   const title = (r.kind === 'prayer' && !r.offset ? '🕌 ' : r.kind === 'azkar' ? '📿 ' : r.kind === 'prayer' ? '⏰ ' : '📖 ') + r.title, body = remBody(r, at);
   remSound(r.kind); vibrate([200, 100, 200]);
   const sys = document.visibilityState !== 'visible' ? await notify(title, body, r.link || (r.kind === 'prayer' ? 'prayer' : ''), r.id) : false;
@@ -2572,6 +2578,7 @@ function remTick(now = new Date(), silentPast = false) {
       fired[key] = now.getTime(); changed = true;
       if (silentPast) continue;
       if (r.kind === 'khatma') { if (!K) { continue; } const di = khDayIndex(K); if (di < 0 || di >= K.days || (K.done || {})[di]) { remLogAdd({ t: Date.now(), id: r.id, title: r.title, at: at.getTime(), ev: 'skipped — wird already read' }); continue; } }
+      if (IS_APK) { let shown = false; try { shown = NATIVE.wasNotified(key); } catch (e) {} if (shown) { remLogAdd({ t: Date.now(), id: r.id, title: r.title, at: at.getTime(), ev: 'notified by Android', sys: true }); continue; } }
       if (age <= REM_WINDOW) remFire(r, at);
       else if (age <= REM_MISS) { remLogAdd({ t: Date.now(), id: r.id, title: r.title, at: at.getTime(), ev: 'missed' }); LOG('reminder', 'Missed while closed: ' + r.title); }
     }
@@ -2579,6 +2586,7 @@ function remTick(now = new Date(), silentPast = false) {
   const sn = LS.get('snoozes', []), due = sn.filter(s => s.at <= now.getTime());
   if (due.length) { LS.set('snoozes', sn.filter(s => s.at > now.getTime())); due.forEach(s => { const r = remList().find(x => x.id === s.id); if (r && now.getTime() - s.at < REM_WINDOW * 2) remFire(r, new Date(s.at)); }); }
   if (changed && !silentPast && curView === 'reminders') setTimeout(() => RENDER.reminders(), 50);
+  if (IS_APK) apkSchedule();
   if (changed || silentPast) { const cut = now.getTime() - 3 * 864e5; Object.keys(fired).forEach(k => { if (fired[k] < cut) delete fired[k]; }); LS.set('remFired', fired); }
 }
 /* ---------- calendar alarms (.ics) — reliable alerts on iPhone even when the app is closed ---------- */
@@ -2673,6 +2681,7 @@ RENDER.reminders = () => {
       LOG('reminder', `Calendar file made: ${count} events`);
       if (IN_FRAME && window.claude) { toast('Calendar alarms can’t be added from inside the Claude app — open AlQuran in Safari or from your Home Screen'); return; }
       if (a === 'ics-save') { const r = await saveFile('alquran-reminders.ics', text, 'text/calendar'); if (r === 'unsupported' || r === 'failed') toast('Saving calendar files isn’t allowed here'); return; }
+      if (IS_APK) { try { NATIVE.openFile('alquran-reminders.ics', 'text/calendar', text); } catch (e) {} return; }
       const url = URL.createObjectURL(new Blob([text], { type: 'text/calendar' }));
       const lnk = document.createElement('a'); lnk.href = url; lnk.target = '_blank'; lnk.rel = 'noopener'; if (!IS_IOS) lnk.download = 'alquran-reminders.ics';
       document.body.appendChild(lnk); lnk.click(); setTimeout(() => { lnk.remove(); URL.revokeObjectURL(url); }, 60000);
@@ -2704,15 +2713,19 @@ function remForm() {
 async function permState() {
   const s = {};
   try { s.geo = navigator.permissions ? (await navigator.permissions.query({ name: 'geolocation' })).state : (navigator.geolocation ? 'unknown' : 'unsupported'); } catch (e) { s.geo = navigator.geolocation ? 'unknown' : 'unsupported'; }
-  s.notif = 'Notification' in window ? Notification.permission : (IS_IOS && !IS_STANDALONE() ? 'install-first' : 'unsupported');
+  s.notif = IS_APK ? NATIVE.notifState() : 'Notification' in window ? Notification.permission : (IS_IOS && !IS_STANDALONE() ? 'install-first' : 'unsupported');
   s.motion = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function' ? (LS.get('motionOK', false) ? 'granted' : 'prompt') : ('ondeviceorientation' in window ? 'auto' : 'unsupported');
   try { s.persist = navigator.storage && navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) { s.persist = null; }
   try { s.est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null; } catch (e) { s.est = null; }
-  s.wake = 'wakeLock' in navigator; s.vib = 'vibrate' in navigator; s.share = !!navigator.share;
+  s.wake = IS_APK || 'wakeLock' in navigator; s.vib = 'vibrate' in navigator; s.share = !!navigator.share;
   s.sw = 'serviceWorker' in navigator ? (navigator.serviceWorker.controller ? 'active' : (location.protocol.startsWith('http') ? 'installing' : 'needs-https')) : 'unsupported';
   return s;
 }
 async function requestNotif() {
+  if (IS_APK) {
+    const r = await new Promise(res => { window.__nativeNotif = v => { window.__nativeNotif = null; res(v); }; try { NATIVE.requestNotifications(); } catch (e) { res('error'); } setTimeout(() => window.__nativeNotif && window.__nativeNotif(NATIVE.notifState()), 60000); });
+    LOG('permission', 'Notifications (Android): ' + r); if (r === 'granted') apkSchedule(true); else toast('Allow notifications for AlQuran in Android Settings › Apps › AlQuran'); return r;
+  }
   if (!('Notification' in window)) { toast(IS_IOS ? 'Add AlQuran to your Home Screen first — iPhone allows notifications only for installed web apps (iOS 16.4+)' : 'Notifications aren’t supported here'); return 'unsupported'; }
   try { const r = await Notification.requestPermission(); LOG('permission', 'Notifications: ' + r); if (r === 'granted') notify('AlQuran', 'Notifications are on. السلام عليكم', 'reminders', 'welcome'); return r; } catch (e) { return 'error'; }
 }
@@ -2722,6 +2735,7 @@ async function requestMotion() {
 function requestGeo() { return new Promise(res => { if (!navigator.geolocation) return res('unsupported'); navigator.geolocation.getCurrentPosition(p => { LOG('permission', 'Location: granted'); res({ lat: p.coords.latitude, lng: p.coords.longitude }); }, e => { LOG('permission', 'Location: ' + (e.code === 1 ? 'denied' : 'error ' + e.message)); res(e.code === 1 ? 'denied' : 'error'); }, { timeout: 15000, enableHighAccuracy: false }); }); }
 let wakeLock = null;
 async function applyWake() {
+  if (IS_APK) { const on = document.visibilityState === 'visible' && (window.AS_ON === true || (S.wake && (curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused)))); try { NATIVE.keepScreenOn(!!on); } catch (e) {} return; }
   if (!('wakeLock' in navigator)) return;
   const want = document.visibilityState === 'visible' && (window.AS_ON === true || S.wake) && (window.AS_ON === true || curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused));
   try { if (want && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; } } catch (e) { wakeLock = null; }
@@ -2732,6 +2746,14 @@ RENDER.device = async () => {
   const el = $('#v-device'), st = await permState(), inst = IS_STANDALONE();
   const quotaTxt = st.est ? `${fmtSize(st.est.usage || 0)} used${st.est.quota ? ' of ' + fmtSize(st.est.quota) : ''}` : '—';
   el.innerHTML = `<h1 class="vt">Phone & offline <span class="arui">الهاتف</span></h1><p class="sub">Permissions, installing AlQuran as an app, and offline recitation — with steps for iPhone.</p>
+  ${IS_APK ? `<div class="card" id="apkCard"><div class="row" style="justify-content:space-between"><b style="font-size:17px">🤖 Android app</b><span class="pchip ok">v${esc((() => { try { return NATIVE.version(); } catch (e) { return '?'; } })())}</span></div>
+      <p class="muted" style="margin:8px 0 10px">Everything is inside the app — it works with no internet. Reminders ring as real Android notifications even when AlQuran is closed (open the app at least once a week to keep them scheduled).</p>
+      <div class="row" style="justify-content:space-between;padding:6px 0;border-top:1px solid var(--line)"><span>Exact alarm times</span>${(() => { let v = 'granted'; try { v = NATIVE.exactAlarms(); } catch (e) {} return v === 'granted' ? '<span class="pchip ok">On</span>' : '<button class="btn sm" id="apkExact">Allow</button>'; })()}</div>
+      <a class="btn sm" style="margin-top:8px" href="${APK_URL}" target="_blank" rel="noopener">${icon('download')} Download the latest version</a></div>`
+    : IS_IOS ? '' : `<div class="card" id="apkCard"><div class="row" style="justify-content:space-between"><b style="font-size:17px">🤖 Android app (APK)</b><span class="pchip">${IS_ANDROID ? 'For this phone' : 'For Android phones'}</span></div>
+      <p class="muted" style="margin:8px 0 10px">A real Android app: works offline from the first launch, reminders as Android notifications even when closed, saves backups to Downloads.</p>
+      <a class="btn pri" href="${APK_URL}">${icon('download')} Download AlQuran.apk</a>
+      <p class="muted" style="margin:10px 0 0;font-size:13px">After downloading, open the file. If Android asks, allow “Install unknown apps” for your browser, then tap Install.</p></div>`}
   <div class="card" id="instCard"><div class="row" style="justify-content:space-between"><b style="font-size:17px">${icon('phone').replace('<svg', '<svg style="width:20px;vertical-align:-4px;color:var(--gold)"')} Install as an app</b>${pchip(inst ? 'granted' : 'prompt').replace(inst ? 'Allowed' : 'Not asked', inst ? 'Installed' : 'In browser')}</div>
     ${inst ? '<p class="muted" style="margin:8px 0 0">AlQuran is installed. It opens from your Home Screen and works without internet.</p>' :
     IN_FRAME ? '<p class="muted" style="margin:8px 0 0">You are viewing AlQuran inside another app. Open the hosted AlQuran link in Safari (iPhone) or Chrome (Android) to install it.</p>' :
@@ -2757,6 +2779,7 @@ RENDER.device = async () => {
   <div class="card" style="margin-top:14px" id="offAudio"></div>`;
   drawOfflineAudio();
   if (st.sw === 'active') askOfflineStatus().then(s => { if (s) onOfflineMsg(s); const d = $('#offDetail'); if (d && s) d.innerHTML = `<div class="row" style="justify-content:space-between;gap:8px"><span class="${s.cached === s.total ? 'pchip ok' : 'pchip warn'}">${s.cached === s.total ? '✓ Offline copy complete' : '⬇ Saved ' + s.cached + ' of ' + s.total + ' parts'}</span><button class="btn sm" id="offRepair">Check &amp; repair</button></div>`; const rb = $('#offRepair'); if (rb) rb.onclick = async () => { if (!navigator.onLine) { toast('Connect to the internet to repair'); return; } const reg = await navigator.serviceWorker.ready; reg.active.postMessage('ensure'); toast('Checking the offline copy…'); setTimeout(() => RENDER.device(), 4000); }; });
+  const ax = $('#apkExact'); if (ax) ax.onclick = () => { try { NATIVE.openAlarmSettings(); } catch (e) {} };
   const ib = $('#instBtn'); if (ib) ib.onclick = async () => { const ev = window.__installEvt; if (!ev) return; ev.prompt(); const r = await ev.userChoice; LOG('install', r.outcome); window.__installEvt = null; RENDER.device(); };
   el.onclick = async e => {
     const b = e.target.closest('[data-perm]'); if (!b) return; const a = b.dataset.perm;
@@ -2848,6 +2871,7 @@ const OFFL = { state: 'unknown', done: 0, total: 0 };
 function offState() { return LS.get('offlineReady', null); }
 function drawOffBadge() {
   const el = $('#offBadge'); if (!el) return;
+  if (IS_APK) { el.innerHTML = '<span class="offb ok">✓ Android app — works offline</span>'; return; }
   if (!window.__PWA__ || !/^https?:$/.test(location.protocol)) { el.innerHTML = ''; return; }
   const r = offState();
   if (OFFL.state === 'saving') el.innerHTML = `<span class="offb saving">⬇ Saving for offline ${OFFL.done}/${OFFL.total} — keep AlQuran open</span>`;
@@ -2873,6 +2897,7 @@ function onOfflineMsg(d) {
 }
 window.__swFresh = Date.now();
 function setupSW() {
+  if (IS_APK) return;   /* the Android app carries every file inside it */
   if (!window.__PWA__ || !('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
   const autoApply = w => { if (Date.now() - (window.__swFresh || 0) < 20000 && !(A.on && !A.el.paused)) { LOG('install', 'Auto-updating to the new version'); toast('Updating AlQuran…'); w.postMessage('skipWaiting'); return true; } return false; };
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
@@ -2973,6 +2998,46 @@ function deviceInit() {
   window.addEventListener('hashchange', () => setTimeout(applyWake, 50));
   ['play', 'pause'].forEach(ev => A.el.addEventListener(ev, applyWake));
   try { if (navigator.storage && navigator.storage.persist && IS_STANDALONE()) navigator.storage.persist(); } catch (e) {}
+}
+
+
+/* =====================================================================
+   ANDROID APP (APK) — reminders become real Android alarms, back button, links
+   ===================================================================== */
+let apkSchedKey = '';
+function apkSchedule(force) {
+  if (!IS_APK) return;
+  const now = new Date(), out = [], K = LS.get('khatma', null), today = now.toDateString();
+  const ico = r => (r.kind === 'prayer' && !r.offset ? '🕌 ' : r.kind === 'azkar' ? '📿 ' : r.kind === 'prayer' ? '⏰ ' : '📖 ');
+  for (const r of remList().filter(r => r.on)) {
+    for (const [y, m, d] of remDayList(now, 7, !!r.anchor)) {
+      const at = remOccur(r, y, m, d); if (!at || at <= now) continue;
+      if (r.kind === 'khatma') { if (!K) continue; if (at.toDateString() === today) { const di = khDayIndex(K); if (di < 0 || di >= K.days || (K.done || {})[di]) continue; } }
+      let body = ''; try { body = remBody(r, at); } catch (e) {}
+      out.push({ key: r.id + '@' + at.toISOString().slice(0, 16), at: at.getTime(), title: ico(r) + r.title, body, link: r.link || (r.kind === 'prayer' ? 'prayer' : ''), kind: r.kind });
+    }
+  }
+  LS.get('snoozes', []).forEach(sz => { const r = remList().find(x => x.id === sz.id); if (r && sz.at > now.getTime()) out.push({ key: 'snooze:' + r.id + '@' + sz.at, at: sz.at, title: '⏰ ' + r.title, body: 'Snoozed reminder', link: r.link || '', kind: r.kind }); });
+  out.sort((a, b) => a.at - b.at);
+  const list = out.slice(0, 200), key = JSON.stringify(list);
+  if (!force && key === apkSchedKey) return;
+  apkSchedKey = key;
+  try { const n = NATIVE.schedule(key); LOG('reminder', `Android alarms set: ${n}`); } catch (e) {}
+}
+window.__androidBack = () => {
+  try {
+    if ($('#modal').classList.contains('on')) { closeModal(); return true; }
+    if ($('#sheet').classList.contains('on')) { closeSheet(); return true; }
+    if ($('#drawer').classList.contains('on')) { $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); return true; }
+    if (typeof AS !== 'undefined' && AS.open) { asClose(); return true; }
+    if (curView === 'quran' && R.range) { quranHome(); window.scrollTo(0, 0); return true; }
+    if (curView !== 'home') { go('home'); window.scrollTo(0, 0); return true; }
+  } catch (e) {}
+  return false;
+};
+if (IS_APK) {
+  document.documentElement.classList.add('apk');
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') apkSchedule(true); });
 }
 
 init();
