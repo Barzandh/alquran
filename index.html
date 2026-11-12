@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261111.201947";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.024356";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@ a{color:var(--g6)}
 .nav a.on{background:linear-gradient(90deg,rgba(216,181,106,.22),rgba(216,181,106,.06));color:#fff}
 .nav a.on::before{content:'';position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:3px;background:var(--gold2)}
 .side .foot{margin-top:auto;font-size:11.5px;color:rgba(239,231,207,.45);padding:12px 8px 0;line-height:1.5}
-main{margin-left:var(--side);min-height:100vh;padding:26px 34px calc(var(--plh,0px) + 60px)}
+main{margin-left:var(--side);min-height:100vh;padding:26px 34px calc(var(--plh,0px) + var(--ash,0px) + 60px)}
 .view{display:none;max-width:980px;margin:0 auto;animation:fade .25s ease}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -406,9 +406,29 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 .chip.on{background:var(--g7);color:#fff;border-color:var(--g7)}
 
 /* ---------- responsive ---------- */
+
+/* auto-scroll bar (Quran Explorer style) */
+.asbar{position:fixed;left:calc(var(--side) + 18px);right:18px;bottom:calc(var(--plh,0px) + 16px);z-index:41;display:none;align-items:center;gap:8px;padding:7px 10px;border-radius:16px;
+  background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:var(--shadow);
+  max-width:620px;margin:0 auto;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.asbar.on{display:flex}
+.asbar button{border:0;background:transparent;color:var(--g7);display:grid;place-items:center;height:40px;min-width:40px;border-radius:12px;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+[data-theme=dark] .asbar button{color:var(--gold2)}
+.asbar button svg{width:22px;height:22px}
+.asbar .asx svg{width:20px;height:20px}
+.asbar .asl{flex:1;min-width:0;text-align:center;font-size:13.5px;color:var(--ink2);background:var(--paper2);border-radius:11px;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asbar .asl b{color:var(--ink);font-size:15px}
+.asbar .asl i{font-style:normal;margin-inline-start:6px;font-size:14px}
+.asbar .asseg{display:flex;align-items:center;background:var(--paper2);border-radius:12px}
+.asbar .asseg button{min-width:46px;font-size:22px;font-weight:500;line-height:1}
+.asbar .asseg span{width:1px;height:22px;background:var(--line)}
+.asbar .asseg button.dn{background:color-mix(in srgb,var(--g7) 18%,transparent)}
+.asbar .asp{background:var(--g7);color:#fff!important;border-radius:50%;min-width:42px;height:42px}
+[data-theme=dark] .asbar .asp{background:var(--gold);color:#1b1b1b!important}
+#qAuto.on{background:var(--g7);color:#fff;border-color:var(--g7)}
 @media (max-width:900px){
   .side{display:none}
-  main{margin-left:0;padding:14px 14px calc(var(--navh,64px) + var(--plh,0px) + 40px)}
+  main{margin-left:0;padding:14px 14px calc(var(--navh,64px) + var(--plh,0px) + var(--ash,0px) + 40px)}
   .topbar{padding-top:calc(10px + env(safe-area-inset-top))!important;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:25;padding:10px 14px;margin:-14px -14px 14px;background:var(--g9);color:#f3e8c8}
   .topbar b{font-family:var(--serif);font-size:21px;flex:1}
   .topbar .logo{width:30px;height:30px}
@@ -434,7 +454,9 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   h1.vt{font-size:28px}
   .hero{padding:22px}
   .hero .np .big{font-size:42px}
-  .toast{bottom:calc(var(--navh,64px) + var(--plh,0px) + 22px)}
+  .toast{bottom:calc(var(--navh,64px) + var(--plh,0px) + var(--ash,0px) + 22px)}
+  .asbar{left:8px;right:8px;bottom:calc(var(--navh,64px) + var(--plh,0px) + 8px);padding:6px 8px}
+  .asbar .asl i{display:none}
   .srbox{position:static;padding:14px}
   .kb{padding:8px 4px}
   .kbr{gap:3px}
@@ -446,7 +468,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   .sheet .sin{max-height:66vh;padding:10px 14px 14px;border-radius:20px 20px 0 0}
 }
 @media print{
-  .side,.topbar,.bottom,.player,.qbar,.noprint,.drawer,.scrim{display:none!important}
+  .side,.topbar,.bottom,.player,.asbar,.qbar,.noprint,.drawer,.scrim{display:none!important}
   main{margin:0;padding:0}
   body{background:#fff}
   .view{display:none!important}
@@ -492,6 +514,7 @@ html{touch-action:manipulation}
       <button class="btn sm trbtn" id="qTr" title="Show or hide translations under every ayah"></button>
       <span style="flex:1"></span>
       <button class="btn sm" id="qSearch" title="Search the whole Quran"></button>
+      <button class="btn icon" id="qAuto" title="Auto-scroll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="6"/><path d="M9 7.5l3 3 3-3M9 12.5l3 3 3-3"/></svg></button>
       <button class="btn icon pri" id="qPlay" title="Play / pause"></button>
       <button class="btn icon" id="qSettings" title="Settings"></button>
       <div class="langs" id="qLangs"></div>
@@ -510,6 +533,7 @@ html{touch-action:manipulation}
   <section class="view" id="v-dev"></section>
   <section class="view" id="v-more"></section>
 </main>
+<div class="asbar" id="asBar" role="toolbar" aria-label="Auto-scroll"></div>
 <div class="player" id="player"></div>
 <nav class="bottom" id="bottom"></nav>
 <div class="sheet" id="sheet"><div class="sin" id="sheetIn"></div></div>
@@ -887,7 +911,7 @@ const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
   tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada' },
   show: { en: true, fr: false, de: false, ku: true }, translit: false, tafsir: false,
-  reciter: 'murattal', bismAudio: true, autoscroll: true, view: 'mushaf', repeat: 1, continuous: true,
+  reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
   azkarEn: true, azkarSize: 24, vibrate: true, sound: false, wake: false, remSound: 'chime',
@@ -2691,7 +2715,7 @@ function requestGeo() { return new Promise(res => { if (!navigator.geolocation) 
 let wakeLock = null;
 async function applyWake() {
   if (!('wakeLock' in navigator)) return;
-  const want = S.wake && document.visibilityState === 'visible' && (curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused));
+  const want = document.visibilityState === 'visible' && (window.AS_ON === true || S.wake) && (window.AS_ON === true || curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused));
   try { if (want && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; } } catch (e) { wakeLock = null; }
 }
 const PCHIP = { granted: ['Allowed', 'ok'], auto: ['Allowed', 'ok'], active: ['Ready', 'ok'], true: ['On', 'ok'], prompt: ['Not asked', ''], default: ['Not asked', ''], unknown: ['Ask when needed', ''], denied: ['Blocked', 'bad'], false: ['Off', ''], unsupported: ['Not available', 'na'], 'install-first': ['Install first', 'warn'], installing: ['Getting ready', 'warn'], 'needs-https': ['Needs hosting', 'warn'], null: ['Not available', 'na'] };
@@ -2922,7 +2946,8 @@ function measureChrome() {
   const r = document.documentElement.style, nav = $('#bottom'), pl = $('#player');
   const nh = nav && getComputedStyle(nav).display !== 'none' ? Math.ceil(nav.getBoundingClientRect().height) : 0;
   const ph = pl && pl.classList.contains('on') ? Math.ceil(pl.getBoundingClientRect().height) + 10 : 0;
-  r.setProperty('--navh', nh + 'px'); r.setProperty('--plh', ph + 'px');
+  const ab = $('#asBar'), ah = ab && ab.classList.contains('on') ? Math.ceil(ab.getBoundingClientRect().height) + 10 : 0;
+  r.setProperty('--navh', nh + 'px'); r.setProperty('--plh', ph + 'px'); r.setProperty('--ash', ah + 'px');
 }
 function deviceInit() {
   measureChrome();
@@ -3034,6 +3059,117 @@ document.addEventListener('wheel', e => {
   pzBadge(Math.round(pzWheelSize));
   clearTimeout(pzWheelT); pzWheelT = setTimeout(() => { pzApply(kind, pzWheelSize, pzWheelAnchor, 1); pzWheelSize = null; pzBadge(null); }, 180);
 }, { passive: false });
+
+/* =====================================================================
+   AUTO-SCROLL — Quran Explorer style: the page glides up on its own.
+   Speed is set as "minutes per juz" (+ = more minutes = slower, − = faster).
+   ===================================================================== */
+const AS = { open: false, on: false, raf: 0, pos: 0, set: 0, last: 0, hold: false, rate: 0, rateAt: 0, adv: false, total: 0, rt: 0, rep: 0 };
+const AS_LIM = [3, 120];
+const asMin = () => Math.max(AS_LIM[0], Math.min(AS_LIM[1], Math.round(S.scrollMin || 24)));
+function asDraw() {
+  const b = $('#asBar'); if (!b) return;
+  const show = AS.open && curView === 'quran' && !!R.range;
+  b.classList.toggle('on', show);
+  const q = $('#qAuto'); if (q) q.classList.toggle('on', AS.open);
+  if (!show) { measureChrome(); return; }
+  const m = asMin();
+  b.innerHTML = `<button class="asx" data-as="close" title="Close auto-scroll" aria-label="Close auto-scroll">${icon('x')}</button>
+    <div class="asl" title="${m} minutes to scroll through one juz"><b>${m}</b> min / juz <i class="arui">${toAr(m)} دقيقة في جزء</i></div>
+    <div class="asseg"><button data-as="plus" title="Slower (more minutes per juz)" aria-label="Slower">+</button><span></span><button data-as="minus" title="Faster (fewer minutes per juz)" aria-label="Faster">−</button></div>
+    <button class="asp" data-as="play" title="${AS.on ? 'Pause' : 'Start'} auto-scroll" aria-label="${AS.on ? 'Pause' : 'Start'} auto-scroll">${icon(AS.on ? 'pause' : 'play')}</button>`;
+  measureChrome();
+}
+function asLabel() { const l = $('#asBar .asl'); if (!l) return; const m = asMin(); l.innerHTML = `<b>${m}</b> min / juz <i class="arui">${toAr(m)} دقيقة في جزء</i>`; l.title = m + ' minutes to scroll through one juz'; }
+function asStep(d) { S.scrollMin = Math.max(AS_LIM[0], Math.min(AS_LIM[1], asMin() + d)); AS.rateAt = 0; asLabel(); clearTimeout(AS.sv); AS.sv = setTimeout(save, 600); }
+async function asTotal() {
+  if (!AS.total) { try { const a = await loadEdition(ARABIC); AS.total = a.reduce((n, t) => n + (t ? t.length : 0), 0); } catch (e) { AS.total = 720000; } }
+  return AS.total;
+}
+/* pixels per second so that one juz of text (1/30 of the Quran's letters) takes N minutes */
+function asRate() {
+  const now = performance.now();
+  if (AS.rate && now - AS.rateAt < 1000) return AS.rate;
+  AS.rateAt = now;
+  const blocks = $$(S.view === 'mushaf' ? '#qBody .mtext' : '#qBody .ayah');
+  let h = 0; blocks.forEach(b => h += b.offsetHeight);
+  const chars = R.items.reduce((n, it) => n + (it.ar ? it.ar.length : 0), 0);
+  if (!h || !chars) { AS.rate = AS.rate || 20; return AS.rate; }
+  const juzPx = h * ((AS.total || 720000) / 30) / chars;
+  AS.rate = Math.max(2, Math.min(400, juzPx / (asMin() * 60)));
+  return AS.rate;
+}
+function asMax() { return Math.max(0, document.documentElement.scrollHeight - window.innerHeight); }
+function asTick(t) {
+  if (!AS.on) return;
+  const dt = AS.last ? Math.min(0.1, (t - AS.last) / 1000) : 0; AS.last = t;
+  const sheetOn = $('#sheet') && $('#sheet').classList.contains('on');
+  if (!AS.hold && !AS.adv && !sheetOn && curView === 'quran' && R.range) {
+    const y = window.scrollY;
+    if (Math.abs(y - AS.set) > 3) AS.pos = y;            // the reader moved the page — carry on from there
+    AS.pos += asRate() * dt;
+    const max = asMax();
+    if (AS.pos >= max - 0.5) { AS.pos = max; window.scrollTo(0, max); AS.set = window.scrollY; asEnd(); }
+    else { window.scrollTo(0, AS.pos); AS.set = window.scrollY; }
+  }
+  AS.raf = requestAnimationFrame(asTick);
+}
+async function asPlay() {
+  if (!R.range) { toast('Open a surah first'); return; }
+  await asTotal();
+  AS.on = true; window.AS_ON = true; AS.last = 0; AS.pos = window.scrollY; AS.set = AS.pos; AS.rateAt = 0;
+  cancelAnimationFrame(AS.raf); AS.raf = requestAnimationFrame(asTick);
+  if (asMax() - window.scrollY < 2) asEnd();
+  asDraw(); applyWake();
+}
+function asPause() { AS.on = false; window.AS_ON = false; cancelAnimationFrame(AS.raf); asDraw(); applyWake(); }
+function asOpen() { if (!R.range) { toast('Open a surah first'); return; } AS.open = true; asDraw(); }
+function asClose() { asPause(); AS.open = false; asDraw(); }
+function asNext() {
+  const r = R.range; if (!r) return null;
+  if (r.type === 'surah' && r.s < 114) return () => openSurah(r.s + 1);
+  if (r.type === 'juz' && r.j < 30) return () => openJuz(r.j + 1);
+  if (r.type === 'pages' && r.kh == null && r.to < 604) { const len = r.to - r.from + 1; return () => openPages(r.to + 1, Math.min(604, r.to + len)); }
+  return null;
+}
+async function asEnd() {
+  if (AS.adv) return;
+  const nx = asNext();
+  if (!nx) { asPause(); toast(R.range && R.range.kh != null ? 'End of today’s wird' : 'End of the Quran — صدق الله العظيم'); return; }
+  AS.adv = true;
+  await new Promise(r => setTimeout(r, 1400));             // a short rest at the end, like turning a page
+  if (!AS.on) { AS.adv = false; return; }
+  nx(); await new Promise(r => setTimeout(r, 0)); try { await R.ready; } catch (e) {}
+  window.scrollTo(0, 0); AS.pos = 0; AS.set = window.scrollY; AS.rateAt = 0; AS.last = 0;
+  setTimeout(() => { AS.adv = false; }, 600);
+}
+/* finger on the page = hold; after the fling settles, keep gliding from the new spot */
+function asRelease() {
+  clearTimeout(AS.rt); let y = window.scrollY;
+  const chk = () => { if (Math.abs(window.scrollY - y) > 0.5) { y = window.scrollY; AS.rt = setTimeout(chk, 140); } else { AS.pos = window.scrollY; AS.set = AS.pos; AS.last = 0; AS.hold = false; } };
+  AS.rt = setTimeout(chk, 160);
+}
+document.addEventListener('touchstart', e => { if (AS.on && !e.target.closest('#asBar,#player,#bottom,#sheet,.drawer')) { AS.hold = true; clearTimeout(AS.rt); } }, { passive: true });
+document.addEventListener('touchend', e => { if (AS.on && AS.hold && !e.touches.length) asRelease(); }, { passive: true });
+document.addEventListener('touchcancel', e => { if (AS.on && AS.hold && !e.touches.length) asRelease(); }, { passive: true });
+window.addEventListener('wheel', () => { if (AS.on) { AS.hold = true; asRelease(); } }, { passive: true });
+document.addEventListener('keydown', e => { if (AS.open && curView === 'quran' && e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); AS.on ? asPause() : asPlay(); } });
+(function asBind() {
+  const b = $('#asBar'), q = $('#qAuto'); if (!b || !q) return;
+  q.onclick = () => AS.open ? asClose() : asOpen();
+  b.addEventListener('click', e => { const t = e.target.closest('[data-as]'); if (!t) return; const a = t.dataset.as; if (a === 'close') asClose(); else if (a === 'play') AS.on ? asPause() : asPlay(); });
+  /* + / − : tap for one step, hold to keep changing */
+  const stop = () => { clearTimeout(AS.rep); clearInterval(AS.rep); $$('#asBar .asseg button').forEach(x => x.classList.remove('dn')); };
+  b.addEventListener('pointerdown', e => {
+    const t = e.target.closest('[data-as=plus],[data-as=minus]'); if (!t) return;
+    e.preventDefault(); const d = t.dataset.as === 'plus' ? 1 : -1; t.classList.add('dn'); asStep(d);
+    stop(); t.classList.add('dn'); AS.rep = setTimeout(() => { AS.rep = setInterval(() => asStep(d), 110); }, 420);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, stop));
+})();
+/* leaving the reader stops the glide; coming back shows the bar again (paused) */
+{ const _route = route; route = function () { const r = _route.apply(this, arguments); if (curView !== 'quran' && AS.on) asPause(); asDraw(); return r; }; }
+window.addEventListener('popstate', () => setTimeout(() => { if (curView !== 'quran' && AS.on) asPause(); asDraw(); }, 30));
 
 </script>
 </body>
