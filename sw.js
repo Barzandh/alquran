@@ -1,11 +1,11 @@
-/* AlQuran service worker — build 20261112.104616
+/* AlQuran service worker — build 20261112.191706
    Saves the whole app (page, Quran data, icons) on install, with retries, and serves it cache-first,
    so AlQuran opens with no internet indefinitely. Every online launch the page asks it to check and
    repair the offline copy. A new build is detected when this file changes. */
-const BUILD = '20261112.104616';
+const BUILD = '20261112.191706';
 const CACHE = 'alquran-' + BUILD;
 const RUNTIME = 'alquran-runtime';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png', './data/ara-quranuthmanihaf.bin', './data/eng-muftitaqiusmani.bin', './data/eng-ummmuhammad.bin', './data/eng-abdullahyusufal.bin', './data/eng-mohammedmarmadu.bin', './data/fra-muhammadhamidul.bin', './data/deu-asfbubenheimand.bin', './data/kur-burhanmuhammada.bin', './data/kur-muhammadsalehba.bin', './data/ara-quran-la.bin', './data/ara-kingfahadquranc.bin', './data/ara-quransimple.bin'];
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png', './data/ara-quranuthmanihaf.bin', './data/eng-muftitaqiusmani.bin', './data/eng-ummmuhammad.bin', './data/eng-abdullahyusufal.bin', './data/eng-mohammedmarmadu.bin', './data/fra-muhammadhamidul.bin', './data/deu-asfbubenheimand.bin', './data/kur-burhanmuhammada.bin', './data/kur-muhammadsalehba.bin', './data/ara-quran-la.bin', './data/ara-kingfahadquranc.bin', './data/ara-quransimple.bin', './data/ara-saddi.bin'];
 const abs = u => new URL(u, self.registration.scope).href;
 const INDEX = () => abs('./index.html');
 
