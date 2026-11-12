@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.232500";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.234000";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -177,6 +177,18 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .qbar .zbtn{min-width:38px;padding:0 9px;font-weight:800;font-family:var(--ui)}
 .qbar .latbtn b{font-weight:800}
 .tafseg{margin:0 0 10px;flex-wrap:wrap}
+.lv{font-size:.68em;opacity:.5;margin-left:1px}
+.lay{padding:14px 16px 16px;background:var(--paper);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s}
+.lay.cur{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldbg)}
+.lay .ltop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.lay .lnum{font-size:12px;font-weight:700;color:var(--gold);font-family:var(--ui);letter-spacing:.4px}
+.lay .ltop .row{gap:2px;flex-wrap:nowrap}
+.lay .ltext{font-family:var(--ui);font-size:var(--lsize);line-height:1.7;color:var(--ink);overflow-wrap:break-word}
+.lay .lar{font-family:var(--qfont);font-size:calc(var(--qsize)*.72);direction:rtl;text-align:right;line-height:2.1;margin-top:8px;color:var(--ink2)}
+.lay .tr{margin-top:12px}
+.lbism{text-align:center;font-family:var(--ui);font-size:var(--lsize);color:var(--g7);margin:4px 0 16px;font-weight:600}
+[data-theme=dark] .lbism{color:#9fd3b6}
+.lnav{display:flex;justify-content:space-between;gap:10px;margin:18px 0 6px}
 .latnote{font-size:12px;line-height:1.6;margin-top:6px}
 .sajda{display:inline-block;font-size:12px;font-family:var(--ui);color:#fff;background:var(--gold);padding:1px 8px;border-radius:99px;margin:0 6px;vertical-align:middle}
 .mushaf{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:30px 34px;box-shadow:var(--shadow);position:relative}
@@ -588,6 +600,7 @@ html.ui-rtl .rtl-hide{display:none!important}
     </div></div>
     <div id="qBody"></div>
   </section>
+  <section class="view" id="v-latin"></section>
   <section class="view" id="v-search"></section>
   <section class="view" id="v-khatma"></section>
   <section class="view" id="v-prayer"></section>
@@ -995,7 +1008,7 @@ const LOGO = `<svg class="logo" viewBox="0 0 48 48"><g fill="none" stroke="#d8b5
 const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
   tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari' },
-  show: { en: true, fr: false, de: false, ku: true, sa: false, tb: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, tafsir: false,
+  show: { en: true, fr: false, de: false, ku: true, sa: false, tb: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, ku: false }, latAr: false, tafsir: false,
   reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: /^ar\b/i.test(navigator.language || '') ? 'ar' : 'en', view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
@@ -1004,7 +1017,7 @@ const DEF = {
 const S = (() => {
   const s = LS.get('settings', {});
   const o = Object.assign({}, DEF, s);
-  ['tr', 'show', 'adj'].forEach(k => o[k] = Object.assign({}, DEF[k], s[k] || {}));
+  ['tr', 'show', 'adj', 'latShow'].forEach(k => o[k] = Object.assign({}, DEF[k], s[k] || {}));
   if (s.tr && s.tr.sa === 'ara-tabari') { o.show.tb = true; o.show.sa = false; }   /* build 231500 kept both tafsirs under one switch */
   Object.keys(EDITIONS).forEach(k => { if (!EDITIONS[k].options.some(x => x[0] === o.tr[k])) o.tr[k] = DEF.tr[k]; });
   if (!o.fullScript) { o.view = 'mushaf'; o.fullScript = 1; }
@@ -1135,7 +1148,7 @@ async function loadRange(rg) {
 
 /* ============ ROUTER ============ */
 const VIEWS = [
-  ['home', 'Home', 'الرئيسية', 'home'], ['quran', 'Quran', 'القرآن', 'quran'], ['search', 'Search', 'البحث', 'search'], ['khatma', 'Khatma', 'الختمة', 'khatma'],
+  ['home', 'Home', 'الرئيسية', 'home'], ['quran', 'Quran', 'القرآن', 'quran'], ['latin', 'Latin Quran', 'القرآن باللاتيني', 'book'], ['search', 'Search', 'البحث', 'search'], ['khatma', 'Khatma', 'الختمة', 'khatma'],
   ['prayer', 'Prayer', 'الصلاة', 'prayer'], ['qibla', 'Qibla', 'القبلة', 'qibla'], ['azkar', 'Azkar', 'الأذكار', 'azkar'], ['tasbih', 'Tasbih', 'السبحة', 'tasbih'],
   ['reminders', 'Reminders', 'التنبيهات', 'bell'], ['backup', 'Backups', 'النسخ الاحتياطي', 'shield'], ['device', 'Phone & offline', 'الهاتف', 'phone'], ['dev', 'Developer', 'المطوّر', 'code'], ['more', 'More', 'المزيد', 'grid'],
 ];
@@ -1185,6 +1198,7 @@ RENDER.home = async () => {
   <form class="card homesr" id="homeSr"><span class="ic">${icon('search')}</span><input type="search" id="homeSrQ" dir="auto" placeholder="Search a word in the whole Quran… ابحث في القرآن"><button class="btn pri sm">Search</button></form>
   <div class="grid g3" style="margin-top:16px">
     <div class="card qcard" data-go="continue"><div class="ic">${icon('quran')}</div><div><b>${last ? 'Continue reading' : 'Open the Quran'}</b><span>${last ? `${esc(SURAHS[last.s - 1].en)} · ayah ${last.n}` : '114 surahs · 4 translations'}</span></div></div>
+    <div class="card qcard" data-go="latin"><div class="ic">${icon('book')}</div><div><b>Latin Quran <span class="arui">القرآن باللاتيني</span></b><span>For readers who don't know Arabic letters</span></div></div>
     <div class="card qcard" data-go="khatma"><div class="ic">${icon('khatma')}</div><div><b>Khatma <span class="arui">الختمة</span></b><span>${esc(khTxt)}</span></div></div>
     <div class="card qcard" data-go="azkar" data-z="${zk}"><div class="ic">${icon(zk === 'morning' ? 'sunrise' : 'sunset')}</div><div><b>${zk === 'morning' ? 'Morning' : 'Evening'} Azkar</b><span class="arui">${AZKAR[zk].ar}</span></div></div>
     <div class="card qcard" data-go="tasbih"><div class="ic">${icon('tasbih')}</div><div><b>Tasbih</b><span>${tToday} today</span></div></div>
@@ -1579,6 +1593,7 @@ A.el.addEventListener('ended', () => {
 A.el.addEventListener('timeupdate', () => { const p = $('#plProg'); if (p && A.el.duration) p.style.width = (A.el.currentTime / A.el.duration * 100) + '%'; });
 function playAt(i) {
   const it = R.items[i]; if (!it) return;
+  if (typeof LP !== 'undefined' && LP.on) lpStop();
   A.i = i; A.item = it; A.on = true; A.rep = S.repeat;
   markCur(i, true);
   LS.set('lastRead', { s: it.s, n: it.n, ts: Date.now() });
@@ -2247,6 +2262,147 @@ RENDER.khatma = async () => {
   try { const m = await getMeta(), s1 = m.pages[ta - 1], s2 = tb < 604 ? m.pages[tb] : [114, 7]; const l = $('#khLoc'); if (l) l.textContent += ` · ${SURAHS[s1[0] - 1].en} ${s1[0]}:${s1[1]} → ${SURAHS[s2[0] - 1].en}`; } catch (e) {}
 };
 
+/* =====================================================================
+   LATIN QURAN — its own section: every ayah in Latin letters (read as recited, Hafs)
+   with English / French / German / Kurdish translation under it, and Al-Minshawi audio.
+   ===================================================================== */
+const LQ = { s: null, items: [], lat1: '' };
+const LQ_LANGS = ['en', 'fr', 'de', 'ku'];
+const LP = { el: new Audio(), on: false, i: -1, phase: 'ayah', urls: [], ui: 0 };
+LP.el.preload = 'auto';
+function lpSrc(urls) { LP.urls = urls; LP.ui = 0; LP.el.src = urls[0]; LP.el.play().catch(e => { if (e.name === 'NotAllowedError') toast('Tap play to start audio'); lpUI(); }); }
+function lpFor(s, n, g) {
+  const urls = audioUrls(s, n, g);
+  if (typeof offlineAudioURL !== 'function') { lpSrc(urls); return; }
+  const tok = (LP.tok = (LP.tok || 0) + 1);
+  offlineAudioURL(S.reciter, g).then(u => { if (tok === LP.tok) lpSrc(u ? [u, ...urls] : urls); }).catch(() => { if (tok === LP.tok) lpSrc(urls); });
+}
+LP.el.addEventListener('error', () => {
+  if (!LP.urls.length) return;
+  if (LP.ui < LP.urls.length - 1) { LP.ui++; LP.el.src = LP.urls[LP.ui]; LP.el.play().catch(() => {}); }
+  else { LP.on = false; lpUI(); toast('Audio unavailable — check your internet connection'); }
+});
+LP.el.addEventListener('ended', () => {
+  if (!LP.on) return;
+  const it = LQ.items[LP.i];
+  if (LP.phase === 'bism' && it) { LP.phase = 'ayah'; lpFor(it.s, it.n, it.g); return; }
+  if (S.continuous && LP.i + 1 < LQ.items.length) lpPlay(LP.i + 1);
+  else if (S.continuous && LQ.s < 114 && curView === 'latin') latOpen(LQ.s + 1).then(() => lpPlay(0));
+  else { LP.on = false; lpUI(); toast('Recitation finished'); }
+});
+['play', 'pause'].forEach(ev => LP.el.addEventListener(ev, () => lpUI()));
+function lpPlay(i) {
+  const it = LQ.items[i]; if (!it) return;
+  if (A.on || A.item) stopAudio();
+  LP.i = i; LP.on = true;
+  if (it.n === 1 && it.s !== 1 && it.s !== 9 && S.bismAudio) { LP.phase = 'bism'; lpFor(1, 1, 1); }
+  else { LP.phase = 'ayah'; lpFor(it.s, it.n, it.g); }
+  LS.set('latLast', { s: it.s, n: it.n });
+  lpUI(true);
+}
+function lpStop() { LP.el.pause(); LP.on = false; LP.i = -1; lpUI(); }
+function lpUI(scroll) {
+  const playing = LP.on && !LP.el.paused;
+  $$('#lBody .lay').forEach(e => { const cur = +e.dataset.i === LP.i && LP.on; e.classList.toggle('cur', cur); const b = e.querySelector('[data-la=play]'); if (b) b.innerHTML = icon(cur && playing ? 'pause' : 'play'); });
+  const pb = $('#lPlay'); if (pb) pb.innerHTML = icon(playing ? 'pause' : 'play') + (playing ? 'Pause' : 'Listen');
+  if (scroll && S.autoscroll) { const el = $(`#lBody .lay[data-i="${LP.i}"]`); if (el) { const r = el.getBoundingClientRect(); if (r.top < 150 || r.bottom > innerHeight - 150) window.scrollBy({ top: r.top - 170, behavior: 'smooth' }); } }
+}
+function latIndex() {
+  LQ.s = null;
+  const v = $('#v-latin'), last = LS.get('latLast', null);
+  v.innerHTML = `<h1 class="vt">Latin Quran <span class="arui">القرآن باللاتيني</span></h1>
+    <p class="sub">The whole Quran in Latin letters, read as it is recited (Hafs) — with English, French, German and Kurdish translation under every ayah. For everyone who doesn't read Arabic letters.</p>
+    ${last ? `<div class="card qcard" data-ls="${last.s}" data-ln="${last.n}" style="margin-bottom:14px"><div class="ic">${icon('book')}</div><div><b>Continue reading</b><span>${esc(SURAHS[last.s - 1].en)} · ayah ${last.n}</span></div></div>` : ''}
+    <input type="text" id="lFilter" placeholder="Filter surahs…" style="max-width:260px;margin-bottom:12px">
+    <div class="sindex" id="lList"></div>`;
+  const draw = () => {
+    const q = ($('#lFilter').value || '').trim().toLowerCase();
+    $('#lList').innerHTML = SURAHS.filter(x => !q || (x.n + ' ' + x.en + ' ' + x.meaning + ' ' + x.ar).toLowerCase().includes(q)).map(x => `
+      <div class="sitem" data-ls="${x.n}"><div class="snum">${x.n}</div><div class="nm"><b>${esc(x.en)}</b><span>${esc(x.meaning)} · ${x.ayahs} ayat</span></div><div class="sar">${x.ar}</div></div>`).join('');
+  };
+  $('#lFilter').oninput = draw; draw();
+  v.onclick = e => { const it = e.target.closest('[data-ls]'); if (it) latOpen(+it.dataset.ls, it.dataset.ln ? +it.dataset.ln : null); };
+}
+function latBar() {
+  const s = LQ.s, chip = (k, on, label) => `<button class="lchip ${on ? 'on' : ''}" data-lt="${k}"><i>${on ? '✓' : '+'}</i>${label}</button>`;
+  return `<div class="qbar"><div class="inner">
+      <button class="btn sm" id="lIdx">${icon('list')}Surahs</button>
+      <select id="lSel" class="noi18n">${SURAHS.map(x => `<option value="${x.n}" ${x.n === s ? 'selected' : ''}>${x.n}. ${esc(x.en)} — ${x.ar}</option>`).join('')}</select>
+      <button class="btn sm pri" id="lPlay">${icon('play')}Listen</button>
+      <button class="btn sm zbtn" id="lZm" title="Smaller text">A−</button><button class="btn sm zbtn" id="lZp" title="Bigger text">A+</button>
+      <div class="langs" id="lLangs"><span class="lt">Translation</span>${LQ_LANGS.map(k => chip(k, S.latShow[k], EDITIONS[k].name)).join('')}${chip('ar', S.latAr, 'العربية')}
+        <span class="seg" style="margin-left:4px" data-noi18n><button data-lst="easy" class="${S.latStyle !== 'precise' ? 'on' : ''}">aa ee oo</button><button data-lst="precise" class="${S.latStyle === 'precise' ? 'on' : ''}">ā ī ū</button></span></div>
+    </div></div>`;
+}
+async function latOpen(s, n) {
+  if (curView !== 'latin') go('latin');
+  LQ.s = s; LQ.items = [];
+  if (LP.on && (!LQ.items.length || LQ.items[0].s !== s)) { /* keep playing only within the same surah */ }
+  const v = $('#v-latin'), x = SURAHS[s - 1];
+  v.innerHTML = latBar() + `<div id="lBody"><div class="loading"><div class="spin"></div></div></div>`;
+  latWire();
+  const g0 = OFF[s - 1], g1 = g0 + x.ayahs - 1, langs = LQ_LANGS.filter(k => S.latShow[k]);
+  let lat, ar, tx;
+  try {
+    [lat, ar, ...tx] = await Promise.all([loadEdition(S.latStyle === 'classic' ? EXTRA_EDITIONS.translit : latEd()), S.latAr ? loadEdition(ARABIC) : null, ...langs.map(k => loadEdition(S.tr[k]).catch(() => null))]);
+  } catch (e) { $('#lBody').innerHTML = `<div class="card">${esc(e.message)}</div>`; return; }
+  if (LQ.s !== s) return;
+  LQ.lat1 = lat[0];
+  for (let g = g0; g <= g1; g++) {
+    const k = AYA[g];
+    LQ.items.push({ s, n: k, g: g + 1, lat: lat[g], ar: ar ? (k === 1 && s !== 1 && s !== 9 ? stripBasmala(ar[g]) : ar[g]) : null, trs: langs.map((l, j) => [l, tx[j] ? tx[j][g] : null]) });
+  }
+  const trHTML = ([k, t]) => { if (t == null) return ''; const E = EDITIONS[k], o = E.options.find(z => z[0] === S.tr[k]); return `<div class="tr" dir="${E.dir}"><span class="tl">${esc(E.label)}${o && E.options.length > 1 ? ' · ' + esc(o[1]) : ''}</span>${esc(t)}</div>`; };
+  $('#lBody').innerHTML = `<div class="shead"><div class="frame"></div><div class="nmar">سُورَةُ ${x.ar}</div><div class="nmen">${x.n}. ${esc(x.en)}</div><div class="meta">${esc(x.meaning)} · ${x.ayahs} ayat · ${x.type}</div></div>
+    ${s !== 1 && s !== 9 ? `<div class="lbism">${latHTML(LQ.lat1)}</div>` : ''}
+    ${LQ.items.map((it, i) => `<div class="lay" id="l-${it.s}-${it.n}" data-i="${i}">
+      <div class="ltop"><span class="lnum">${esc(x.en)} ${it.s}:${it.n}</span><div class="row"><button class="btn icon sm ghost" data-la="play" title="Listen">${icon('play')}</button><button class="btn icon sm ghost" data-la="copy" title="Copy">${icon('copy')}</button><button class="btn icon sm ghost" data-la="open" title="Open in the Quran reader">${icon('quran')}</button></div></div>
+      <div class="ltext" dir="ltr">${latHTML(it.lat)}</div>
+      ${it.ar ? `<div class="lar">${esc(it.ar)} <span class="amark">${toAr(it.n)}</span></div>` : ''}
+      ${it.trs.map(trHTML).join('')}</div>`).join('')}
+    <div class="lnav">${s > 1 ? `<button class="btn" data-lgo="${s - 1}">${icon('left')} ${esc(SURAHS[s - 2].en)}</button>` : '<span></span>'}${s < 114 ? `<button class="btn" data-lgo="${s + 1}">${esc(SURAHS[s].en)} ${icon('right')}</button>` : ''}</div>`;
+  LS.set('latLast', { s, n: n || 1 });
+  lpUI();
+  if (n && n > 1) { const el = document.getElementById(`l-${s}-${n}`); if (el) requestAnimationFrame(() => window.scrollBy(0, el.getBoundingClientRect().top - 170)); }
+  else window.scrollTo(0, 0);
+}
+function latWire() {
+  $('#lIdx').onclick = latIndex;
+  $('#lSel').onchange = e => latOpen(+e.target.value);
+  $('#lPlay').onclick = () => {
+    if (LP.on) { if (LP.el.paused) LP.el.play().catch(() => {}); else LP.el.pause(); return; }
+    let i = 0; const top = [...$$('#lBody .lay')].findIndex(e => e.getBoundingClientRect().bottom > 170); if (top > 0) i = top;
+    lpPlay(i);
+  };
+  $('#lZm').onclick = () => readerZoom(-1);
+  $('#lZp').onclick = () => readerZoom(1);
+  $('#lLangs').onclick = e => {
+    const st = e.target.closest('[data-lst]');
+    if (st) { S.latStyle = st.dataset.lst; save(); latReopen(); return; }
+    const c = e.target.closest('[data-lt]'); if (!c) return;
+    const k = c.dataset.lt;
+    if (k === 'ar') S.latAr = !S.latAr; else S.latShow[k] = !S.latShow[k];
+    save(); latReopen();
+  };
+  $('#v-latin').onclick = async e => {
+    const nb = e.target.closest('[data-lgo]'); if (nb) { lpStop(); latOpen(+nb.dataset.lgo); return; }
+    const b = e.target.closest('[data-la]'); if (!b) return;
+    const card = b.closest('.lay'), i = +card.dataset.i, it = LQ.items[i];
+    if (b.dataset.la === 'play') { if (LP.on && LP.i === i) { if (LP.el.paused) LP.el.play().catch(() => {}); else LP.el.pause(); } else lpPlay(i); }
+    if (b.dataset.la === 'open') { lpStop(); openSurah(it.s, it.n); }
+    if (b.dataset.la === 'copy') {
+      const txt = [latText(it.lat).replace(/\((\S{1,4})\)/g, '$1'), it.ar, ...it.trs.map(t => t[1])].filter(Boolean).join('\n') + `\n— ${SURAHS[it.s - 1].en} ${it.s}:${it.n}`;
+      try { await navigator.clipboard.writeText(txt); toast('Copied'); } catch (err) { toast('Copy not allowed here'); }
+    }
+  };
+}
+/* re-draw the open surah, keeping the ayah at the top of the screen */
+function latReopen() {
+  const top = [...$$('#lBody .lay')].find(e => e.getBoundingClientRect().bottom > 170);
+  latOpen(LQ.s, top ? LQ.items[+top.dataset.i].n : null);
+}
+RENDER.latin = () => { if (!LQ.s || !$('#lBody')) latIndex(); };
+
 /* ============ INIT ============ */
 function buildShell() {
   const sideSep = { reminders: 'Tools' };
@@ -2670,6 +2826,10 @@ const AR_T = {
 
 /* ---- language packs ---- */
 Object.assign(AR, {
+  'Latin Quran': 'القرآن باللاتيني', 'Quran in Latin letters + translation': 'القرآن بالحروف اللاتينية مع الترجمة',
+  "For readers who don't know Arabic letters": 'لمن لا يعرف قراءة الحروف العربية', 'Surahs': 'السور', 'Listen': 'استماع',
+  "The whole Quran in Latin letters, read as it is recited (Hafs) — with English, French, German and Kurdish translation under every ayah. For everyone who doesn't read Arabic letters.": 'القرآن كاملاً بالحروف اللاتينية كما يُتلى (رواية حفص) — مع الترجمة الإنجليزية والفرنسية والألمانية والكوردية تحت كل آية، لكل من لا يقرأ الحروف العربية.',
+  'Open in the Quran reader': 'فتح في قارئ القرآن', 'Recitation finished': 'انتهت التلاوة',
   'Latin': 'لاتيني', 'Latin reading': 'القراءة بالحروف اللاتينية', 'Read the Quran in Latin letters': 'اقرأ القرآن بالحروف اللاتينية',
   "Latin reading · for readers who don't know Arabic letters": 'القراءة بالحروف اللاتينية · لمن لا يعرف قراءة الحروف العربية',
   'Show the Quran in Latin letters': 'عرض القرآن بالحروف اللاتينية', 'Latin size': 'حجم الحروف اللاتينية',
@@ -2679,7 +2839,10 @@ Object.assign(AR, {
   ', are said only if you go on without stopping.': '، تُنطق فقط عند الوصل دون وقف.', 'Tafsir': 'التفسير',
 });
 Object.assign(KU, {
-  'Latin': 'لاتینی', 'Latin reading': 'خوێندنەوە بە پیتی لاتینی', 'Read the Quran in Latin letters': 'قورئان بە پیتی لاتینی بخوێنەوە',
+  'Latin Quran': 'قورئانی لاتینی', 'Quran in Latin letters + translation': 'قورئان بە پیتی لاتینی لەگەڵ وەرگێڕان',
+  "For readers who don't know Arabic letters": 'بۆ ئەوانەی پیتی عەرەبی ناخوێننەوە', 'Surahs': 'سوورەتەکان', 'Listen': 'گوێگرتن',
+  "The whole Quran in Latin letters, read as it is recited (Hafs) — with English, French, German and Kurdish translation under every ayah. For everyone who doesn't read Arabic letters.": 'هەموو قورئان بە پیتی لاتینی وەک خوێندنەوەکەی (حەفس) — لەگەڵ وەرگێڕانی ئینگلیزی، فەڕەنسی، ئەڵمانی و کوردی لە ژێر هەر ئایەتێک. بۆ هەموو ئەوانەی پیتی عەرەبی ناخوێننەوە.',
+  'Open in the Quran reader': 'کردنەوە لە قورئانخوێن', 'Latin': 'لاتینی', 'Latin reading': 'خوێندنەوە بە پیتی لاتینی', 'Read the Quran in Latin letters': 'قورئان بە پیتی لاتینی بخوێنەوە',
   "Latin reading · for readers who don't know Arabic letters": 'خوێندنەوە بە پیتی لاتینی · بۆ ئەوانەی پیتی عەرەبی ناخوێننەوە',
   'Show the Quran in Latin letters': 'پیشاندانی قورئان بە پیتی لاتینی', 'Latin size': 'قەبارەی پیتی لاتینی',
   'Latin reading on — tap A+ or pinch to make the text bigger': 'خوێندنەوەی لاتینی چالاکە — A+ دابگرە یان بە دوو پەنجە گەورەی بکە',
@@ -3624,7 +3787,7 @@ RENDER.dev = async () => {
    MORE (phone hub)
    ===================================================================== */
 RENDER.more = () => {
-  const tiles = [['search', 'Search the Quran', 'Any word, any language'], ['khatma', 'Khatma', 'Your reading plan'], ['qibla', 'Qibla', 'Direction & compass'], ['tasbih', 'Tasbih', 'Counter & my athkar'],
+  const tiles = [['latin', 'Latin Quran', 'Quran in Latin letters + translation'], ['search', 'Search the Quran', 'Any word, any language'], ['khatma', 'Khatma', 'Your reading plan'], ['qibla', 'Qibla', 'Direction & compass'], ['tasbih', 'Tasbih', 'Counter & my athkar'],
     ['reminders', 'Reminders', 'Prayer, azkar & calendar alarms'], ['backup', 'Backups', 'Automatic copies & restore'], ['device', 'Phone & offline', 'Install, permissions, audio'], ['dev', 'Developer', 'Self-test & diagnostics']];
   $('#v-more').innerHTML = `<h1 class="vt">More <span class="arui">المزيد</span></h1><p class="sub">AlQuran ${APP_VERSION}</p>
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px"><b>Language · اللغة</b>${langSwitch()}</div>
@@ -3714,15 +3877,16 @@ function pzKind(t) {
   if (!t || !t.closest) return null;
   if (t.closest('#sheet .sin') && $('#sheet').classList.contains('on')) return 'sheet';
   if (t.closest('#v-quran') && R.range) return 'quran';
+  if (t.closest('#v-latin') && LQ.s) return 'quran';
   if (t.closest('#v-azkar') && $('#zList')) return 'azkar';
   return null;
 }
 function pzAnchorOf(x, y) {
   const hit = document.elementFromPoint(x, y);
-  let el = hit && hit.closest('.ma,.ayah,.zitem');
+  let el = hit && hit.closest('.ma,.ayah,.zitem,.lay');
   if (!el) {   /* fingers between lines or ayat: hold the nearest ayah instead */
     let best = null, bd = 1e9;
-    $$('#qBody .ma, #qBody .ayah, #zList .zitem').forEach(n => { const r = n.getBoundingClientRect(); if (r.bottom < -200 || r.top > innerHeight + 200) return; const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < bd) { bd = d; best = n; } });
+    $$('#qBody .ma, #qBody .ayah, #zList .zitem, #lBody .lay').forEach(n => { const r = n.getBoundingClientRect(); if (r.bottom < -200 || r.top > innerHeight + 200) return; const d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < bd) { bd = d; best = n; } });
     el = best;
   }
   if (!el) return null;
@@ -3761,7 +3925,7 @@ document.addEventListener('touchstart', e => {
   const kind = pzKind(e.target) || pzKind(e.touches[0].target); if (!kind) return;
   const [a, b] = e.touches, mx = (a.clientX + b.clientX) / 2, my = (a.clientY + b.clientY) / 2;
   PZ.on = true; PZ.kind = kind; PZ.d0 = pzDist(a, b) || 1; PZ.s = 1; PZ.base = pzCur(kind);
-  PZ.el = kind === 'quran' ? $('#qBody') : kind === 'sheet' ? $('#shTr') : $('#zList'); PZ.mid = { x: mx, y: my }; PZ.anchor = pzAnchorOf(mx, my);
+  PZ.el = kind === 'quran' ? (curView === 'latin' ? $('#lBody') : $('#qBody')) : kind === 'sheet' ? $('#shTr') : $('#zList'); PZ.mid = { x: mx, y: my }; PZ.anchor = pzAnchorOf(mx, my);
   const r = PZ.el.getBoundingClientRect();
   PZ.el.style.transformOrigin = `${mx - r.left}px ${my - r.top}px`; PZ.el.style.willChange = 'transform'; PZ.el.style.transition = 'none';
   e.preventDefault();
