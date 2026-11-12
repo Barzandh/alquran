@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.234000";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.235000";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1159,7 +1159,7 @@ function route(arg) {
   curView = VIEWS.some(x => x[0] === v) ? v : 'home';
   $$('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + curView));
   if (curView !== 'quran' && typeof closeSheet === 'function') closeSheet();
-  const inMore = !['home', 'quran', 'prayer', 'azkar'].includes(curView);
+  const inMore = !['home', 'quran', 'latin', 'prayer', 'azkar'].includes(curView);
   $$('[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === curView || (inMore && a.dataset.v === 'more' && !!a.closest('#bottom'))));
   try { const r = RENDER[curView] && RENDER[curView](); if (r && r.catch) r.catch(e => console.error(e)); } catch (e) { console.error(e); }
   if (curView !== 'quran') window.scrollTo(0, 0);
@@ -2407,7 +2407,7 @@ RENDER.latin = () => { if (!LQ.s || !$('#lBody')) latIndex(); };
 function buildShell() {
   const sideSep = { reminders: 'Tools' };
   $('#nav').innerHTML = VIEWS.filter(v => v[0] !== 'more').map(([k, en, ar, ic]) => `${sideSep[k] ? `<div class="navsep">${sideSep[k]}</div>` : ''}<a href="#${k}" data-v="${k}">${icon(ic)}<span>${en}</span><span class="na">${ar}</span></a>`).join('');
-  $('#bottom').innerHTML = ['home', 'quran', 'prayer', 'azkar', 'more'].map(k => VIEWS.find(v => v[0] === k)).map(([k, en, ar, ic]) => `<a href="#${k}" data-v="${k}">${icon(ic)}<span>${en}</span></a>`).join('');
+  $('#bottom').innerHTML = ['home', 'quran', 'latin', 'prayer', 'azkar', 'more'].map(k => VIEWS.find(v => v[0] === k)).map(([k, en, ar, ic]) => `<a href="#${k}" data-v="${k}">${icon(ic)}<span>${k === 'latin' ? 'Latin' : en}</span></a>`).join('');
   $$('.logoSlot').forEach(s => s.innerHTML = LOGO);
   $$('[data-theme-btn]').forEach(b => { b.innerHTML = icon('theme'); b.onclick = () => { S.theme = { light: 'sepia', sepia: 'dark', dark: 'light' }[S.theme]; save(); applyLook(); }; });
 }
