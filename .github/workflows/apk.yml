@@ -30,20 +30,23 @@ jobs:
           echo "WEB_BUILD=$(grep -o "BUILD = '[0-9.]*'" sw.js | grep -o '[0-9.]*')" >> "$GITHUB_ENV"
       - name: Check the app compiles
         run: gradle -p android assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-      - name: Make the signing key from your ALQURAN_KEY secret
+      - name: Make the signing key
         env:
-          ALQURAN_KEY: ${{ secrets.ALQURAN_KEY }}
+          SECRET_KEY: ${{ secrets.ALQURAN_KEY }}
         run: |
-          if [ ${#ALQURAN_KEY} -lt 16 ]; then
-            echo "::error title=Signing password missing::Add a repository secret named ALQURAN_KEY (at least 16 characters) in Settings > Secrets and variables > Actions, then run this workflow again."
-            exit 1
+          # Uses the private ALQURAN_KEY secret if one is set. Without it, a fixed built-in
+          # password is used, so every build still has the same key and updates install over
+          # the old app. (Switching to a secret later changes the key: uninstall once, then install.)
+          if [ ${#SECRET_KEY} -ge 16 ]; then KEY="$SECRET_KEY"; else
+            echo "::warning title=Using built-in signing key::No ALQURAN_KEY secret set; signing with the built-in key."
+            KEY="alquran-built-in-signing-key-v1"
           fi
+          echo "ALQURAN_KEY=$KEY" >> "$GITHUB_ENV"
           pip install --quiet cryptography
-          python3 android/sign/derive_key.py "$RUNNER_TEMP/alquran.p12"
+          ALQURAN_KEY="$KEY" python3 android/sign/derive_key.py "$RUNNER_TEMP/alquran.p12"
           echo "ALQURAN_KEYSTORE=$RUNNER_TEMP/alquran.p12" >> "$GITHUB_ENV"
       - name: Build the APK
         env:
-          ALQURAN_KEY: ${{ secrets.ALQURAN_KEY }}
           VERSION_CODE: ${{ github.run_number }}
           VERSION_NAME: 2.0.${{ github.run_number }}
         run: gradle -p android assembleRelease --no-daemon --stacktrace 2>&1 | tee -a build.log
