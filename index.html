@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.090459";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.093847";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1082,7 +1082,7 @@ RENDER.home = async () => {
   <div class="hero">
     <svg class="pat" viewBox="0 0 100 100"><g fill="none" stroke="#d8b56a" stroke-width=".6">${Array.from({ length: 6 }, (_, i) => `<rect x="${20 + i * 3}" y="${20 + i * 3}" width="${60 - i * 6}" height="${60 - i * 6}" transform="rotate(${i % 2 ? 45 : 0} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="46"/></g></svg>
     <div class="hij">${esc(hijri(new Date(), 'ar'))}</div>
-    <div class="greg">${new Date().toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${esc(hijri(new Date(), 'en'))}</div>
+    <div class="greg">${new Date().toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}${S.lang === 'ar' ? '' : ' · ' + esc(hijri(new Date(), 'en'))}</div>
     <div class="np" id="homeNext"></div>
     <div id="offBadge" style="margin-top:14px"></div>
   </div>
@@ -1595,7 +1595,7 @@ function ymdIn(tz, date = new Date()) {
 }
 /* ---------- official fixed timetables (Kurdistan Region & Iraq Awqaf etc. — MuslimData, Apache-2.0) ---------- */
 const OPT = { data: null, p: null };
-const KU_NAMES = { Erbil: 'هەولێر', Sulaymaniyah: 'سلێمانی', Duhok: 'دهۆک', Halabja: 'هەڵەبجە', Kirkuk: 'کەرکووک', Zakho: 'زاخۆ', Ranya: 'ڕانیە', Soran: 'سۆران',
+const KU_NAMES = { 'Altun Kupri': 'پردێ', Dibis: 'دووبز', Erbil: 'هەولێر', Sulaymaniyah: 'سلێمانی', Duhok: 'دهۆک', Halabja: 'هەڵەبجە', Kirkuk: 'کەرکووک', Zakho: 'زاخۆ', Ranya: 'ڕانیە', Soran: 'سۆران',
   Koysinjaq: 'کۆیە', Chamchamal: 'چەمچەماڵ', Kalar: 'کەلار', Penjwen: 'پێنجوێن', Qaladiza: 'قەڵادزێ', Darbandikhan: 'دەربەندیخان', Akre: 'ئاکرێ', Amedi: 'ئامێدی',
   Shaqlawa: 'شەقڵاوە', Rawanduz: 'ڕەواندز', 'Said Sadiq': 'سەیدسادق', Dokan: 'دووکان', Khanaqin: 'خانەقین', Kifri: 'کفری', Makhmur: 'مەخموور', Taqtaq: 'تەقتەق',
   Choman: 'چۆمان', Mergasur: 'مێرگەسۆر', Barzan: 'بارزان', Bardarash: 'بەردەڕەش', Harir: 'حەریر', Koya: 'کۆیە', Arbat: 'عەربەت', Sirwan: 'سیروان', Khurmal: 'خورماڵ',
@@ -1605,6 +1605,9 @@ const KU_NAMES = { Erbil: 'هەولێر', Sulaymaniyah: 'سلێمانی', Duhok:
   Baghdad: 'بغداد', Mosul: 'الموصل', Basrah: 'البصرة', Najaf: 'النجف', Karbala: 'كربلاء', Hillah: 'الحلة', Kut: 'الكوت', Amarah: 'العمارة', Nasiriyah: 'الناصرية',
   Diwaniyah: 'الديوانية', Samawah: 'السماوة', Ramadi: 'الرمادي', 'Al-Fallujah': 'الفلوجة', Tikrit: 'تكريت', Samarra: 'سامراء', Baqubah: 'بعقوبة', Sinjar: 'شنگال' };
 const PT_GROUPS = [['IQ', 'Kurdistan Region & Iraq — official timetable'], ['IR', 'Eastern Kurdistan (Iran) — official timetable'], ['KW', 'Kuwait — official timetable'], ['AE', 'UAE — official timetable'], ['DE', 'Germany — official timetable'], ['FR', 'France — official timetable'], ['GB', 'United Kingdom — official timetable']];
+/* Towns with no official table of their own: they use the official table of the nearby city (Kirkuk),
+   shifted by the town's own astronomical difference, worked out for every day. [id, name, cc, lat, lng, base id, derived] */
+const PT_EXTRA = [[900001, 'Altun Kupri', 'IQ', 35.7533, 44.1436, 77385, 1], [900002, 'Dibis', 'IQ', 35.6748, 44.0707, 77385, 1]];
 function loadPT() {
   if (OPT.p) return OPT.p;
   OPT.p = (async () => {
@@ -1613,6 +1616,7 @@ function loadPT() {
     const d = JSON.parse(await new Response(s).text());
     for (const id in d.t) d.t[id] = d.t[id].map(col => { let a = 0; return col.map((v, i) => (a = i ? a + v : v)); });
     d.byId = {}; d.locs.forEach(l => d.byId[l[0]] = l);
+    PT_EXTRA.forEach(l => { if (!d.byId[l[0]]) { d.locs.push(l); d.byId[l[0]] = l; } });
     OPT.data = d; return d;
   })();
   OPT.p.catch(e => { console.error(e); OPT.p = null; });
@@ -1626,8 +1630,14 @@ function officialTimes(y, m, d) {
   const L = OPT.data.byId[S.loc.fid], T = OPT.data.t[L[5] || L[0]], tz = OPT.data.tz[L[2]];
   const di = Math.round((Date.UTC(2024, m - 1, d) - Date.UTC(2024, 0, 1)) / 864e5);
   const std = Math.min(tzOffsetMin(tz, new Date(Date.UTC(y, 0, 15))), tzOffsetMin(tz, new Date(Date.UTC(y, 6, 15))));
-  const o = {}; ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach((k, i) => o[k] = new Date(Date.UTC(y, m - 1, d, 0, T[i][di] + (S.adj[k] || 0)) - std * 6e4));
-  const nf = T[0][(di + 1) % 366] + 1440, mg = T[4][di];
+  let dl = () => 0;
+  if (L[6] && OPT.data.byId[L[5]]) {   // derived town: base table + (town − base) from the sun's position that day
+    const B = OPT.data.byId[L[5]], opt = { method: 'MWL', asr: 'Standard', highLat: 'None' };
+    const a = PT.compute(y, m, d, L[3], L[4], opt), b = PT.compute(y, m, d, B[3], B[4], opt);
+    dl = k => (isNaN(a[k]) || isNaN(b[k]) ? 0 : Math.round((a[k] - b[k]) * 60));
+  }
+  const o = {}; ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'].forEach((k, i) => o[k] = new Date(Date.UTC(y, m - 1, d, 0, T[i][di] + dl(k) + (S.adj[k] || 0)) - std * 6e4));
+  const nf = T[0][(di + 1) % 366] + dl('fajr') + 1440, mg = T[4][di] + dl('maghrib');
   o.midnight = new Date(Date.UTC(y, m - 1, d, 0, mg + (nf - mg) / 2) - std * 6e4);
   o.lastThird = new Date(Date.UTC(y, m - 1, d, 0, mg + (nf - mg) * 2 / 3) - std * 6e4);
   return o;
@@ -1712,7 +1722,7 @@ let pMonth = null;
 RENDER.prayer = async () => {
   const el = $('#v-prayer');
   if (!OPT.data) { try { await loadPT(); } catch (e) {} }
-  const head = `<h1 class="vt">Prayer Times <span class="arui">مواقيت الصلاة</span></h1><p class="sub">${esc(hijri(new Date(), 'ar'))} · ${esc(hijri(new Date(), 'en'))}</p>`;
+  const head = `<h1 class="vt">Prayer Times <span class="arui">مواقيت الصلاة</span></h1><p class="sub">${esc(hijri(new Date(), 'ar'))} · ${S.lang === 'ar' ? esc(new Date().toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long', year: 'numeric' })) : esc(hijri(new Date(), 'en'))}</p>`;
   if (!S.loc) { el.innerHTML = head + locCard(); bindLoc(el, RENDER.prayer); return; }
   const tz = locTZ(), [y, m, d] = ymdIn(tz), t = dayTimes(y, m, d);
   if (!pMonth) pMonth = [y, m];
@@ -1728,7 +1738,7 @@ RENDER.prayer = async () => {
   <div class="ptimes">${PRAYERS.map(([k, en, ar, ic]) => `<div class="pt" data-k="${k}">${icon(ic)}<div class="n">${en}</div><div class="na">${ar}</div><div class="t">${fmtT(t[k], tz).replace(/\s?([AP]M|ص|م)$/, '<small>$1</small>')}</div></div>`).join('')}</div>
   <div class="grid g2" style="margin-top:16px">
     <div class="card noprint"><div class="orn">${officialOn() ? 'Source' : 'Calculation'}</div>
-      ${S.loc.fid ? `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:10px 12px;border-radius:12px;background:var(--goldbg);margin-bottom:12px"><span><b>Official timetable</b><br><small class="muted">${S.lang === 'ar' ? `المواقيت الثابتة التي تعتمدها مساجد ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? L(OPT.data.byId[S.loc.fid][1]) : 'هذه المدينة')} — مثل الجداول في تطبيقات المواقيت الكردية` : `The fixed times used by mosques in ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? OPT.data.byId[S.loc.fid][1] : 'this city')} — the same kind of table Kurdish prayer apps use`}</small></span><label class="switch"><input type="checkbox" data-ps="ptOfficial" ${S.ptOfficial !== false ? 'checked' : ''}><span></span></label></div>` : ''}
+      ${S.loc.fid ? `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:10px 12px;border-radius:12px;background:var(--goldbg);margin-bottom:12px"><span><b>Official timetable</b><br><small class="muted">${OPT.data && OPT.data.byId[S.loc.fid] && OPT.data.byId[S.loc.fid][6] ? (S.lang === 'ar' ? `الجدول الرسمي لـ${esc(L(OPT.data.byId[OPT.data.byId[S.loc.fid][5]][1]))} مع تعديل لموقع ${esc(L(OPT.data.byId[S.loc.fid][1]))} (فرق دقيقة إلى دقيقتين تقريباً)` : `${esc(OPT.data.byId[OPT.data.byId[S.loc.fid][5]][1])}'s official timetable, adjusted for the position of ${esc(OPT.data.byId[S.loc.fid][1])} (about 1–2 minutes' difference)`) : S.lang === 'ar' ? `المواقيت الثابتة التي تعتمدها مساجد ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? L(OPT.data.byId[S.loc.fid][1]) : 'هذه المدينة')} — مثل الجداول في تطبيقات المواقيت الكردية` : `The fixed times used by mosques in ${esc(OPT.data && OPT.data.byId[S.loc.fid] ? OPT.data.byId[S.loc.fid][1] : 'this city')} — the same kind of table Kurdish prayer apps use`}</small></span><label class="switch"><input type="checkbox" data-ps="ptOfficial" ${S.ptOfficial !== false ? 'checked' : ''}><span></span></label></div>` : ''}
       <div style="${officialOn() ? 'display:none' : ''}">
       <label class="f">Method</label><select data-ps="method">${Object.entries(M).map(([k, v]) => `<option value="${k}" ${S.method === k ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
       <div class="grid g2" style="margin-top:12px;gap:10px">
@@ -2272,7 +2282,7 @@ const AR_WORDS = {
   'al-Bukhari': 'البخاري', Muslim: 'مسلم', 'Abu Dawud': 'أبو داود', 'at-Tirmidhi': 'الترمذي', 'Ibn Majah': 'ابن ماجه', 'an-Nasa’i': 'النسائي', Ahmad: 'أحمد', 'at-Tabarani': 'الطبراني', 'al-Hakim': 'الحاكم', 'Ibn Hibban': 'ابن حبان', 'Sayyid al-Istighfar': 'سيد الاستغفار',
   morning: 'الصباح', evening: 'المساء', sleep: 'النوم', waking: 'الاستيقاظ', prayer: 'الصلاة',
 };
-const AR_PLACES = { Erbil: 'أربيل', Baghdad: 'بغداد', Sulaymaniyah: 'السليمانية', Duhok: 'دهوك', Kirkuk: 'كركوك', Makkah: 'مكة المكرمة', Madinah: 'المدينة المنورة', Mosul: 'الموصل', Basrah: 'البصرة', Halabja: 'حلبجة', Zakho: 'زاخو', Soran: 'سوران', Ranya: 'رانية', Najaf: 'النجف', Karbala: 'كربلاء', Kuwait: 'الكويت', Dubai: 'دبي' };
+const AR_PLACES = { 'Altun Kupri': 'آلتون كوبري', Dibis: 'الدبس', Erbil: 'أربيل', Baghdad: 'بغداد', Sulaymaniyah: 'السليمانية', Duhok: 'دهوك', Kirkuk: 'كركوك', Makkah: 'مكة المكرمة', Madinah: 'المدينة المنورة', Mosul: 'الموصل', Basrah: 'البصرة', Halabja: 'حلبجة', Zakho: 'زاخو', Soran: 'سوران', Ranya: 'رانية', Najaf: 'النجف', Karbala: 'كربلاء', Kuwait: 'الكويت', Dubai: 'دبي' };
 const AR_PRAYER = { Fajr: 'الفجر', Sunrise: 'الشروق', Dhuhr: 'الظهر', Asr: 'العصر', Maghrib: 'المغرب', Isha: 'العشاء' };
 
 /* ---- whole strings ---- */
@@ -2512,7 +2522,7 @@ function trCore(t) {
     for (const sep of [' · ', ' — ', ' – ', ': ']) {
       if (!t.includes(sep)) continue;
       const parts = t.split(sep), tr = parts.map(p => p.trim() ? trCore(p.trim()) : p);
-      if (tr.some(x => x != null)) return parts.map((p, i) => tr[i] ?? arNum(p)).join(sep);
+      if (tr.some(x => x != null)) { const out = parts.map((p, i) => tr[i] ?? arNum(p)); return out.length === 2 && i18nNorm(out[0]) === i18nNorm(out[1]) ? out[0] : out.join(sep); }
     }
     let hit = false;
     const mixed = t.replace(/[A-Za-z][A-Za-z'’&,.() -]*[A-Za-z.)]|[A-Za-z]/g, ph => { const k = ph.trim(), r = AR[k] ?? AR_WORDS[k] ?? (k === 'at' ? 'الساعة' : null); if (r != null) { hit = true; return r; } return ph; });
