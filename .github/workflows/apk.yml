@@ -1,3 +1,4 @@
+# Builds AlQuran.apk on GitHub's servers and publishes it under Releases.
 name: Android APK
 on:
   push:
