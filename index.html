@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.024356";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.025541";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -407,6 +407,12 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 
 /* ---------- responsive ---------- */
 
+.asfab{position:fixed;left:calc(50% + var(--side) / 2);transform:translateX(-50%);bottom:calc(var(--plh,0px) + 18px);z-index:41;display:none;align-items:center;gap:8px;height:50px;padding:0 18px 0 14px;border-radius:25px;
+  border:1px solid color-mix(in srgb,var(--g7) 40%,transparent);background:var(--g7);color:#fff;font:600 14.5px/1 inherit;box-shadow:0 6px 22px rgba(0,0,0,.22);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.asfab.on{display:flex}
+.asfab svg{width:24px;height:24px}
+.asfab:active{transform:translateX(-50%) scale(.95)}
+[data-theme=dark] .asfab{background:var(--gold);color:#1b1b1b}
 /* auto-scroll bar (Quran Explorer style) */
 .asbar{position:fixed;left:calc(var(--side) + 18px);right:18px;bottom:calc(var(--plh,0px) + 16px);z-index:41;display:none;align-items:center;gap:8px;padding:7px 10px;border-radius:16px;
   background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:var(--shadow);
@@ -455,6 +461,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   .hero{padding:22px}
   .hero .np .big{font-size:42px}
   .toast{bottom:calc(var(--navh,64px) + var(--plh,0px) + var(--ash,0px) + 22px)}
+  .asfab{left:50%;bottom:calc(var(--navh,64px) + var(--plh,0px) + 10px)}
   .asbar{left:8px;right:8px;bottom:calc(var(--navh,64px) + var(--plh,0px) + 8px);padding:6px 8px}
   .asbar .asl i{display:none}
   .srbox{position:static;padding:14px}
@@ -468,7 +475,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
   .sheet .sin{max-height:66vh;padding:10px 14px 14px;border-radius:20px 20px 0 0}
 }
 @media print{
-  .side,.topbar,.bottom,.player,.asbar,.qbar,.noprint,.drawer,.scrim{display:none!important}
+  .side,.topbar,.bottom,.player,.asbar,.asfab,.qbar,.noprint,.drawer,.scrim{display:none!important}
   main{margin:0;padding:0}
   body{background:#fff}
   .view{display:none!important}
@@ -533,6 +540,7 @@ html{touch-action:manipulation}
   <section class="view" id="v-dev"></section>
   <section class="view" id="v-more"></section>
 </main>
+<button class="asfab" id="asFab" title="Auto-scroll — the page moves by itself" aria-label="Start auto-scroll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="6"/><path d="M9 7.5l3 3 3-3M9 12.5l3 3 3-3"/></svg><span>Auto-scroll</span></button>
 <div class="asbar" id="asBar" role="toolbar" aria-label="Auto-scroll"></div>
 <div class="player" id="player"></div>
 <nav class="bottom" id="bottom"></nav>
@@ -2946,7 +2954,7 @@ function measureChrome() {
   const r = document.documentElement.style, nav = $('#bottom'), pl = $('#player');
   const nh = nav && getComputedStyle(nav).display !== 'none' ? Math.ceil(nav.getBoundingClientRect().height) : 0;
   const ph = pl && pl.classList.contains('on') ? Math.ceil(pl.getBoundingClientRect().height) + 10 : 0;
-  const ab = $('#asBar'), ah = ab && ab.classList.contains('on') ? Math.ceil(ab.getBoundingClientRect().height) + 10 : 0;
+  const ab = $('#asBar'), af = $('#asFab'), ah = ab && ab.classList.contains('on') ? Math.ceil(ab.getBoundingClientRect().height) + 10 : af && af.classList.contains('on') ? Math.ceil(af.getBoundingClientRect().height) + 12 : 0;
   r.setProperty('--navh', nh + 'px'); r.setProperty('--plh', ph + 'px'); r.setProperty('--ash', ah + 'px');
 }
 function deviceInit() {
@@ -3071,6 +3079,7 @@ function asDraw() {
   const b = $('#asBar'); if (!b) return;
   const show = AS.open && curView === 'quran' && !!R.range;
   b.classList.toggle('on', show);
+  const fab = $('#asFab'); if (fab) fab.classList.toggle('on', !AS.open && curView === 'quran' && !!R.range);
   const q = $('#qAuto'); if (q) q.classList.toggle('on', AS.open);
   if (!show) { measureChrome(); return; }
   const m = asMin();
@@ -3156,7 +3165,8 @@ window.addEventListener('wheel', () => { if (AS.on) { AS.hold = true; asRelease(
 document.addEventListener('keydown', e => { if (AS.open && curView === 'quran' && e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); AS.on ? asPause() : asPlay(); } });
 (function asBind() {
   const b = $('#asBar'), q = $('#qAuto'); if (!b || !q) return;
-  q.onclick = () => AS.open ? asClose() : asOpen();
+  q.onclick = () => { if (AS.open) asClose(); else { asOpen(); asPlay(); } };
+  const fab = $('#asFab'); if (fab) fab.onclick = () => { asOpen(); asPlay(); };   /* one tap: bar appears and the page starts moving */
   b.addEventListener('click', e => { const t = e.target.closest('[data-as]'); if (!t) return; const a = t.dataset.as; if (a === 'close') asClose(); else if (a === 'play') AS.on ? asPause() : asPlay(); });
   /* + / − : tap for one step, hold to keep changing */
   const stop = () => { clearTimeout(AS.rep); clearInterval(AS.rep); $$('#asBar .asseg button').forEach(x => x.classList.remove('dn')); };
@@ -3170,6 +3180,7 @@ document.addEventListener('keydown', e => { if (AS.open && curView === 'quran' &
 /* leaving the reader stops the glide; coming back shows the bar again (paused) */
 { const _route = route; route = function () { const r = _route.apply(this, arguments); if (curView !== 'quran' && AS.on) asPause(); asDraw(); return r; }; }
 window.addEventListener('popstate', () => setTimeout(() => { if (curView !== 'quran' && AS.on) asPause(); asDraw(); }, 30));
+asDraw();
 
 </script>
 </body>
