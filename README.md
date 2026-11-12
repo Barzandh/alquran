@@ -1,6 +1,6 @@
 # AlQuran — Quran, Prayer & Azkar
 
-Installable offline web app: the Holy Quran (Uthmani Hafs) with Al-Minshawi recitation, English/French/German/Kurdish translations, official Kurdistan & Iraq prayer timetables, Qibla, azkar, tasbih, khatma, reminders and backups.
+Installable offline web app: the Holy Quran (Uthmani Hafs) with Al-Minshawi recitation, translations in English, French, German, Kurdish, Spanish, Swedish, Norwegian, Dutch and Polish (the whole interface also in those languages plus Arabic), official prayer methods for 16 more countries, official Kurdistan & Iraq prayer timetables, Qibla, azkar, tasbih, khatma, reminders and backups.
 
 **Install on iPhone:** open the site in Safari → Share → Add to Home Screen.
 

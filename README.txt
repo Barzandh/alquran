@@ -1,4 +1,4 @@
-AlQuran — installable dev build (20261112.235900)
+AlQuran — installable dev build (20261113.003000)
 =================================================
 
 What this is
