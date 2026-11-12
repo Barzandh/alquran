@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.235000";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.235900";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,6 +174,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .tr.translit{font-family:var(--ui);font-size:var(--lsize);line-height:1.7;color:var(--ink);letter-spacing:.1px}
 .tr.translit .lv{font-size:.68em;opacity:.5;margin-left:1px}
 .tr.taf .pb{display:block;height:.6em}
+.tr.taf[dir=ltr]{font-family:var(--ui);text-align:left;line-height:1.7;font-size:calc(var(--tafsize,21px)*.86)}
+.lay{cursor:pointer}
+.lay.sel{border-color:var(--gold2)}
+.lsht{font-family:var(--ui);font-size:var(--lsize);line-height:1.65;color:var(--ink);padding:2px 0 4px}
+.lgrp{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink2);margin:2px 0 6px;font-family:var(--ui)}
+.lopts{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
+.lopts select{font-size:13px;padding:6px 8px}
 .qbar .zbtn{min-width:38px;padding:0 9px;font-weight:800;font-family:var(--ui)}
 .qbar .latbtn b{font-weight:800}
 .tafseg{margin:0 0 10px;flex-wrap:wrap}
@@ -754,8 +761,11 @@ const EDITIONS = {
     ['eng-muftitaqiusmani', 'Mufti Taqi Usmani'], ['eng-ummmuhammad', 'Saheeh International'],
     ['eng-abdullahyusufal', 'Abdullah Yusuf Ali'], ['eng-mohammedmarmadu', 'M. M. Pickthall']] },
   fr: { label: 'Français', name: 'Français', short: 'French', dir: 'ltr', options: [['fra-muhammadhamidul', 'Muhammad Hamidullah']] },
-  de: { label: 'Deutsch', name: 'Deutsch', short: 'German', dir: 'ltr', options: [['deu-asfbubenheimand', 'Bubenheim & Elyas']] },
+  de: { label: 'Deutsch', name: 'Deutsch', short: 'German', dir: 'ltr', options: [['deu-asfbubenheimand', 'Bubenheim & Elyas'], ['deu-aburida', 'Abu Rida Muhammad Rassoul'], ['deu-rwwad', 'Rowad Translation Center']] },
   ku: { label: 'کوردی', name: 'کوردی', short: 'Kurdish', dir: 'rtl', options: [['kur-burhanmuhammada', 'بورهان محەمەد ئەمین (تەفسیری ئاسان)'], ['kur-muhammadsalehba', 'محەمەد ساڵح بامۆکی']] },
+  te: { label: 'English Tafsir', name: 'English Tafsir', short: 'English tafsir', dir: 'ltr', tafsir: true, options: [['eng-mukhtasar', 'Al-Mukhtasar fi Tafsir al-Quran'], ['eng-ibnkathir', 'Tafsir Ibn Kathir (abridged)']] },
+  tf: { label: 'Tafsir Français', name: 'Tafsir Français', short: 'French tafsir', dir: 'ltr', tafsir: true, options: [['fra-mukhtasar', 'Al-Mukhtasar — Exégèse abrégée du Coran']] },
+  tk: { label: 'تەفسیری کوردی', name: 'تەفسیری کوردی', short: 'Kurdish tafsir', dir: 'rtl', tafsir: true, options: [['kur-mukhtasar', 'ئەلموختەسەر لە تەفسیری قورئانی پیرۆز'], ['kur-rebar', 'تەفسیری ڕێبەر']] },
   sa: { label: 'تفسير السعدي', name: 'تفسير السعدي', short: "Tafsir al-Sa'di", dir: 'rtl', tafsir: true, options: [['ara-saddi', 'تيسير الكريم الرحمن — للشيخ عبد الرحمن بن ناصر السعدي']] },
   tb: { label: 'تفسير الطبري', name: 'تفسير الطبري', short: 'Tafsir al-Tabari', dir: 'rtl', tafsir: true, options: [['ara-tabari', 'جامع البيان عن تأويل آي القرآن — للإمام ابن جرير الطبري']] },
 };
@@ -774,7 +784,7 @@ function latText(v) {
 }
 const latHTML = v => esc(latText(v)).replace(/\(([^)]{1,4})\)/g, '<span class="lv">$1</span>');
 /* big editions stored as one file per surah (data/<dir>NNN.bin), loaded only for the surahs you open */
-const CHUNKED = { 'ara-tabari': 'tabari/' };
+const CHUNKED = { 'ara-tabari': 'tabari/', 'eng-ibnkathir': 'ibnkathir/' };
 const META = {"pageStart": [0, 7, 12, 23, 31, 36, 44, 55, 64, 68, 76, 83, 90, 95, 100, 108, 112, 119, 126, 133, 141, 148, 152, 160, 170, 176, 183, 188, 193, 197, 203, 209, 217, 222, 226, 231, 237, 240, 244, 252, 255, 259, 263, 266, 271, 276, 281, 288, 289, 293, 302, 308, 315, 322, 330, 338, 345, 354, 363, 370, 376, 384, 393, 401, 408, 414, 425, 433, 441, 446, 450, 458, 466, 473, 479, 487, 493, 499, 504, 507, 512, 516, 519, 526, 530, 537, 544, 552, 558, 567, 572, 579, 584, 587, 594, 598, 606, 614, 620, 627, 633, 640, 647, 655, 663, 668, 671, 674, 678, 682, 686, 692, 700, 705, 710, 714, 719, 726, 733, 739, 745, 751, 758, 764, 772, 777, 782, 789, 797, 807, 816, 824, 833, 841, 848, 857, 862, 870, 879, 883, 890, 899, 907, 913, 920, 926, 931, 935, 940, 946, 954, 965, 976, 984, 991, 997, 1005, 1011, 1021, 1027, 1035, 1041, 1049, 1058, 1074, 1084, 1091, 1097, 1103, 1109, 1113, 1117, 1124, 1132, 1141, 1149, 1160, 1168, 1176, 1185, 1193, 1200, 1205, 1212, 1221, 1229, 1235, 1241, 1248, 1255, 1261, 1266, 1271, 1275, 1282, 1289, 1296, 1303, 1307, 1314, 1321, 1328, 1334, 1341, 1346, 1352, 1357, 1364, 1370, 1378, 1384, 1389, 1397, 1406, 1417, 1425, 1434, 1442, 1452, 1461, 1470, 1478, 1485, 1492, 1501, 1510, 1518, 1526, 1535, 1544, 1554, 1561, 1570, 1581, 1590, 1600, 1610, 1618, 1626, 1633, 1639, 1648, 1659, 1665, 1674, 1682, 1691, 1699, 1707, 1712, 1720, 1725, 1735, 1741, 1749, 1755, 1760, 1768, 1774, 1783, 1792, 1802, 1817, 1833, 1853, 1872, 1892, 1907, 1915, 1927, 1935, 1943, 1955, 1965, 1973, 1980, 1988, 1994, 2003, 2011, 2019, 2029, 2036, 2046, 2056, 2067, 2078, 2087, 2095, 2104, 2115, 2125, 2133, 2144, 2155, 2160, 2167, 2174, 2185, 2193, 2201, 2214, 2223, 2237, 2250, 2261, 2275, 2288, 2301, 2314, 2326, 2345, 2360, 2385, 2399, 2412, 2424, 2435, 2446, 2461, 2473, 2483, 2493, 2507, 2518, 2527, 2540, 2555, 2564, 2573, 2584, 2595, 2600, 2610, 2618, 2625, 2633, 2641, 2650, 2659, 2667, 2673, 2690, 2700, 2715, 2732, 2747, 2762, 2777, 2791, 2801, 2811, 2818, 2822, 2827, 2834, 2844, 2849, 2852, 2857, 2866, 2875, 2887, 2898, 2910, 2922, 2932, 2951, 2971, 2992, 3015, 3043, 3068, 3091, 3115, 3138, 3159, 3172, 3181, 3194, 3203, 3214, 3222, 3235, 3247, 3257, 3265, 3273, 3280, 3287, 3295, 3302, 3311, 3322, 3329, 3336, 3346, 3354, 3363, 3370, 3378, 3385, 3392, 3403, 3414, 3424, 3433, 3441, 3450, 3459, 3469, 3480, 3488, 3497, 3503, 3514, 3523, 3533, 3539, 3548, 3555, 3563, 3568, 3576, 3583, 3587, 3595, 3606, 3613, 3620, 3628, 3637, 3645, 3654, 3663, 3671, 3678, 3690, 3698, 3704, 3717, 3732, 3745, 3759, 3775, 3788, 3812, 3839, 3864, 3890, 3914, 3941, 3970, 3986, 3996, 4012, 4031, 4053, 4063, 4068, 4079, 4089, 4098, 4105, 4114, 4125, 4132, 4140, 4149, 4158, 4166, 4173, 4182, 4191, 4199, 4210, 4218, 4229, 4238, 4247, 4256, 4264, 4272, 4282, 4287, 4294, 4303, 4316, 4323, 4335, 4347, 4358, 4372, 4385, 4398, 4414, 4432, 4453, 4473, 4486, 4495, 4505, 4515, 4524, 4530, 4538, 4545, 4556, 4564, 4574, 4583, 4592, 4598, 4606, 4611, 4616, 4623, 4630, 4645, 4665, 4681, 4705, 4726, 4749, 4766, 4784, 4810, 4828, 4852, 4873, 4895, 4917, 4941, 4968, 4995, 5029, 5055, 5078, 5086, 5093, 5099, 5104, 5110, 5115, 5125, 5129, 5135, 5142, 5150, 5155, 5161, 5168, 5177, 5185, 5192, 5199, 5208, 5217, 5222, 5229, 5236, 5241, 5253, 5267, 5286, 5313, 5331, 5357, 5385, 5414, 5429, 5447, 5460, 5475, 5494, 5512, 5542, 5570, 5596, 5616, 5641, 5672, 5702, 5727, 5758, 5800, 5829, 5854, 5882, 5909, 5931, 5963, 5993, 6016, 6043, 6072, 6098, 6125, 6137, 6155, 6176, 6193, 6207, 6221], "sajda": [[7, 206], [13, 15], [16, 50], [17, 109], [19, 58], [22, 18], [22, 77], [25, 60], [27, 26], [32, 15], [38, 24], [41, 38], [53, 62], [84, 21], [96, 19]]};
 
 const RECITERS = {
@@ -1007,8 +1017,8 @@ const LOGO = `<svg class="logo" viewBox="0 0 48 48"><g fill="none" stroke="#d8b5
 /* ============ SETTINGS ============ */
 const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
-  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari' },
-  show: { en: true, fr: false, de: false, ku: true, sa: false, tb: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, ku: false }, latAr: false, tafsir: false,
+  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari', te: 'eng-mukhtasar', tf: 'fra-mukhtasar', tk: 'kur-mukhtasar' },
+  show: { en: true, fr: false, de: false, ku: true, sa: false, tb: false, te: false, tf: false, tk: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, ku: false }, latAr: true, tafsir: false,
   reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: /^ar\b/i.test(navigator.language || '') ? 'ar' : 'en', view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
@@ -1018,6 +1028,7 @@ const S = (() => {
   const s = LS.get('settings', {});
   const o = Object.assign({}, DEF, s);
   ['tr', 'show', 'adj', 'latShow'].forEach(k => o[k] = Object.assign({}, DEF[k], s[k] || {}));
+  if (!o.latAr2) { o.latAr = true; o.latAr2 = 1; }   /* Arabic under the Latin text is on for everyone once */
   if (s.tr && s.tr.sa === 'ara-tabari') { o.show.tb = true; o.show.sa = false; }   /* build 231500 kept both tafsirs under one switch */
   Object.keys(EDITIONS).forEach(k => { if (!EDITIONS[k].options.some(x => x[0] === o.tr[k])) o.tr[k] = DEF.tr[k]; });
   if (!o.fullScript) { o.view = 'mushaf'; o.fullScript = 1; }
@@ -1102,23 +1113,36 @@ const activeTr = () => {
 };
 /* Tafsir as-Sa'di: when the Sheikh explains several ayat together, the first ayah carries '⟦N-M⟧' + the text
    and the others carry '^N-M'. full = the whole explanation (ayah sheet); otherwise a short pointer (ayah list). */
+function grpLabel(k, a, b, pointer) {
+  const E = EDITIONS[k] || {};
+  if (E.dir === 'ltr') return pointer ? `↑ Explained together with ayat ${a}–${b}` : `Tafsir of ayat ${a}–${b}`;
+  if (k === 'tk') return pointer ? `↑ ئەم ئایەتە لەگەڵ ئایەتەکانی ${a}–${b} تەفسیر کراوە` : `تەفسیری ئایەتەکانی ${a}–${b}`;
+  return pointer ? `↑ تفسير هذه الآية ضمن تفسير الآيات ${toAr(a)}–${toAr(b)}` : `تفسير الآيات ${toAr(a)}–${toAr(b)}`;
+}
 function trValue(k, arr, g, full) {
   const v = arr[g - 1];
-  if ((k !== 'sa' && k !== 'tb') || v == null) return v;
+  if (!EDITIONS[k] || !EDITIONS[k].tafsir || v == null) return v;
   let m = /^\^(\d+)-(\d+)$/.exec(v);
   if (m) {
-    const lbl = `﴾تفسير الآيات ${toAr(m[1])}–${toAr(m[2])}﴿`;
-    if (!full) return `↑ تفسير هذه الآية ضمن تفسير الآيات ${toAr(m[1])}–${toAr(m[2])}`;
+    if (!full) return grpLabel(k, m[1], m[2], true);
     const g0 = g - (AYA[g - 1] - +m[1]), src = arr[g0 - 1] || '';
-    return lbl + ' ' + src.replace(/^⟦\d+-\d+⟧/, '');
+    return `﴾${grpLabel(k, m[1], m[2])}﴿ ` + src.replace(/^⟦\d+-\d+⟧/, '');
   }
   m = /^⟦(\d+)-(\d+)⟧/.exec(v);
-  return m ? `﴾تفسير الآيات ${toAr(m[1])}–${toAr(m[2])}﴿ ` + v.slice(m[0].length) : v;
+  return m ? `﴾${grpLabel(k, m[1], m[2])}﴿ ` + v.slice(m[0].length) : v;
+}
+/** one tafsir / translation box */
+function trBox(k, v, opts = {}) {
+  const E = EDITIONS[k], o = E.options.find(x => x[0] === S.tr[k]), lab = `${esc(E.label)}${o && (E.tafsir || E.options.length > 1) ? ' · ' + esc(o[1]) : ''}`;
+  if (v == null) v = '—';
+  if (!E.tafsir) return `<div class="tr" dir="${E.dir}"><span class="tl">${lab}</span>${esc(v)}</div>`;
+  const clamp = opts.clamp && v.length > 700;
+  return `<div class="tr taf${clamp ? ' clamp' : ''}" dir="${E.dir}"><span class="tl">${lab}</span>${tafHTML(v)}${clamp ? `<button class="tafmore" data-tafmore>${E.dir === 'rtl' ? '…اقرأ المزيد' : 'Read more…'}</button>` : ''}</div>`;
 }
 /** tafsir text → HTML with the Quran quotations ﴿…﴾ highlighted */
 function tafHTML(v) {
   let lbl = '';
-  const m = /^﴾(تفسير الآيات [^﴿]+)﴿ ?/.exec(v);
+  const m = /^﴾([^﴿﴾]{1,90})﴿ ?/.exec(v);
   if (m) { lbl = `<b class="tgrp">${esc(m[1])}</b>`; v = v.slice(m[0].length); }
   return lbl + esc(v).replace(/﴿([^﴾﴿]{1,400})﴾/g, '<span class="tq">﴿$1﴾</span>').replace(/\u2029/g, '<span class="pb"></span>');
 }
@@ -1158,7 +1182,9 @@ function route(arg) {
   const v = typeof arg === 'string' ? arg : ((location.hash || '#home').slice(1) || 'home');
   curView = VIEWS.some(x => x[0] === v) ? v : 'home';
   $$('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + curView));
-  if (curView !== 'quran' && typeof closeSheet === 'function') closeSheet();
+  if (curView !== 'quran' && curView !== 'latin' && typeof closeSheet === 'function') closeSheet();
+  if (curView === 'quran' && SH.mode === 'latin' && typeof closeSheet === 'function') closeSheet();
+  if (curView === 'latin' && SH.mode === 'q' && typeof closeSheet === 'function') closeSheet();
   const inMore = !['home', 'quran', 'latin', 'prayer', 'azkar'].includes(curView);
   $$('[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === curView || (inMore && a.dataset.v === 'more' && !!a.closest('#bottom'))));
   try { const r = RENDER[curView] && RENDER[curView](); if (r && r.catch) r.catch(e => console.error(e)); } catch (e) { console.error(e); }
@@ -1348,7 +1374,7 @@ function ayahHTML(it, i, trs, bmset) {
       <button data-act="bm" title="Bookmark" class="${bm ? 'on' : ''}">${icon(bm ? 'bmf' : 'bm')}</button>
       <button data-act="copy" title="Copy">${icon('copy')}</button></div>
     <div class="atext">${esc(it.ar)}${it.sj ? '<span class="sajda">۩ Sajda</span>' : ''} <span class="amark">${toAr(it.n)}</span></div>
-    <div class="trs">${trs.map(t => { const v = it.trs[t.ed]; if (v == null) return ''; const rtl = t.lang === 'ku' || t.lang === 'tafsir' || t.lang === 'sa' || t.lang === 'tb'; if (t.lang === 'sa' || t.lang === 'tb') return `<div class="tr taf${v.length > 700 ? ' clamp' : ''}" dir="rtl"><span class="tl">${esc(trLabel(t))}</span>${tafHTML(v)}${v.length > 700 ? '<button class="tafmore" data-tafmore>…اقرأ المزيد</button>' : ''}</div>`; if (t.lang === 'translit') return `<div class="tr translit" dir="ltr"><span class="tl">${esc(trLabel(t))}</span>${latHTML(v)}</div>`; return `<div class="tr" dir="${rtl ? 'rtl' : 'ltr'}"><span class="tl">${esc(trLabel(t))}</span>${esc(v)}</div>`; }).join('')}</div>
+    <div class="trs">${trs.map(t => { const v = it.trs[t.ed]; if (v == null) return ''; const rtl = t.lang === 'tafsir' || (EDITIONS[t.lang] && EDITIONS[t.lang].dir === 'rtl'); if (EDITIONS[t.lang] && EDITIONS[t.lang].tafsir) return trBox(t.lang, v, { clamp: true }); if (t.lang === 'translit') return `<div class="tr translit" dir="ltr"><span class="tl">${esc(trLabel(t))}</span>${latHTML(v)}</div>`; return `<div class="tr" dir="${rtl ? 'rtl' : 'ltr'}"><span class="tl">${esc(trLabel(t))}</span>${esc(v)}</div>`; }).join('')}</div>
   </div>`;
 }
 function readingHTML() {
@@ -1475,6 +1501,8 @@ function markCur(i, scroll) {
 const SH = { i: -1 };
 async function openSheet(i) {
   const it = R.items[i]; if (!it) return;
+  if (SH.qClick) $('#sheet').onclick = SH.qClick;
+  SH.mode = 'q'; $$('.lay.sel').forEach(e => e.classList.remove('sel'));
   SH.i = i;
   $$('.ma.sel').forEach(e => e.classList.remove('sel'));
   const span = document.getElementById('m-' + it.s + '-' + it.n); if (span) span.classList.add('sel');
@@ -1504,7 +1532,7 @@ async function openSheet(i) {
       return `<div class="tr${E.tafsir ? ' taf' : ''}" dir="${E.dir}"><span class="tl">${esc(E.label)} · ${esc(o ? o[1] : '')}</span>${E.tafsir ? tafHTML(v || '—') : esc(v || '—')}</div>`; }).join('');
   }
 }
-function closeSheet() { $('#sheet').classList.remove('on'); $$('.ma.sel').forEach(e => e.classList.remove('sel')); SH.i = -1; }
+function closeSheet() { $('#sheet').classList.remove('on'); $$('.ma.sel,.lay.sel').forEach(e => e.classList.remove('sel')); SH.i = -1; SH.li = -1; }
 function bindSheet() {
   $('#sheet').onclick = async e => {
     const l = e.target.closest('[data-shl]');
@@ -1521,6 +1549,7 @@ function bindSheet() {
     if (a === 'bm') { let bms = LS.get('bookmarks', []); const k = bms.findIndex(x => x.s === it.s && x.n === it.n); if (k >= 0) bms.splice(k, 1); else bms.push({ s: it.s, n: it.n, ts: Date.now() }); LS.set('bookmarks', bms); toast(k >= 0 ? 'Bookmark removed' : 'Bookmarked ' + it.s + ':' + it.n); openSheet(SH.i); }
     if (a === 'copy') { const txt = `${it.ar} ﴿${toAr(it.n)}﴾\n` + [...$$('#shTr .tr')].map(x => [...x.childNodes].slice(1).filter(n => !(n.classList && n.classList.contains('tafmore'))).map(n => n.textContent).join('')).filter(Boolean).join('\n') + `\n— ${SURAHS[it.s - 1].en} ${it.s}:${it.n}`; try { await navigator.clipboard.writeText(txt); toast('Copied'); } catch (err) { toast('Copy not allowed here'); } }
   };
+  SH.qClick = $('#sheet').onclick;
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheet').classList.contains('on')) closeSheet(); });
 }
 /* A− / A+ in the ayah panel: tafsir and translations get bigger or smaller together */
@@ -2268,6 +2297,7 @@ RENDER.khatma = async () => {
    ===================================================================== */
 const LQ = { s: null, items: [], lat1: '' };
 const LQ_LANGS = ['en', 'fr', 'de', 'ku'];
+const lqKeys = () => Object.keys(EDITIONS);
 const LP = { el: new Audio(), on: false, i: -1, phase: 'ayah', urls: [], ui: 0 };
 LP.el.preload = 'auto';
 function lpSrc(urls) { LP.urls = urls; LP.ui = 0; LP.el.src = urls[0]; LP.el.play().catch(e => { if (e.name === 'NotAllowedError') toast('Tap play to start audio'); lpUI(); }); }
@@ -2330,7 +2360,7 @@ function latBar() {
       <select id="lSel" class="noi18n">${SURAHS.map(x => `<option value="${x.n}" ${x.n === s ? 'selected' : ''}>${x.n}. ${esc(x.en)} — ${x.ar}</option>`).join('')}</select>
       <button class="btn sm pri" id="lPlay">${icon('play')}Listen</button>
       <button class="btn sm zbtn" id="lZm" title="Smaller text">A−</button><button class="btn sm zbtn" id="lZp" title="Bigger text">A+</button>
-      <div class="langs" id="lLangs"><span class="lt">Translation</span>${LQ_LANGS.map(k => chip(k, S.latShow[k], EDITIONS[k].name)).join('')}${chip('ar', S.latAr, 'العربية')}
+      <div class="langs" id="lLangs">${chip('ar', S.latAr, 'العربية')}${lqKeys().filter(k => !EDITIONS[k].tafsir).map(k => chip(k, S.latShow[k], EDITIONS[k].name)).join('')}${lqKeys().filter(k => EDITIONS[k].tafsir).map(k => chip(k, S.latShow[k], EDITIONS[k].name)).join('')}
         <span class="seg" style="margin-left:4px" data-noi18n><button data-lst="easy" class="${S.latStyle !== 'precise' ? 'on' : ''}">aa ee oo</button><button data-lst="precise" class="${S.latStyle === 'precise' ? 'on' : ''}">ā ī ū</button></span></div>
     </div></div>`;
 }
@@ -2341,18 +2371,18 @@ async function latOpen(s, n) {
   const v = $('#v-latin'), x = SURAHS[s - 1];
   v.innerHTML = latBar() + `<div id="lBody"><div class="loading"><div class="spin"></div></div></div>`;
   latWire();
-  const g0 = OFF[s - 1], g1 = g0 + x.ayahs - 1, langs = LQ_LANGS.filter(k => S.latShow[k]);
+  const g0 = OFF[s - 1], g1 = g0 + x.ayahs - 1, langs = lqKeys().filter(k => S.latShow[k]);
   let lat, ar, tx;
   try {
-    [lat, ar, ...tx] = await Promise.all([loadEdition(S.latStyle === 'classic' ? EXTRA_EDITIONS.translit : latEd()), S.latAr ? loadEdition(ARABIC) : null, ...langs.map(k => loadEdition(S.tr[k]).catch(() => null))]);
+    [lat, ar, ...tx] = await Promise.all([loadEdition(S.latStyle === 'classic' ? EXTRA_EDITIONS.translit : latEd()), S.latAr ? loadEdition(ARABIC) : null, ...langs.map(k => loadEdition(S.tr[k], g0 + 1, g1 + 1).catch(() => null))]);
   } catch (e) { $('#lBody').innerHTML = `<div class="card">${esc(e.message)}</div>`; return; }
   if (LQ.s !== s) return;
   LQ.lat1 = lat[0];
   for (let g = g0; g <= g1; g++) {
     const k = AYA[g];
-    LQ.items.push({ s, n: k, g: g + 1, lat: lat[g], ar: ar ? (k === 1 && s !== 1 && s !== 9 ? stripBasmala(ar[g]) : ar[g]) : null, trs: langs.map((l, j) => [l, tx[j] ? tx[j][g] : null]) });
+    LQ.items.push({ s, n: k, g: g + 1, lat: lat[g], ar: ar ? (k === 1 && s !== 1 && s !== 9 ? stripBasmala(ar[g]) : ar[g]) : null, trs: langs.map((l, j) => [l, tx[j] ? trValue(l, tx[j], g + 1, false) : null]) });
   }
-  const trHTML = ([k, t]) => { if (t == null) return ''; const E = EDITIONS[k], o = E.options.find(z => z[0] === S.tr[k]); return `<div class="tr" dir="${E.dir}"><span class="tl">${esc(E.label)}${o && E.options.length > 1 ? ' · ' + esc(o[1]) : ''}</span>${esc(t)}</div>`; };
+  const trHTML = ([k, t]) => t == null ? '' : trBox(k, t, { clamp: true });
   $('#lBody').innerHTML = `<div class="shead"><div class="frame"></div><div class="nmar">سُورَةُ ${x.ar}</div><div class="nmen">${x.n}. ${esc(x.en)}</div><div class="meta">${esc(x.meaning)} · ${x.ayahs} ayat · ${x.type}</div></div>
     ${s !== 1 && s !== 9 ? `<div class="lbism">${latHTML(LQ.lat1)}</div>` : ''}
     ${LQ.items.map((it, i) => `<div class="lay" id="l-${it.s}-${it.n}" data-i="${i}">
@@ -2383,10 +2413,13 @@ function latWire() {
     const k = c.dataset.lt;
     if (k === 'ar') S.latAr = !S.latAr; else S.latShow[k] = !S.latShow[k];
     save(); latReopen();
+    if (SH.mode === 'latin' && $('#sheet').classList.contains('on')) latSheet(SH.li);
   };
   $('#v-latin').onclick = async e => {
-    const nb = e.target.closest('[data-lgo]'); if (nb) { lpStop(); latOpen(+nb.dataset.lgo); return; }
-    const b = e.target.closest('[data-la]'); if (!b) return;
+    const nb = e.target.closest('[data-lgo]'); if (nb) { lpStop(); closeSheet(); latOpen(+nb.dataset.lgo); return; }
+    const tm = e.target.closest('[data-tafmore]'); if (tm) { const box = tm.closest('.tr'); box.classList.remove('clamp'); tm.remove(); return; }
+    const b = e.target.closest('[data-la]');
+    if (!b) { const card = e.target.closest('.lay'); if (card && !getSelection().toString()) { const i = +card.dataset.i; if (SH.mode === 'latin' && SH.li === i && $('#sheet').classList.contains('on')) closeSheet(); else latSheet(i); } return; }
     const card = b.closest('.lay'), i = +card.dataset.i, it = LQ.items[i];
     if (b.dataset.la === 'play') { if (LP.on && LP.i === i) { if (LP.el.paused) LP.el.play().catch(() => {}); else LP.el.pause(); } else lpPlay(i); }
     if (b.dataset.la === 'open') { lpStop(); openSurah(it.s, it.n); }
@@ -2397,9 +2430,59 @@ function latWire() {
   };
 }
 /* re-draw the open surah, keeping the ayah at the top of the screen */
+/* ---------- ayah panel for the Latin section: tap an ayah → Latin, Arabic, and any translation / tafsir ---------- */
+async function latSheet(i) {
+  const it = LQ.items[i]; if (!it) return;
+  SH.mode = 'latin'; SH.i = -1; SH.li = i;
+  $('#sheet').onclick = latSheetClick;
+  $$('.lay.sel,.ma.sel').forEach(e => e.classList.remove('sel'));
+  const card = $(`#lBody .lay[data-i="${i}"]`); if (card) card.classList.add('sel');
+  const keys = lqKeys(), on = keys.filter(k => S.latShow[k]);
+  const chip = k => `<button class="lchip ${S.latShow[k] ? 'on' : ''}" data-lsh="${k}"><i>${S.latShow[k] ? '✓' : '+'}</i>${EDITIONS[k].name}</button>`;
+  $('#sheetIn').innerHTML = `<div class="shgrip" title="Drag to make this panel taller or shorter"><i></i></div>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <div class="row" style="flex-wrap:nowrap;gap:6px"><button class="btn icon sm ghost" data-ls2="prev" title="Previous ayah" ${i ? '' : 'disabled'}>${icon('left')}</button>
+        <span class="pill gold" style="font-size:13px">${esc(SURAHS[it.s - 1].en)} ${it.s}:${it.n}</span>
+        <button class="btn icon sm ghost" data-ls2="next" title="Next ayah" ${i < LQ.items.length - 1 ? '' : 'disabled'}>${icon('right')}</button></div>
+      <div class="row" style="flex-wrap:nowrap;gap:4px"><button class="btn icon sm ghost shA" data-ls2="tminus" title="Smaller text">A−</button><button class="btn icon sm ghost shA" data-ls2="tplus" title="Bigger text">A+</button>
+      <button class="btn icon sm ghost" data-ls2="close" title="Close">${icon('x')}</button></div></div>
+    <div class="lsht" dir="ltr">${latHTML(it.lat)}</div>
+    <div class="sar" id="lshAr">${it.ar ? `${esc(it.ar)} <span class="amark">${toAr(it.n)}</span>` : ''}</div>
+    <div class="lgrp">Translation</div><div class="langs" style="padding:0 0 8px">${keys.filter(k => !EDITIONS[k].tafsir).map(chip).join('')}</div>
+    <div class="lgrp">Tafsir</div><div class="langs" style="padding:0 0 10px">${keys.filter(k => EDITIONS[k].tafsir).map(chip).join('')}</div>
+    <div class="lopts">${on.filter(k => EDITIONS[k].options.length > 1).map(k => `<select data-lopt="${k}" class="noi18n">${EDITIONS[k].options.map(([v, l]) => `<option value="${v}" ${S.tr[k] === v ? 'selected' : ''}>${esc(EDITIONS[k].name)} · ${esc(l)}</option>`).join('')}</select>`).join('')}</div>
+    <div id="shTr">${on.length ? '<div class="loading" style="padding:16px"><div class="spin"></div></div>' : '<div class="muted" style="padding:6px 0 10px">Choose a translation or tafsir above.</div>'}</div>
+    <div class="row shact"><button class="btn sm pri" data-ls2="play">${icon('play')} Listen from here</button>
+      <button class="btn sm" data-ls2="copy">${icon('copy')} Copy</button></div>`;
+  $$('#sheetIn [data-lopt]').forEach(sel => { sel.onchange = () => { S.tr[sel.dataset.lopt] = sel.value; save(); latSheet(SH.li); latRefresh(); }; });
+  $('#sheet').classList.add('on');
+  if (!it.ar) loadEdition(ARABIC).then(a => { const el = $('#lshAr'); if (el && SH.li === i) el.innerHTML = `${esc(it.n === 1 && it.s !== 1 && it.s !== 9 ? stripBasmala(a[it.g - 1]) : a[it.g - 1])} <span class="amark">${toAr(it.n)}</span>`; }).catch(() => {});
+  if (on.length) {
+    const parts = await Promise.all(on.map(async k => { try { const arr = await loadEdition(S.tr[k], it.g, it.g); return [k, trValue(k, arr, it.g, true)]; } catch (e) { return [k, null]; } }));
+    if (SH.li !== i || SH.mode !== 'latin') return;
+    $('#shTr').innerHTML = parts.map(([k, v]) => trBox(k, v)).join('');
+  }
+}
+async function latSheetClick(e) {
+  const l = e.target.closest('[data-lsh]');
+  if (l) { S.latShow[l.dataset.lsh] = !S.latShow[l.dataset.lsh]; save(); latSheet(SH.li); latRefresh(); return; }
+  const b = e.target.closest('[data-ls2]'); if (!b) return;
+  const a = b.dataset.ls2, i = SH.li, it = LQ.items[i];
+  if (a === 'close') closeSheet();
+  if (a === 'tminus' || a === 'tplus') { sheetText(a === 'tplus' ? 1 : -1); return; }
+  if (a === 'prev' && i > 0) latSheet(i - 1);
+  if (a === 'next' && i < LQ.items.length - 1) latSheet(i + 1);
+  if (a === 'play') { closeSheet(); lpPlay(i); }
+  if (a === 'copy') {
+    const txt = [latText(it.lat).replace(/\((\S{1,4})\)/g, '$1'), ($('#lshAr') || {}).innerText, ...[...$$('#shTr .tr')].map(x => [...x.childNodes].slice(1).filter(n => !(n.classList && n.classList.contains('tafmore'))).map(n => n.textContent).join(''))].filter(Boolean).join('\n') + `\n— ${SURAHS[it.s - 1].en} ${it.s}:${it.n}`;
+    try { await navigator.clipboard.writeText(txt); toast('Copied'); } catch (err) { toast('Copy not allowed here'); }
+  }
+}
+/* the list under the panel follows what was chosen in the panel */
+function latRefresh() { clearTimeout(latRefresh.t); latRefresh.t = setTimeout(() => { const keep = SH.li; latReopen().then(() => { if (SH.mode === 'latin' && keep >= 0) { const c = $(`#lBody .lay[data-i="${keep}"]`); if (c) c.classList.add('sel'); } }); }, 250); }
 function latReopen() {
   const top = [...$$('#lBody .lay')].find(e => e.getBoundingClientRect().bottom > 170);
-  latOpen(LQ.s, top ? LQ.items[+top.dataset.i].n : null);
+  return latOpen(LQ.s, top ? LQ.items[+top.dataset.i].n : null);
 }
 RENDER.latin = () => { if (!LQ.s || !$('#lBody')) latIndex(); };
 
@@ -2826,6 +2909,7 @@ const AR_T = {
 
 /* ---- language packs ---- */
 Object.assign(AR, {
+  'Choose a translation or tafsir above.': 'اختر ترجمة أو تفسيراً من الأعلى.', 'Listen from here': 'الاستماع من هنا', 'English Tafsir': 'التفسير الإنجليزي', 'Tafsir Français': 'التفسير الفرنسي',
   'Latin Quran': 'القرآن باللاتيني', 'Quran in Latin letters + translation': 'القرآن بالحروف اللاتينية مع الترجمة',
   "For readers who don't know Arabic letters": 'لمن لا يعرف قراءة الحروف العربية', 'Surahs': 'السور', 'Listen': 'استماع',
   "The whole Quran in Latin letters, read as it is recited (Hafs) — with English, French, German and Kurdish translation under every ayah. For everyone who doesn't read Arabic letters.": 'القرآن كاملاً بالحروف اللاتينية كما يُتلى (رواية حفص) — مع الترجمة الإنجليزية والفرنسية والألمانية والكوردية تحت كل آية، لكل من لا يقرأ الحروف العربية.',
@@ -2839,6 +2923,7 @@ Object.assign(AR, {
   ', are said only if you go on without stopping.': '، تُنطق فقط عند الوصل دون وقف.', 'Tafsir': 'التفسير',
 });
 Object.assign(KU, {
+  'Choose a translation or tafsir above.': 'وەرگێڕان یان تەفسیرێک لە سەرەوە هەڵبژێرە.', 'Listen from here': 'لێرەوە گوێ بگرە', 'English Tafsir': 'تەفسیری ئینگلیزی', 'Tafsir Français': 'تەفسیری فەڕەنسی', 'Translation': 'وەرگێڕان',
   'Latin Quran': 'قورئانی لاتینی', 'Quran in Latin letters + translation': 'قورئان بە پیتی لاتینی لەگەڵ وەرگێڕان',
   "For readers who don't know Arabic letters": 'بۆ ئەوانەی پیتی عەرەبی ناخوێننەوە', 'Surahs': 'سوورەتەکان', 'Listen': 'گوێگرتن',
   "The whole Quran in Latin letters, read as it is recited (Hafs) — with English, French, German and Kurdish translation under every ayah. For everyone who doesn't read Arabic letters.": 'هەموو قورئان بە پیتی لاتینی وەک خوێندنەوەکەی (حەفس) — لەگەڵ وەرگێڕانی ئینگلیزی، فەڕەنسی، ئەڵمانی و کوردی لە ژێر هەر ئایەتێک. بۆ هەموو ئەوانەی پیتی عەرەبی ناخوێننەوە.',
