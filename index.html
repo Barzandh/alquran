@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.034331";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261112.064040";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -849,7 +849,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
 function confirmBox(msg, okLabel = 'Yes') {
   return new Promise(res => {
     const m = $('#modal');
-    m.innerHTML = `<div class="box" style="max-width:420px"><p style="font-size:16px;margin:0 0 18px">${esc(msg)}</p>
+    m.innerHTML = `<div class="box" style="max-width:420px"><p style="font-size:16px;margin:0 0 18px;white-space:pre-line">${esc(msg)}</p>
       <div class="row" style="justify-content:flex-end"><button class="btn" data-r="0">Cancel</button><button class="btn pri" data-r="1">${esc(okLabel)}</button></div></div>`;
     m.classList.add('on');
     m.onclick = e => { const b = e.target.closest('[data-r]'); if (b || e.target === m) { m.classList.remove('on'); m.onclick = null; res(b ? b.dataset.r === '1' : false); } };
@@ -2255,6 +2255,8 @@ const IDB = (() => {
     get: (s, k) => req(s, 'readonly', st => st.get(k)),
     put: (s, k, v) => req(s, 'readwrite', st => st.put(v, k)),
     del: (s, k) => req(s, 'readwrite', st => st.delete(k)),
+    delMany: (s, ks) => req(s, 'readwrite', st => { ks.forEach(k => st.delete(k)); return null; }),
+    delPrefix: (s, pre) => req(s, 'readwrite', st => st.delete(IDBKeyRange.bound(pre, pre + '\uffff'))),
     all: s => req(s, 'readonly', st => st.getAll()),
     keys: s => req(s, 'readonly', st => st.getAllKeys()),
     clear: s => req(s, 'readwrite', st => st.clear()),
@@ -2735,9 +2737,9 @@ async function requestMotion() {
 function requestGeo() { return new Promise(res => { if (!navigator.geolocation) return res('unsupported'); navigator.geolocation.getCurrentPosition(p => { LOG('permission', 'Location: granted'); res({ lat: p.coords.latitude, lng: p.coords.longitude }); }, e => { LOG('permission', 'Location: ' + (e.code === 1 ? 'denied' : 'error ' + e.message)); res(e.code === 1 ? 'denied' : 'error'); }, { timeout: 15000, enableHighAccuracy: false }); }); }
 let wakeLock = null;
 async function applyWake() {
-  if (IS_APK) { const on = document.visibilityState === 'visible' && (window.AS_ON === true || (S.wake && (curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused)))); try { NATIVE.keepScreenOn(!!on); } catch (e) {} return; }
+  if (IS_APK) { const on = document.visibilityState === 'visible' && (window.AS_ON === true || DL.busy || (S.wake && (curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused)))); try { NATIVE.keepScreenOn(!!on); } catch (e) {} return; }
   if (!('wakeLock' in navigator)) return;
-  const want = document.visibilityState === 'visible' && (window.AS_ON === true || S.wake) && (window.AS_ON === true || curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused));
+  const want = document.visibilityState === 'visible' && (window.AS_ON === true || DL.busy || S.wake) && (window.AS_ON === true || DL.busy || curView === 'quran' || curView === 'azkar' || curView === 'tasbih' || (A.on && !A.el.paused));
   try { if (want && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } else if (!want && wakeLock) { await wakeLock.release(); wakeLock = null; } } catch (e) { wakeLock = null; }
 }
 const PCHIP = { granted: ['Allowed', 'ok'], auto: ['Allowed', 'ok'], active: ['Ready', 'ok'], true: ['On', 'ok'], prompt: ['Not asked', ''], default: ['Not asked', ''], unknown: ['Ask when needed', ''], denied: ['Blocked', 'bad'], false: ['Off', ''], unsupported: ['Not available', 'na'], 'install-first': ['Install first', 'warn'], installing: ['Getting ready', 'warn'], 'needs-https': ['Needs hosting', 'warn'], null: ['Not available', 'na'] };
@@ -2814,15 +2816,21 @@ async function downloadSurahs(rec, list) {
   DL.total = jobs.length; drawOfflineAudio();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   const have = new Set((await IDB.keys('audio').catch(() => [])) || []);
+  const idx0 = AIDX(); idx0[rec] = idx0[rec] || {};
+  const cnt = {}; [...new Set([1, ...list])].forEach(s => { let c = 0; for (let n = 1; n <= SURAHS[s - 1].ayahs; n++) if (have.has(rec + '|' + (gIndex(s, n) + 1))) c++; cnt[s] = c; });
+  const flush = () => { const ix = AIDX(); ix[rec] = ix[rec] || {}; Object.entries(cnt).forEach(([s, c]) => { if (c) ix[rec][s] = c; }); LS.set('audioIdx', ix); };
+  DL.list = list; DL.cur = list[0]; applyWake();
   let k = 0;
   const worker = async () => {
     while (k < jobs.length && !DL.cancel) {
       const [s, n, g] = jobs[k++], key = rec + '|' + g;
+      DL.cur = s;
       if (have.has(key)) { DL.done++; continue; }
       let ok = false;
       for (const url of dlSources(rec, s, n, g)) { try { const r = await fetch(url, { mode: 'cors' }); if (r.ok) { const b = await r.blob(); if (b.size > 500) { await IDB.put('audio', key, b); ok = true; break; } } } catch (e) {} }
-      if (!ok) DL.errors++;
+      if (!ok) DL.errors++; else cnt[s] = (cnt[s] || 0) + 1;
       DL.done++; if (DL.done % 5 === 0) drawOfflineAudio(true);
+      if (DL.done % 40 === 0) flush();
     }
   };
   await Promise.all([worker(), worker(), worker(), worker()]);
@@ -2832,30 +2840,47 @@ async function downloadSurahs(rec, list) {
   LS.set('audioIdx', idx);
   LOG('audio', `Download ${DL.cancel ? 'cancelled' : 'finished'}: ${list.length} surah(s), ${DL.errors} failed`);
   toast(DL.cancel ? 'Download stopped' : DL.errors ? `Done — ${DL.errors} ayat failed (check connection) — tap again to retry` : 'Saved for offline listening ✓');
-  DL.busy = false; drawOfflineAudio();
+  DL.busy = false; applyWake(); drawOfflineAudio();
 }
 async function deleteSurahAudio(rec, s) {
   const idx = AIDX(); if (!idx[rec]) return;
-  for (let n = 1; n <= SURAHS[s - 1].ayahs; n++) await IDB.del('audio', rec + '|' + (gIndex(s, n) + 1)).catch(() => {});
+  const ks = []; for (let n = 1; n <= SURAHS[s - 1].ayahs; n++) ks.push(rec + '|' + (gIndex(s, n) + 1));
+  await IDB.delMany('audio', ks).catch(() => {});
   delete idx[rec][s]; LS.set('audioIdx', idx);
 }
-const AUDIO_SETS = [['Al-Fatihah', [1]], ['Ya-Sin', [36]], ['Al-Kahf', [18]], ['Al-Mulk', [67]], ['Al-Waqi\'ah', [56]], ['Ar-Rahman', [55]], ['Juz \'Amma', Array.from({ length: 37 }, (_, i) => 78 + i)], ['Whole Quran', Array.from({ length: 114 }, (_, i) => i + 1)]];
+const AUDIO_SETS = [['Al-Fatihah', [1]], ['Ya-Sin', [36]], ['Al-Kahf', [18]], ['Al-Mulk', [67]], ['Al-Waqi\'ah', [56]], ['Ar-Rahman', [55]], ['Juz \'Amma', Array.from({ length: 37 }, (_, i) => 78 + i)]];
 let offRec = null;
 function drawOfflineAudio(progressOnly) {
   const box = $('#offAudio'); if (!box) return;
   offRec = offRec || S.reciter;
-  if (progressOnly && DL.busy && $('#dlBar')) { $('#dlBar').style.width = (DL.done / DL.total * 100) + '%'; $('#dlTxt').textContent = `${DL.done.toLocaleString()} / ${DL.total.toLocaleString()} ayat`; return; }
+  const dlText = () => `${DL.list && DL.list.length > 1 ? `Surah ${DL.cur} · ` : ''}${DL.done.toLocaleString()} / ${DL.total.toLocaleString()} ayat · ${Math.floor(DL.done / Math.max(1, DL.total) * 100)}%`;
+  if (progressOnly && DL.busy && $('#dlBar')) { $('#dlBar').style.width = (DL.done / DL.total * 100) + '%'; $('#dlTxt').textContent = dlText(); return; }
   const idx = AIDX()[offRec] || {}, saved = Object.keys(idx).map(Number).sort((a, b) => a - b);
   box.innerHTML = `<div class="orn">Offline recitation — Al-Minshawi</div>
     <p class="muted" style="margin:0 0 10px;font-size:13.5px">Download surahs once (needs internet), then listen anywhere. About 1 MB per minute of recitation; the whole Quran is roughly 1–1.5 GB.</p>
     <div class="row"><select id="offRec" style="width:auto">${Object.entries(RECITERS).map(([k, v]) => `<option value="${k}" ${k === offRec ? 'selected' : ''}>${v.name}</option>`).join('')}</select>
-      <select id="offSurah" style="width:auto;max-width:220px">${SURAHS.map(s => `<option value="${s.n}">${s.n}. ${esc(s.en)}</option>`).join('')}</select><button class="btn pri" id="offGo" ${DL.busy ? 'disabled' : ''}>${icon('download')} Download</button></div>
+      <select id="offSurah" style="width:auto;max-width:220px">${SURAHS.map(s => `<option value="${s.n}">${s.n}. ${esc(s.en)}</option>`).join('')}</select><button class="btn pri" id="offGo" ${DL.busy ? 'disabled' : ''}>${icon('download')} Download</button>
+      <button class="btn pri" id="offAll" ${DL.busy ? 'disabled' : ''}>${icon('download')} Download all (114)</button></div>
+    <small class="muted" style="display:block;margin-top:6px">${(() => { const full = saved.filter(n => idx[n] === SURAHS[n - 1].ayahs).length; return full === 114 ? '✓ The whole Quran is saved for this recitation' : `${full} of 114 surahs fully saved` + (full ? ' — “Download all” only fetches what is missing' : ''); })()}</small>
     <div class="chips" style="margin-top:10px">${AUDIO_SETS.map(([l, a], i) => `<button class="chip" data-set="${i}" ${DL.busy ? 'disabled' : ''}>${l}</button>`).join('')}</div>
-    ${DL.busy ? `<div style="margin-top:12px"><div class="dlbar"><i id="dlBar" style="width:${DL.total ? DL.done / DL.total * 100 : 0}%"></i></div><div class="row" style="justify-content:space-between;margin-top:6px"><small id="dlTxt" class="muted">${DL.done} / ${DL.total} ayat</small><button class="btn sm" id="offStop">Stop</button></div></div>` : ''}
-    <div style="margin-top:12px">${saved.length ? `<label class="f">Saved on this phone</label><div class="chips">${saved.map(s => `<span class="chip">${s}. ${esc(SURAHS[s - 1].en)} <small class="muted">${idx[s] === SURAHS[s - 1].ayahs ? '✓' : idx[s] + '/' + SURAHS[s - 1].ayahs}</small> <button class="x" data-del="${s}" title="Delete">✕</button></span>`).join('')}</div>` : '<small class="muted">Nothing downloaded yet.</small>'}</div>`;
+    ${DL.busy ? `<div style="margin-top:12px"><div class="dlbar"><i id="dlBar" style="width:${DL.total ? DL.done / DL.total * 100 : 0}%"></i></div><div class="row" style="justify-content:space-between;margin-top:6px"><small id="dlTxt" class="muted">${dlText()}</small><button class="btn sm" id="offStop">Stop</button></div></div>` : ''}
+    <div style="margin-top:12px">${saved.length ? `<label class="f">Saved on this phone</label><div class="chips">${saved.map(s => `<span class="chip">${s}. ${esc(SURAHS[s - 1].en)} <small class="muted">${idx[s] === SURAHS[s - 1].ayahs ? '✓' : idx[s] + '/' + SURAHS[s - 1].ayahs}</small> <button class="x" data-del="${s}" title="Delete">✕</button></span>`).join('')}</div>` : '<small class="muted">Nothing downloaded yet.</small>'}${saved.length && !DL.busy ? `<button class="btn sm" id="offDelAll" style="margin-top:10px">${icon('trash')} Delete all for this recitation</button>` : ''}</div>`;
   $('#offRec').onchange = e => { offRec = e.target.value; drawOfflineAudio(); };
   const start = list => { if (!navigator.onLine) { toast('You are offline — connect to download'); return; } downloadSurahs(offRec, list); };
   $('#offGo').onclick = () => start([+$('#offSurah').value]);
+  $('#offAll').onclick = async () => {
+    let free = '';
+    try { const e = await navigator.storage.estimate(); if (e && e.quota) free = `\n\nSpace AlQuran can use on this phone: about ${(Math.max(0, e.quota - e.usage) / 1e9).toFixed(1)} GB.`; } catch (e) {}
+    const big = offRec === 'murattal' ? 'about 1–1.5 GB' : 'well over 2 GB';
+    if (!(await confirmBox(`Download all 114 surahs of ${RECITERS[offRec].name} (${big})?\n\nUse Wi-Fi and keep AlQuran open with the screen on until it finishes — the screen stays on by itself while downloading. If it stops, tap “Download all” again: it continues where it left off.${free}`, 'Download all'))) return;
+    start(Array.from({ length: 114 }, (_, i) => i + 1));
+  };
+  const da = $('#offDelAll'); if (da) da.onclick = async () => {
+    if (!(await confirmBox(`Delete all saved recitation for ${RECITERS[offRec].name} from this phone?`, 'Delete all'))) return;
+    await IDB.delPrefix('audio', offRec + '|').catch(() => {});
+    const ix = AIDX(); delete ix[offRec]; LS.set('audioIdx', ix);
+    toast('Deleted'); drawOfflineAudio();
+  };
   box.querySelectorAll('[data-set]').forEach(b => b.onclick = async () => { const set = AUDIO_SETS[+b.dataset.set]; if (set[1].length > 10 && !(await confirmBox(`Download ${set[0]} (${set[1].length} surahs)? This uses a lot of storage and data.`, 'Download'))) return; start(set[1]); });
   const stop = $('#offStop'); if (stop) stop.onclick = () => { DL.cancel = true; };
   box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { await deleteSurahAudio(offRec, +b.dataset.del); drawOfflineAudio(); });
