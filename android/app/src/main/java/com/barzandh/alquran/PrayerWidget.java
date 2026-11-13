@@ -85,18 +85,20 @@ public class PrayerWidget extends AppWidgetProvider {
             Bundle o = m.getAppWidgetOptions(id);
             if (o != null) { w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0); h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0); }
         } catch (Exception ignored) {}
-        // scale the text with the widget width; drop the date and label rows when the widget is short
-        float f = w > 0 ? Math.max(0.8f, Math.min(1.5f, w / 300f)) : 1f;
-        if (h > 0) f = Math.min(f, Math.max(0.8f, h / 200f));
-        size(v, R.id.w_date, 11, f); size(v, R.id.w_label, 11, f); size(v, R.id.w_cityname, 28, f);
-        size(v, R.id.w_ar, 15, f); size(v, R.id.w_name, 19, f); size(v, R.id.w_time, 22, f);
-        size(v, R.id.w_clock, 34, f); size(v, R.id.w_clock2, 14, f); size(v, R.id.w_minus, 24, f); size(v, R.id.w_count, 24, f);
-        boolean tight = h > 0 && h < 170, tiny = h > 0 && h < 125;
-        v.setViewVisibility(R.id.w_date, tight ? View.GONE : View.VISIBLE);
-        v.setViewVisibility(R.id.w_lblrow, tight ? View.GONE : View.VISIBLE);
-        v.setViewVisibility(R.id.w_lanl, tight ? View.GONE : View.VISIBLE);
-        v.setViewVisibility(R.id.w_lanr, tight ? View.GONE : View.VISIBLE);
-        v.setViewVisibility(R.id.w_city, tiny ? View.GONE : View.VISIBLE);
+        // scale the text with the widget size; drop the less important lines when the widget is short
+        float f = w > 0 ? Math.max(0.75f, Math.min(1.45f, w / 300f)) : 1f;
+        if (h > 0) f = Math.min(f, Math.max(0.75f, h / 380f));
+        size(v, R.id.w_date, 15, f); size(v, R.id.w_hijri, 12, f); size(v, R.id.w_cityname, 24, f);
+        size(v, R.id.w_cur, 11, f); size(v, R.id.w_clock, 38, f); size(v, R.id.w_sec, 13, f); size(v, R.id.w_ap, 15, f);
+        size(v, R.id.w_label, 11, f); size(v, R.id.w_arl, 14, f); size(v, R.id.w_ar, 22, f); size(v, R.id.w_name, 17, f);
+        size(v, R.id.w_time, 26, f); size(v, R.id.w_minus, 12, f); size(v, R.id.w_count, 12, f);
+        boolean noRule = h > 0 && h < 330, noClock = h > 0 && h < 260, noDate = h > 0 && h < 200;
+        v.setViewVisibility(R.id.w_rule, noRule ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_b2, noClock ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_date, noDate ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_hijri, noDate ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_lanl, noDate ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_lanr, noDate ? View.GONE : View.VISIBLE);
 
         long now = System.currentTimeMillis();
         JSONObject d = null;
@@ -106,30 +108,31 @@ public class PrayerWidget extends AppWidgetProvider {
         if (d != null) {
             v.setInt(R.id.w_root, "setLayoutDirection", d.optBoolean("rtl") ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
             String tz = d.optString("tz", "");
-            if (!tz.isEmpty()) { v.setString(R.id.w_clock, "setTimeZone", tz); v.setString(R.id.w_clock2, "setTimeZone", tz); }
+            if (!tz.isEmpty()) for (int t : new int[]{R.id.w_clock, R.id.w_sec, R.id.w_ap}) v.setString(t, "setTimeZone", tz);
+            v.setTextViewText(R.id.w_cur, d.optBoolean("rtl") ? d.optString("cur", "Current time") : d.optString("cur", "Current time").toUpperCase());
+            v.setTextViewText(R.id.w_cityname, d.optString("city", ""));
+            // today's date: the day whose start (midnight in the city) is the latest one before now
+            JSONArray dates = d.optJSONArray("dates"), starts = d.optJSONArray("starts");
+            String date = "";
+            if (dates != null && starts != null) for (int k = 0; k < starts.length() && k < dates.length(); k++) if (starts.optLong(k) <= now) date = dates.optString(k);
+            int cut = date.indexOf("  •  ");
+            v.setTextViewText(R.id.w_date, cut < 0 ? date : date.substring(0, cut));
+            v.setTextViewText(R.id.w_hijri, cut < 0 ? "" : date.substring(cut + 5));
         }
         if (nx == null) {
-            v.setTextViewText(R.id.w_date, "AlQuran");
-            v.setTextViewText(R.id.w_label, "");
-            v.setTextViewText(R.id.w_cityname, d == null ? "Open AlQuran" : d.optString("refresh", "Open AlQuran"));
-            v.setViewVisibility(R.id.w_boxes, View.GONE);
-            v.setViewVisibility(R.id.w_cdrow, View.GONE);
+            v.setTextViewText(R.id.w_label, "AlQuran");
+            v.setTextViewText(R.id.w_name, d == null ? "Open AlQuran" : d.optString("refresh", "Open AlQuran"));
+            for (int t : new int[]{R.id.w_arl, R.id.w_rule, R.id.w_ar, R.id.w_time, R.id.w_cdrow}) v.setViewVisibility(t, View.GONE);
             return v;
         }
-        v.setViewVisibility(R.id.w_boxes, View.VISIBLE);
-        v.setViewVisibility(R.id.w_cdrow, View.VISIBLE);
+        for (int t : new int[]{R.id.w_ar, R.id.w_time, R.id.w_cdrow}) v.setViewVisibility(t, View.VISIBLE);
         JSONArray day = days.optJSONArray(nx[0]), it = day.optJSONArray(nx[1]);
         long at = it.optLong(1);
-        String ar = it.optString(3, ""), name = it.optString(0, "");
-        // today's date: the day whose start (midnight in the city) is the latest one before now
-        JSONArray dates = d.optJSONArray("dates"), starts = d.optJSONArray("starts");
-        String date = "";
-        if (dates != null && starts != null) for (int k = 0; k < starts.length() && k < dates.length(); k++) if (starts.optLong(k) <= now) date = dates.optString(k);
-        v.setTextViewText(R.id.w_date, date);
-        v.setViewVisibility(R.id.w_date, tight || date.isEmpty() ? View.GONE : View.VISIBLE);
-        String lbl = d.optString("label", "Next prayer");
-        v.setTextViewText(R.id.w_label, d.optBoolean("ar") ? lbl + " (" + ar + ")" : lbl.toUpperCase() + "  •  الصلاة القادمة (" + ar + ")");
-        v.setTextViewText(R.id.w_cityname, d.optString("city", ""));
+        String ar = it.optString(3, ""), name = it.optString(0, ""), lbl = d.optString("label", "Next prayer");
+        boolean isAr = d.optBoolean("ar"), rtl = d.optBoolean("rtl");
+        v.setTextViewText(R.id.w_label, rtl ? lbl : lbl.toUpperCase());
+        v.setTextViewText(R.id.w_arl, "الصلاة القادمة (" + ar + ")");
+        v.setViewVisibility(R.id.w_arl, isAr ? View.GONE : View.VISIBLE);
         v.setTextViewText(R.id.w_ar, ar);
         v.setTextViewText(R.id.w_name, name);
         v.setViewVisibility(R.id.w_name, name.isEmpty() ? View.GONE : View.VISIBLE);
