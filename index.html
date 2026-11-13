@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261113.073553";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.075617";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -109,6 +109,8 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .hero .np .big{font-family:var(--serif);font-size:52px;line-height:1;font-weight:600;color:#fff}
 .hero .np .lbl{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;opacity:.75}
 .hero .cd{font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;color:var(--gold2)}
+.hero .ptime{font-family:var(--serif);font-size:36px;line-height:1.1;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:6px}
+.hero .ptime .ampm,.hero .ptime small{font-size:.5em;opacity:.85}
 .qcard{display:flex;gap:14px;align-items:center;cursor:pointer;transition:.15s}
 .qcard:hover{transform:translateY(-2px);border-color:var(--gold2)}
 .qcard .ic{width:46px;height:46px;border-radius:13px;background:var(--g1);color:var(--g7);display:grid;place-items:center;flex:none}
@@ -1989,7 +1991,7 @@ function tickHome() {
   el.onclick = e => { if (e.target.closest('[data-gop]')) go('prayer'); };
   if (!np) { el.innerHTML = `<div><div class="lbl">Prayer times</div><button class="btn gold" style="margin-top:8px" data-gop="1">${icon('pin')} Set your location</button></div>`; return; }
   el.innerHTML = `<div><div class="lbl">Next prayer · ${esc(S.loc.name)}</div><div class="big">${np.en} <span class="rtl-hide" style="font-family:Amiri,serif;font-size:30px;color:var(--gold2)">${np.ar}</span></div></div>
-    <div><div class="lbl">at ${fmtT(np.at)}</div><div class="cd">− ${cdown(np.at - new Date())}</div></div>`;
+    <div><div class="ptime">at ${fmtT(np.at)}</div><div class="cd">− ${cdown(np.at - new Date())}</div></div>`;
 }
 function tickPrayer() {
   const c = $('#pCd'); if (!c || !S.loc) return;
