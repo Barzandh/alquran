@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261113.052837";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.053748";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -779,17 +779,18 @@ const juzOfPage = p => { let j = 1; for (let i = 0; i < 30; i++) if (p >= JUZ_PA
 
 /* Translations — built into this file (Tanzil / QuranEnc / King Fahd Complex sources, via fawazahmed0/quran-api) */
 const EDITIONS = {
+  tb: { label: 'تفسير الطبري', name: 'تفسير الطبري', short: 'Tafsir al-Tabari', dir: 'rtl', tafsir: true, options: [['ara-tabari', 'جامع البيان عن تأويل آي القرآن — للإمام ابن جرير الطبري']] },
+  sa: { label: 'تفسير السعدي', name: 'تفسير السعدي', short: "Tafsir al-Sa'di", dir: 'rtl', tafsir: true, options: [['ara-saddi', 'تيسير الكريم الرحمن — للشيخ عبد الرحمن بن ناصر السعدي']] },
+  tk: { label: 'تەفسیری کوردی', name: 'تەفسیری کوردی', short: 'Kurdish tafsir', dir: 'rtl', tafsir: true, options: [['kur-mukhtasar', 'ئەلموختەسەر لە تەفسیری قورئانی پیرۆز'], ['kur-rebar', 'تەفسیری ڕێبەر']] },
   en: { label: 'English', name: 'English', short: 'English', dir: 'ltr', options: [
     ['eng-muftitaqiusmani', 'Mufti Taqi Usmani'], ['eng-ummmuhammad', 'Saheeh International'],
     ['eng-abdullahyusufal', 'Abdullah Yusuf Ali'], ['eng-mohammedmarmadu', 'M. M. Pickthall']] },
+  te: { label: 'English Tafsir', name: 'English Tafsir', short: 'English tafsir', dir: 'ltr', tafsir: true, options: [['eng-mukhtasar', 'Al-Mukhtasar fi Tafsir al-Quran'], ['eng-ibnkathir', 'Tafsir Ibn Kathir (abridged)']] },
   fr: { label: 'Français', name: 'Français', short: 'French', dir: 'ltr', options: [['fra-muhammadhamidul', 'Muhammad Hamidullah']] },
+  tf: { label: 'Tafsir Français', name: 'Tafsir Français', short: 'French tafsir', dir: 'ltr', tafsir: true, options: [['fra-mukhtasar', 'Al-Mukhtasar — Exégèse abrégée du Coran']] },
   de: { label: 'Deutsch', name: 'Deutsch', short: 'German', dir: 'ltr', options: [['deu-asfbubenheimand', 'Bubenheim & Elyas'], ['deu-aburida', 'Abu Rida Muhammad Rassoul'], ['deu-rwwad', 'Rowad Translation Center']] },
   es: { label: 'Español', name: 'Español', short: 'Spanish', dir: 'ltr', options: [['spa-juliocortes', 'Julio Cortés'], ['spa-muhammadisagarc', 'Muhammad Isa García']] },
-  te: { label: 'English Tafsir', name: 'English Tafsir', short: 'English tafsir', dir: 'ltr', tafsir: true, options: [['eng-mukhtasar', 'Al-Mukhtasar fi Tafsir al-Quran'], ['eng-ibnkathir', 'Tafsir Ibn Kathir (abridged)']] },
-  tf: { label: 'Tafsir Français', name: 'Tafsir Français', short: 'French tafsir', dir: 'ltr', tafsir: true, options: [['fra-mukhtasar', 'Al-Mukhtasar — Exégèse abrégée du Coran']] },
-  tk: { label: 'تەفسیری کوردی', name: 'تەفسیری کوردی', short: 'Kurdish tafsir', dir: 'rtl', tafsir: true, options: [['kur-mukhtasar', 'ئەلموختەسەر لە تەفسیری قورئانی پیرۆز'], ['kur-rebar', 'تەفسیری ڕێبەر']] },
-  sa: { label: 'تفسير السعدي', name: 'تفسير السعدي', short: "Tafsir al-Sa'di", dir: 'rtl', tafsir: true, options: [['ara-saddi', 'تيسير الكريم الرحمن — للشيخ عبد الرحمن بن ناصر السعدي']] },
-  tb: { label: 'تفسير الطبري', name: 'تفسير الطبري', short: 'Tafsir al-Tabari', dir: 'rtl', tafsir: true, options: [['ara-tabari', 'جامع البيان عن تأويل آي القرآن — للإمام ابن جرير الطبري']] },
+  ts: { label: 'Tafsir Español', name: 'Tafsir Español', short: 'Spanish tafsir', dir: 'ltr', tafsir: true, options: [['spa-mukhtasar', 'Al-Mukhtasar — Explicación abreviada del Corán']] },
 };
 const EXTRA_EDITIONS = { translit: 'lat-hafs', translitOld: 'ara-quran-la', tafsir: 'ara-kingfahadquranc' };
 /* Latin reading of the Quran (for readers who don't know Arabic letters).
@@ -1039,7 +1040,7 @@ const LOGO = `<svg class="logo" viewBox="0 0 48 48"><g fill="none" stroke="#d8b5
 /* ============ SETTINGS ============ */
 const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
-  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', es: 'spa-juliocortes', sv: 'swe-knutbernstrom', no: 'nor-einarberg', nl: 'nld-sofianssiregar', pl: 'pol-jozefabielawski', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari', te: 'eng-mukhtasar', tf: 'fra-mukhtasar', tk: 'kur-mukhtasar' },
+  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', es: 'spa-juliocortes', sv: 'swe-knutbernstrom', no: 'nor-einarberg', nl: 'nld-sofianssiregar', pl: 'pol-jozefabielawski', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari', te: 'eng-mukhtasar', tf: 'fra-mukhtasar', tk: 'kur-mukhtasar', ts: 'spa-mukhtasar' },
   show: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: true, sa: false, tb: false, te: false, tf: false, tk: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: false }, latAr: true, tafsir: false,
   reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: (l => /^ar\b/.test(l) ? 'ar' : /^(ckb|ku)\b/.test(l) ? 'ku' : /^(nb|nn|no)\b/.test(l) ? 'no' : (l.match(/^(fr|de|es|sv|nl|pl)\b/) || [0, 'en'])[1])((navigator.language || '').toLowerCase()), view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
@@ -1128,7 +1129,8 @@ function loadEdition(id, g0, g1) {
 async function getMeta() { return { pages: META.pageStart.map(g => [SUR[g], AYA[g]]) }; }
 const allEditionIds = () => [...Object.values(EDITIONS).flatMap(E => E.options.map(o => o[0])), ...Object.values(EXTRA_EDITIONS)];
 const activeTr = () => {
-  const l = Object.keys(EDITIONS).filter(k => S.show[k]).map(k => ({ ed: S.tr[k], lang: k }));
+  /* Latin first, then Tafsir al-Tabari, al-Sa'di, Kurdish tafsir, English (+ tafsir), French (+ tafsir), German, Spanish (+ tafsir) */
+  const l = lqKeys().filter(k => S.show[k]).map(k => ({ ed: S.tr[k], lang: k }));
   if (S.translit) l.unshift({ ed: latEd(), lang: 'translit' });
   if (S.tafsir) l.push({ ed: EXTRA_EDITIONS.tafsir, lang: 'tafsir' });
   return l;
@@ -1303,7 +1305,7 @@ function buildQbar() {
   $('#qZp').onclick = () => readerZoom(1);
   $('#qLangs').onclick = e => {
     const pb = e.target.closest('#qPick');
-    if (pb) { pickOpen(pb, qItems(false), (k, on) => { S.show[k] = on; save(); keepPlace(); R.rendered = null; RENDER.quran(); }); return; }
+    if (pb) { pickOpen(pb, qItems(true), (k, on) => { if (k === 'translit') S.translit = on; else S.show[k] = on; save(); keepPlace(); R.rendered = null; RENDER.quran(); }); return; }
     const b = e.target.closest('[data-lang]'); if (!b) return;
     const l = b.dataset.lang;
     if (l === 'none') Object.keys(EDITIONS).forEach(k => S.show[k] = false);
@@ -1339,7 +1341,7 @@ function syncQbar() {
   $('#qTr').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h8M8 3v2m2.5 0c-1 4-3.5 7-6.5 8.5M6 9c1.3 2 3 3.4 5 4.3M13 21l4-10 4 10m-6.8-3h5.6"/></svg>Translation <b class="trst">${trOn ? 'ON' : 'OFF'}</b>`;
   const anyOn = Object.keys(EDITIONS).some(k => S.show[k]);
   document.body.classList.toggle('aronly', !activeTr().length);
-  $('#qLangs').innerHTML = pickBtn('qPick', qItems(false)) +
+  $('#qLangs').innerHTML = pickBtn('qPick', qItems(true)) +
     `<button class="lchip ${anyOn ? '' : 'on'}" data-lang="none" title="Hide all translations"><i>${anyOn ? '' : '✓'}</i>Arabic only</button>`;
   $('#qLangs').style.display = S.view === 'mushaf' || !R.range ? 'none' : '';
   $('#qTr').style.display = R.range ? '' : 'none';
@@ -2416,7 +2418,7 @@ function qItems(withLat) {
 }
 const LQ = { s: null, items: [], lat1: '' };
 const LQ_LANGS = ['en', 'fr', 'de'];
-const LQ_ORDER = ['tk', 'en', 'fr', 'de', 'ku', 'es', 'sv', 'no', 'nl', 'pl', 'te', 'tf', 'sa', 'tb'];
+const LQ_ORDER = ['tb', 'sa', 'tk', 'en', 'te', 'fr', 'tf', 'de', 'es', 'ts'];
 const lqKeys = () => [...LQ_ORDER.filter(k => EDITIONS[k]), ...Object.keys(EDITIONS).filter(k => !LQ_ORDER.includes(k))];
 const LP = { el: new Audio(), on: false, i: -1, phase: 'ayah', urls: [], ui: 0 };
 LP.el.preload = 'auto';

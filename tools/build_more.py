@@ -26,7 +26,7 @@ def tafsir_surahs(d):
         yield s, group([clean(x['text']) for x in a])
 def write(path, lines):
     with gzip.open(path, 'wb', compresslevel=9) as f: f.write('\n'.join(lines).encode('utf-8'))
-for d, out in [('en-tafsir-al-mukhtasar', 'eng-mukhtasar'), ('french-mokhtasar', 'fra-mukhtasar'), ('kurdish-mokhtasar', 'kur-mukhtasar'), ('kurd-tafsir-rebar', 'kur-rebar')]:
+for d, out in [('en-tafsir-al-mukhtasar', 'eng-mukhtasar'), ('french-mokhtasar', 'fra-mukhtasar'), ('spanish-mokhtasar', 'spa-mukhtasar'), ('kurdish-mokhtasar', 'kur-mukhtasar'), ('kurd-tafsir-rebar', 'kur-rebar')]:
     lines = [l for s, ls in tafsir_surahs(d) for l in ls]; assert len(lines) == 6236
     write(f'{OUT}/{out}.bin', lines); print(out, os.path.getsize(f'{OUT}/{out}.bin'))
 os.makedirs(f'{OUT}/ibnkathir', exist_ok=True); tot = 0
