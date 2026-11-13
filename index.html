@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261113.082819";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.102849";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,6 +110,18 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .hero .np .lbl{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;opacity:.75}
 .hero .cd{font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;color:var(--gold2)}
 .hero .np .cd{font-size:40px;line-height:1.15;font-weight:700}
+.hero .nprow{flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}
+.hero .nprow>*{flex:none}
+.hero .nprow{min-width:0;max-width:100%}
+.hero .np .nprow .ptime{font-size:var(--hf,42px)}
+.hero .np .nprow .cd{font-size:calc(var(--hf,42px) * .95)}
+.hero .eclock{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;aspect-ratio:1;padding:10px 12px;border-radius:18px;
+  background:linear-gradient(160deg,rgba(0,0,0,.38),rgba(0,0,0,.22));border:1.5px solid rgba(232,200,120,.45);box-shadow:inset 0 2px 10px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.18);
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;color:#ffd77a;text-shadow:0 0 10px rgba(255,200,90,.55);font-variant-numeric:tabular-nums}
+.hero .eclock .ec-t{font-size:var(--hf,42px);line-height:1;font-weight:700;letter-spacing:-1px;white-space:nowrap}
+.hero .eclock .ec-c{display:inline-block;width:.45em;text-align:center}
+.hero .eclock .ec-c.off{opacity:.25}
+.hero .eclock .ec-b{display:flex;gap:10px;font-size:15px;font-weight:700;letter-spacing:1px;opacity:.9}
 .hero .ptime{font-family:var(--serif);font-size:42px;line-height:1.1;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;margin-bottom:6px}
 .hero .ptime .ampm,.hero .ptime small{font-size:.5em;opacity:.85}
 .hero .ptime{white-space:nowrap}
@@ -1995,7 +2007,26 @@ function tickHome() {
   el.onclick = e => { if (e.target.closest('[data-gop]')) go('prayer'); };
   if (!np) { el.innerHTML = `<div><div class="lbl">Prayer times</div><button class="btn gold" style="margin-top:8px" data-gop="1">${icon('pin')} Set your location</button></div>`; return; }
   el.innerHTML = `<div><div class="lbl">Next prayer · ${esc(S.loc.name)}</div><div class="big">${np.en} <span class="rtl-hide" style="font-family:Amiri,serif;font-size:30px;color:var(--gold2)">${np.ar}</span></div></div>
-    <div><div class="ptime"><span class="pword">at</span> <span>${fmtT(np.at)}</span></div><div class="cd">− ${cdown(np.at - new Date())}</div></div>`;
+    <div class="nprow"><div><div class="ptime"><span class="pword">at</span> <span>${fmtT(np.at)}</span></div><div class="cd">− ${cdown(np.at - new Date())}</div></div>${clockBox()}</div>`;
+  fitHeroRow(el);
+}
+/* keep the prayer time, countdown and clock on one row: shrink all three together until they fit */
+function fitHeroRow(el) {
+  const row = el.querySelector('.nprow'); if (!row) return;
+  const need = () => [...row.children].reduce((w, c) => w + c.getBoundingClientRect().width, 0) + 12;
+  let f = 42; row.style.setProperty('--hf', f + 'px');
+  while (need() > el.clientWidth && f > 22) { f -= 2; row.style.setProperty('--hf', f + 'px'); }
+}
+/* digital 12-hour clock (local time of the chosen city) shown beside the next prayer */
+function clockBox() {
+  let h = '--', m = '--', sec = '--', ap = 'AM';
+  try {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: locTZ(), hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).formatToParts(new Date());
+    const g = t => (p.find(x => x.type === t) || {}).value || '';
+    h = g('hour').padStart(2, '0'); m = g('minute'); sec = g('second'); ap = /p/i.test(g('dayPeriod')) ? 'PM' : 'AM';
+  } catch (e) {}
+  const P = (S.lang !== 'en' && typeof LD === 'function' && LD()) || {}, apL = ap === 'AM' ? (P.am || 'AM') : (P.pm || 'PM');
+  return `<div class="eclock" data-noi18n dir="ltr" role="timer" aria-label="${h}:${m} ${ap}"><div class="ec-t">${h}<span class="ec-c${+sec % 2 ? ' off' : ''}">:</span>${m}</div><div class="ec-b"><span>${esc(apL)}</span><span>${sec}</span></div></div>`;
 }
 function tickPrayer() {
   const c = $('#pCd'); if (!c || !S.loc) return;
