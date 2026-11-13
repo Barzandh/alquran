@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261112.192903";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.041759";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -729,12 +729,12 @@ const juzOfPage = p => { let j = 1; for (let i = 0; i < 30; i++) if (p >= JUZ_PA
 
 /* Translations — built into this file (Tanzil / QuranEnc / King Fahd Complex sources, via fawazahmed0/quran-api) */
 const EDITIONS = {
+  ku: { label: 'کوردی', name: 'کوردی', short: 'Kurdish', dir: 'rtl', options: [['kur-burhanmuhammada', 'بورهان محەمەد ئەمین (تەفسیری ئاسان)'], ['kur-muhammadsalehba', 'محەمەد ساڵح بامۆکی']] },
   en: { label: 'English', name: 'English', short: 'English', dir: 'ltr', options: [
     ['eng-muftitaqiusmani', 'Mufti Taqi Usmani'], ['eng-ummmuhammad', 'Saheeh International'],
     ['eng-abdullahyusufal', 'Abdullah Yusuf Ali'], ['eng-mohammedmarmadu', 'M. M. Pickthall']] },
   fr: { label: 'Français', name: 'Français', short: 'French', dir: 'ltr', options: [['fra-muhammadhamidul', 'Muhammad Hamidullah']] },
   de: { label: 'Deutsch', name: 'Deutsch', short: 'German', dir: 'ltr', options: [['deu-asfbubenheimand', 'Bubenheim & Elyas']] },
-  ku: { label: 'کوردی', name: 'کوردی', short: 'Kurdish', dir: 'rtl', options: [['kur-burhanmuhammada', 'بورهان محەمەد ئەمین (تەفسیری ئاسان)'], ['kur-muhammadsalehba', 'محەمەد ساڵح بامۆکی']] },
   sa: { label: 'تيسير الكريم الرحمن في تفسير كلام المنان', name: 'تيسير الكريم الرحمن', short: 'Taysir al-Karim ar-Rahman', dir: 'rtl', tafsir: true, options: [['ara-saddi', 'للشيخ عبد الرحمن بن ناصر السعدي']] },
 };
 const EXTRA_EDITIONS = { translit: 'ara-quran-la', tafsir: 'ara-kingfahadquranc' };
@@ -1031,8 +1031,9 @@ async function getMeta() { return { pages: META.pageStart.map(g => [SUR[g], AYA[
 const allEditionIds = () => [...Object.values(EDITIONS).flatMap(E => E.options.map(o => o[0])), ...Object.values(EXTRA_EDITIONS)];
 const activeTr = () => {
   const l = Object.keys(EDITIONS).filter(k => S.show[k]).map(k => ({ ed: S.tr[k], lang: k }));
-  if (S.translit) l.unshift({ ed: EXTRA_EDITIONS.translit, lang: 'translit' });
+  /* under the Arabic ayah: Kurdish, English, French, German, the tafsirs, and the Latin-letter transliteration last */
   if (S.tafsir) l.push({ ed: EXTRA_EDITIONS.tafsir, lang: 'tafsir' });
+  if (S.translit) l.push({ ed: EXTRA_EDITIONS.translit, lang: 'translit' });
   return l;
 };
 /* Tafsir as-Sa'di: when the Sheikh explains several ayat together, the first ayah carries '⟦N-M⟧' + the text
