@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261113.124137";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.141447";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -99,6 +99,59 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .orn{display:flex;align-items:center;gap:12px;color:var(--gold);margin:4px 0 14px}
 .orn::before,.orn::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent)}
 
+
+/* ---------- next-prayer card (green & gold board) ---------- */
+.hero.pc{container-type:inline-size;padding:clamp(16px,4.2cqw,30px) clamp(14px,4cqw,28px) clamp(14px,3.6cqw,26px);border-radius:24px;color:#f6ecd0;text-align:center;
+  background:radial-gradient(120% 90% at 50% 40%,#0f6a35 0%,#0a4d26 45%,#063419 100%);
+  box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 0 60px rgba(0,0,0,.35)}
+.pc .pc-bg{position:absolute;inset:0;width:100%;height:100%;opacity:.09;pointer-events:none}
+.pc .pc-frame{position:absolute;inset:8px;border-radius:18px;border:2px solid #d9b25e;box-shadow:0 0 0 4px rgba(0,0,0,.22),0 0 0 5px rgba(232,200,115,.45),inset 0 0 0 4px rgba(0,0,0,.18),inset 0 0 0 5px rgba(232,200,115,.35);pointer-events:none}
+.pc .pc-lan{position:absolute;top:-2px;width:clamp(30px,8.5cqw,58px);height:auto;filter:drop-shadow(0 0 10px rgba(255,200,90,.55));pointer-events:none;z-index:1}
+.pc .pc-lan.l{left:clamp(6px,2.4cqw,20px)}.pc .pc-lan.r{right:clamp(6px,2.4cqw,20px)}
+.pc .pc-corner{position:absolute;bottom:0;width:clamp(60px,17cqw,120px);opacity:.35;pointer-events:none}
+.pc .pc-corner.bl{left:0}.pc .pc-corner.br{right:0;transform:scaleX(-1)}
+.pc .pc-corner svg{display:block;width:100%;height:auto;-webkit-mask:linear-gradient(45deg,#000 35%,transparent 65%);mask:linear-gradient(45deg,#000 35%,transparent 65%)}
+.pc>*:not(.pc-bg):not(.pc-frame):not(.pc-lan):not(.pc-corner){position:relative;z-index:2}
+.pc .pc-gold{background:linear-gradient(180deg,#fff4bf 0%,#f3cf6c 45%,#c8952e 75%,#f0cf78 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
+.pc .pc-date{display:flex;justify-content:center;margin:clamp(4px,2cqw,14px) clamp(32px,10cqw,70px) 0}
+.pc .pc-date>span{display:inline-block;padding:clamp(6px,1.6cqw,11px) clamp(12px,3.4cqw,24px);border-radius:999px;background:linear-gradient(180deg,#0b3a1f,#06281a);
+  border:2px solid #d9b25e;box-shadow:inset 0 0 0 3px rgba(0,0,0,.35),inset 0 0 0 4px rgba(232,200,115,.4),0 4px 12px rgba(0,0,0,.3);
+  font-family:var(--serif);font-weight:600;font-size:clamp(11px,3cqw,21px);line-height:1.35;color:#f6ecd0}
+.pc .pc-date bdi{white-space:nowrap}
+.pc .pc-dot{font-style:normal;color:#e8c873}
+.pc .pc-date em{font-style:normal;color:#e8c873;margin:0 .25em}
+.pc .pc-lbl{display:flex;align-items:center;gap:10px;margin:clamp(10px,3cqw,22px) 0 clamp(8px,2.2cqw,16px);font-family:var(--serif);font-size:clamp(11px,3cqw,21px);letter-spacing:.12em;text-transform:uppercase;color:#f6ecd0;font-weight:600}
+.pc .pc-lbl>i{flex:1;height:1.5px;background:linear-gradient(90deg,transparent,#e8c873 60%,#e8c873)}
+.pc .pc-lbl>i:last-child{background:linear-gradient(270deg,transparent,#e8c873 60%,#e8c873)}
+.pc .pc-lbl .pc-arl{font-family:Amiri,serif;text-transform:none;letter-spacing:0;color:#e8c873;font-size:1.12em}
+.pc .pc-city{cursor:pointer;margin:0 auto;padding:2px;background:linear-gradient(90deg,#9b7228,#f3d47f 25%,#c9a04a 50%,#f3d47f 75%,#9b7228);
+  clip-path:polygon(0 50%,5% 0,95% 0,100% 50%,95% 100%,5% 100%)}
+.pc .pc-cityin{display:flex;align-items:center;justify-content:center;gap:clamp(6px,2cqw,16px);padding:clamp(6px,2cqw,14px) clamp(18px,5cqw,40px);
+  background:radial-gradient(100% 140% at 50% 50%,#0d5a2d,#063419);clip-path:polygon(0 50%,5% 0,95% 0,100% 50%,95% 100%,5% 100%)}
+.pc .pc-cityin b{font-family:var(--serif);font-weight:700;font-size:clamp(28px,11cqw,78px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pc .pc-pin svg{width:clamp(22px,7cqw,50px);height:auto;color:#f0c95e;fill:#f0c95e;stroke:#7a5518;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.pc .pc-pin svg circle{fill:#063419;stroke:none}
+.pc .pc-star{width:clamp(30px,9cqw,64px);height:auto;color:#e8c873;flex:none}
+.pc .pc-row{display:grid;grid-template-columns:1.12fr 1fr;gap:clamp(8px,2.4cqw,18px);margin-top:clamp(10px,3cqw,22px)}
+.pc .pc-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border-radius:clamp(14px,3.2cqw,22px);padding:clamp(8px,2.2cqw,16px) clamp(6px,2cqw,14px);
+  background:linear-gradient(180deg,#0b4523,#05301a);border:2px solid #d9b25e;box-shadow:inset 0 0 0 3px rgba(0,0,0,.3),inset 0 0 0 4px rgba(232,200,115,.35),0 6px 16px rgba(0,0,0,.3)}
+.pc .pc-ar{font-family:Amiri,serif;font-size:clamp(16px,5cqw,34px);line-height:1.2;color:#e8c873;font-weight:700}
+.pc .pc-en{font-family:var(--serif);font-size:clamp(18px,6.4cqw,46px);line-height:1.1;font-weight:700;color:#fff}
+.pc .pc-pr hr{width:88%;border:0;height:1.5px;background:linear-gradient(90deg,transparent,#e8c873,transparent);margin:clamp(6px,1.6cqw,12px) 0}
+.pc .pc-time{font-family:var(--serif);font-size:clamp(22px,7.6cqw,56px);line-height:1;font-weight:700;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pc .pc-time small{font-size:.62em}
+.hero.pc .pc-clk .eclock{all:unset;display:flex;flex-direction:column;align-items:center;gap:clamp(4px,1.4cqw,10px);width:100%}
+.pc .sdig{width:92%;max-width:240px;height:auto;overflow:visible}
+.pc .sdig .on{fill:#ffd36e;filter:drop-shadow(0 0 3px rgba(255,190,70,.85))}
+.pc .sdig .off{fill:rgba(255,211,110,.07)}
+.hero.pc .pc-clk .ec-b{display:flex;gap:1.1em;font-family:system-ui,-apple-system,Roboto,sans-serif;font-weight:700;font-size:clamp(13px,4.4cqw,32px);color:#ffd36e;letter-spacing:.04em;text-shadow:0 0 8px rgba(255,190,70,.6);font-variant-numeric:tabular-nums}
+.pc .pc-cd{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.6cqw,20px);width:max-content;max-width:100%;margin:clamp(10px,3cqw,22px) auto 0;padding:clamp(4px,1.4cqw,10px) clamp(18px,6cqw,46px);
+  border-radius:999px;background:linear-gradient(180deg,#0b3a1f,#06281a);border:2px solid #d9b25e;box-shadow:inset 0 0 0 3px rgba(0,0,0,.35),inset 0 0 0 4px rgba(232,200,115,.4),0 4px 12px rgba(0,0,0,.3)}
+.pc .pc-cd .pc-gold{font-family:var(--serif);font-weight:700;font-size:clamp(24px,8.6cqw,62px);line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pc .pc-glass{width:clamp(18px,5.4cqw,40px);height:auto;color:#f0c95e;flex:none}
+.pc .pc-off:not(:empty){margin-top:14px}
+.pc .btn.gold{position:relative}
+@media (min-width:700px){.hero.pc{max-width:680px;margin-inline:auto}}
 /* ---------- home ---------- */
 .hero{position:relative;overflow:hidden;border-radius:22px;padding:28px 30px;color:#f3ead0;
   background:linear-gradient(130deg,var(--g9) 0%,var(--g7) 70%,#2a7a59 100%);box-shadow:var(--shadow)}
@@ -1343,12 +1396,10 @@ RENDER.home = async () => {
   let khTxt = 'Plan a complete reading of the Quran';
   if (K) { const d = khDayIndex(K); const [a, b] = khRange(K, Math.min(d, K.days - 1)); khTxt = d >= K.days ? 'Plan finished — review days' : `Day ${d + 1}/${K.days} · pages ${a}–${b}`; }
   el.innerHTML = `
-  <div class="hero">
-    <svg class="pat" viewBox="0 0 100 100"><g fill="none" stroke="#d8b56a" stroke-width=".6">${Array.from({ length: 6 }, (_, i) => `<rect x="${20 + i * 3}" y="${20 + i * 3}" width="${60 - i * 6}" height="${60 - i * 6}" transform="rotate(${i % 2 ? 45 : 0} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="46"/></g></svg>
-    <div class="hij">${esc(hijri(new Date(), 'ar'))}</div>
-    <div class="greg">${locFix(new Date().toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))}${uiRTL() ? '' : ' · ' + esc(hijri(new Date(), 'en'))}</div>
-    <div class="np" id="homeNext"></div>
-    <div id="offBadge" style="margin-top:14px"></div>
+  <div class="hero pc">${pcDecor()}
+    <div class="pc-date"><span>${pcDate()}</span></div>
+    <div class="pc-next" id="homeNext"></div>
+    <div id="offBadge" class="pc-off"></div>
   </div>
   <form class="card homesr" id="homeSr"><span class="ic">${icon('search')}</span><input type="search" id="homeSrQ" dir="auto" placeholder="Search a word in the whole Quran… ابحث في القرآن"><button class="btn pri sm">Search</button></form>
   <div class="grid g3" style="margin-top:16px">
@@ -2118,11 +2169,54 @@ function tickHome() {
   const el = $('#homeNext'); if (!el) return;
   const np = nextPrayer();
   el.onclick = e => { if (e.target.closest('[data-gop]')) go('prayer'); };
-  if (!np) { el.innerHTML = `<div><div class="lbl">Prayer times</div><button class="btn gold" style="margin-top:8px" data-gop="1">${icon('pin')} Set your location</button></div>`; return; }
-  el.innerHTML = `<div><div class="lbl">Next prayer · ${esc(S.loc.name)}</div><div class="big">${np.en} <span class="rtl-hide" style="font-family:Amiri,serif;font-size:30px;color:var(--gold2)">${np.ar}</span></div></div>
-    <div class="nprow"><div><div class="ptime"><span class="pword">at</span> <span>${fmtT(np.at)}</span></div><div class="cd">− ${cdown(np.at - new Date())}</div></div>${clockBox()}</div>`;
-  fitHeroRow(el);
+  if (!np) { el.innerHTML = `<div class="pc-lbl"><i></i><span>Prayer times</span><i></i></div><div style="text-align:center;margin:10px 0 6px"><button class="btn gold" data-gop="1">${icon('pin')} Set your location</button></div>`; return; }
+  const ft = fmtT(np.at), fm = ft.match(/^([\d٠-٩۰-۹:.]+)\s*(.*)$/);
+  const tHTML = fm ? `${esc(fm[1])}${fm[2] ? ` <small>${esc(fm[2])}</small>` : ''}` : esc(ft);
+  const sub = S.lang === 'ar' ? '' : pName(np.k);
+  el.innerHTML = `<div class="pc-lbl"><i></i><span><span>Next prayer</span>${S.lang === 'ar' ? ` (${np.ar})` : ` <em class="pc-dot">•</em> <bdi class="pc-arl">الصلاة القادمة (${np.ar})</bdi>`}</span><i></i></div>
+    <div class="pc-city" data-gop="1"><div class="pc-cityin">${pcStar()}<span class="pc-pin">${icon('pin')}</span><b class="pc-gold" data-noi18n>${esc(S.loc.name)}</b>${pcStar()}</div></div>
+    <div class="pc-row">
+      <div class="pc-box pc-pr"><div class="pc-ar">${np.ar}</div>${sub ? `<div class="pc-en" data-noi18n>${esc(sub)}</div>` : ''}<hr><div class="pc-time" data-noi18n dir="ltr">${tHTML}</div></div>
+      <div class="pc-box pc-clk">${clockBox()}</div>
+    </div>
+    <div class="pc-cd" dir="ltr">${pcGlass()}<span class="pc-gold">− ${cdown(np.at - new Date())}</span></div>`;
 }
+/* ---- next-prayer card ornaments (gold on green, like a mosque display board) ---- */
+function pcDate() {
+  const now = new Date();
+  const g = locFix(now.toLocaleDateString(UI_LOC() || 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+  return `${esc(g)} <em>•</em> <bdi>${esc(hijri(now))}</bdi>`;
+}
+const pcStar = () => `<svg class="pc-star" viewBox="0 0 60 24" aria-hidden="true"><path d="M2 12h16M42 12h16" stroke="currentColor" stroke-width="1.2"/><g transform="translate(30 12)" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M0-10L3-3 10 0 3 3 0 10-3 3-10 0-3-3z"/><path d="M-6-6L0-2 6-6 2 0 6 6 0 2-6 6-2 0z" opacity=".8"/><circle r="2" fill="currentColor"/></g></svg>`;
+const pcGlass = () => `<svg class="pc-glass" viewBox="0 0 24 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 2h18M3 30h18M6 2c0 8 12 8 12 14S6 22 6 30M18 2c0 8-12 8-12 14s12 6 12 14"/><path d="M9 26c1-2 5-2 6 0z" fill="currentColor" stroke="none"/></svg>`;
+function pcLantern(cls) {
+  return `<svg class="pc-lan ${cls}" viewBox="0 0 60 130" aria-hidden="true"><defs><linearGradient id="pcg${cls}" x1="0" x2="1"><stop offset="0" stop-color="#8a6420"/><stop offset=".5" stop-color="#f6d77e"/><stop offset="1" stop-color="#8a6420"/></linearGradient>
+    <radialGradient id="pcl${cls}"><stop offset="0" stop-color="#fff6c8"/><stop offset=".55" stop-color="#ffd36a"/><stop offset="1" stop-color="#e09a2a" stop-opacity=".4"/></radialGradient></defs>
+    <path d="M30 0v18" stroke="#c9a14a" stroke-width="1.5"/><circle cx="30" cy="20" r="3" fill="none" stroke="url(#pcg${cls})" stroke-width="2"/>
+    <path d="M16 36L30 23 44 36z" fill="url(#pcg${cls})"/><rect x="13" y="36" width="34" height="5" rx="2" fill="url(#pcg${cls})"/>
+    <path d="M16 41h28l-3 46H19z" fill="url(#pcl${cls})" stroke="url(#pcg${cls})" stroke-width="2.5"/>
+    <path d="M30 41v46M23 41l-2 46M37 41l2 46" stroke="#b8862b" stroke-width="1.2" opacity=".7"/>
+    <rect x="14" y="87" width="32" height="6" rx="2" fill="url(#pcg${cls})"/><path d="M20 93h20l-6 10h-8z" fill="url(#pcg${cls})"/><circle cx="30" cy="108" r="3" fill="url(#pcg${cls})"/></svg>`;
+}
+function pcDecor() {
+  const lat = `<svg class="pc-lat" viewBox="0 0 120 120" aria-hidden="true"><g fill="none" stroke="#d8b56a" stroke-width="1.1">${[0, 40, 80].map(x => [0, 40, 80].map(y => `<g transform="translate(${x + 20} ${y + 20})"><rect x="-12" y="-12" width="24" height="24"/><rect x="-12" y="-12" width="24" height="24" transform="rotate(45)"/><circle r="5"/></g>`).join('')).join('')}</g></svg>`;
+  return `<svg class="pc-bg" aria-hidden="true"><defs><pattern id="pcStarPat" width="56" height="56" patternUnits="userSpaceOnUse"><g fill="none" stroke="#e8c873" stroke-width=".7"><rect x="14" y="14" width="28" height="28"/><rect x="14" y="14" width="28" height="28" transform="rotate(45 28 28)"/><path d="M0 28h14M42 28h14M28 0v14M28 42v14"/></g></pattern></defs><rect width="100%" height="100%" fill="url(#pcStarPat)"/></svg>
+    <span class="pc-frame"></span>${pcLantern('l')}${pcLantern('r')}<span class="pc-corner bl">${lat}</span><span class="pc-corner br">${lat}</span>`;
+}
+/* seven-segment digits for the clock */
+const SEG = { a: '5,6 9,2 31,2 35,6 31,10 9,10', b: '35,8 39,12 39,29 35,33 31,29 31,12', c: '35,37 39,41 39,58 35,62 31,58 31,41', d: '5,64 9,60 31,60 35,64 31,68 9,68',
+  e: '5,37 9,41 9,58 5,62 1,58 1,41', f: '5,8 9,12 9,29 5,33 1,29 1,12', g: '5,35 9,31 31,31 35,35 31,39 9,39' };
+const SEG_ON = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc', 'abc', 'abcdefg', 'abcdfg'];
+function segDigits(txt, blink) {
+  let x = 0, out = '';
+  for (const ch of txt) {
+    if (ch === ':') { out += `<g class="${blink ? 'off' : 'on'}"><circle cx="${x + 7}" cy="22" r="4"/><circle cx="${x + 7}" cy="48" r="4"/></g>`; x += 16; continue; }
+    const on = SEG_ON[+ch] || '';
+    out += `<g transform="translate(${x} 0) skewX(-5)">${Object.entries(SEG).map(([k, p]) => `<polygon class="${on.includes(k) ? 'on' : 'off'}" points="${p}"/>`).join('')}</g>`; x += 46;
+  }
+  return `<svg class="sdig" viewBox="-4 0 ${x + 4} 70" role="img" aria-label="${txt}">${out}</svg>`;
+}
+
 /* keep the prayer time, countdown and clock on one row: shrink all three together until they fit */
 function fitHeroRow(el) {
   const row = el.querySelector('.nprow'); if (!row) return;
@@ -2139,7 +2233,7 @@ function clockBox() {
     h = g('hour').padStart(2, '0'); m = g('minute'); sec = g('second'); ap = /p/i.test(g('dayPeriod')) ? 'PM' : 'AM';
   } catch (e) {}
   const P = (S.lang !== 'en' && typeof LD === 'function' && LD()) || {}, apL = ap === 'AM' ? (P.am || 'AM') : (P.pm || 'PM');
-  return `<div class="eclock" data-noi18n dir="ltr" role="timer" aria-label="${h}:${m} ${ap}"><div class="ec-t">${h}<span class="ec-c${+sec % 2 ? ' off' : ''}">:</span>${m}</div><div class="ec-b"><span>${esc(apL)}</span><span>${sec}</span></div></div>`;
+  return `<div class="eclock" data-noi18n dir="ltr" role="timer" aria-label="${h}:${m} ${ap}">${segDigits(h + ':' + m, +sec % 2)}<div class="ec-b"><span>${esc(apL)}</span><span>${sec}</span></div></div>`;
 }
 function tickPrayer() {
   const c = $('#pCd'); if (!c || !S.loc) return;
@@ -4561,12 +4655,16 @@ function apkWidget() {
   if (!IS_APK || typeof NATIVE.widget !== 'function') return;
   let data = { refresh: L('Open AlQuran'), days: [] };
   if (S.loc && !(S.loc.fid && S.ptOfficial !== false && !OPT.data)) {
-    const days = [];
+    const days = [], dates = [], starts = [];
     for (const [y, m, d] of remDayList(new Date(), 14, true)) {
       let T; try { T = dayTimes(y, m, d); } catch (e) { continue; }
-      days.push(['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map(k => [pName(k), T[k] ? T[k].getTime() : 0, T[k] ? fmtT(T[k]) : '—']));
+      const AR = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+      const noon = new Date(Date.UTC(y, m - 1, d, 9));
+      days.push(['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map(k => [S.lang === 'ar' ? '' : pName(k), T[k] ? T[k].getTime() : 0, T[k] ? fmtT(T[k]) : '—', AR[k]]));
+      dates.push(locFix(noon.toLocaleDateString(UI_LOC() || 'en-GB', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })) + '  •  ' + hijri(noon));
+      starts.push(Date.UTC(y, m - 1, d) - tzOffsetMin(locTZ(), noon) * 6e4);
     }
-    data = { label: L('Next prayer'), city: L(S.loc.name), rtl: uiRTL(), refresh: L('Open AlQuran'), days };
+    data = { label: L('Next prayer'), city: L(S.loc.name), rtl: uiRTL(), ar: S.lang === 'ar', tz: locTZ(), refresh: L('Open AlQuran'), days, dates, starts };
   }
   const key = JSON.stringify(data); if (key === apkWidgetKey) return; apkWidgetKey = key;
   try { NATIVE.widget(key); } catch (e) {}

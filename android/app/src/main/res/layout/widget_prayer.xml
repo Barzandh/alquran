@@ -1,43 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/w_root"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_vertical"
-    android:background="@drawable/widget_bg"
-    android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="10dp" android:paddingBottom="10dp">
-  <TextView android:id="@+id/w_label" android:layout_width="match_parent" android:layout_height="wrap_content"
-      android:textColor="#FFE8C873" android:textSize="13sp" android:singleLine="true" android:ellipsize="end" android:text="Next prayer" />
-  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-    <TextView android:id="@+id/w_name" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:textColor="#FFFFFFFF" android:textSize="24sp" android:textStyle="bold" android:singleLine="true" android:text="AlQuran" />
-    <TextView android:id="@+id/w_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
-        android:textColor="#FFFFFFFF" android:textSize="24sp" android:singleLine="true" android:text="" />
-    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="" />
-    <Chronometer android:id="@+id/w_count" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:textColor="#FFE8C873" android:textSize="18sp" android:singleLine="true" />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/widget_bg">
+  <ImageView android:id="@+id/w_lanl" android:layout_width="24dp" android:layout_height="52dp" android:layout_gravity="top|start" android:layout_marginStart="14dp" android:src="@drawable/widget_lantern" android:scaleType="fitXY" />
+  <ImageView android:id="@+id/w_lanr" android:layout_width="24dp" android:layout_height="52dp" android:layout_gravity="top|end" android:layout_marginEnd="14dp" android:src="@drawable/widget_lantern" android:scaleType="fitXY" />
+  <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center"
+      android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="12dp" android:paddingBottom="12dp">
+    <TextView android:id="@+id/w_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="30dp" android:layout_marginEnd="30dp"
+        android:background="@drawable/widget_pill" android:paddingStart="14dp" android:paddingEnd="14dp" android:paddingTop="5dp" android:paddingBottom="5dp"
+        android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFF6ECD0" android:textSize="11sp" android:gravity="center" android:maxLines="2" android:text="" />
+    <LinearLayout android:id="@+id/w_lblrow" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp">
+      <FrameLayout android:layout_width="0dp" android:layout_height="1.5dp" android:layout_weight="1" android:background="@drawable/widget_line" />
+      <TextView android:id="@+id/w_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+          android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFF6ECD0" android:textSize="11sp" android:letterSpacing="0.08" android:singleLine="true" android:ellipsize="end" android:text="NEXT PRAYER" />
+      <FrameLayout android:layout_width="0dp" android:layout_height="1.5dp" android:layout_weight="1" android:background="@drawable/widget_line" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/w_city" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:orientation="horizontal" android:gravity="center"
+        android:background="@drawable/widget_banner" android:paddingStart="20dp" android:paddingEnd="20dp" android:paddingTop="2dp" android:paddingBottom="2dp">
+      <ImageView android:layout_width="30dp" android:layout_height="12dp" android:src="@drawable/widget_star" />
+      <ImageView android:layout_width="22dp" android:layout_height="22dp" android:layout_marginStart="6dp" android:src="@drawable/widget_pin" />
+      <TextView android:id="@+id/w_cityname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:layout_marginEnd="6dp"
+          android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFF0CC6A" android:textSize="28sp" android:singleLine="true" android:ellipsize="end" android:shadowColor="#AA000000" android:shadowDx="0" android:shadowDy="1.5" android:shadowRadius="3" android:text="AlQuran" />
+      <ImageView android:layout_width="30dp" android:layout_height="12dp" android:src="@drawable/widget_star" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/w_boxes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:orientation="horizontal">
+      <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.12" android:orientation="vertical" android:gravity="center"
+          android:background="@drawable/widget_box" android:paddingTop="6dp" android:paddingBottom="7dp" android:paddingStart="6dp" android:paddingEnd="6dp">
+        <TextView android:id="@+id/w_ar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFE8C873" android:textSize="15sp" android:textStyle="bold" android:singleLine="true" android:text="" />
+        <TextView android:id="@+id/w_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFFFFFFF" android:textSize="19sp" android:singleLine="true" android:shadowColor="#AA000000" android:shadowDx="0" android:shadowDy="1.5" android:shadowRadius="3" android:text="" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="1.5dp" android:layout_marginTop="4dp" android:layout_marginBottom="3dp" android:layout_marginStart="8dp" android:layout_marginEnd="8dp" android:background="@drawable/widget_line" />
+        <TextView android:id="@+id/w_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFFFFFFF" android:textSize="22sp" android:singleLine="true" android:shadowColor="#AA000000" android:shadowDx="0" android:shadowDy="1.5" android:shadowRadius="3" android:text="" />
+      </LinearLayout>
+      <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical" android:gravity="center"
+          android:background="@drawable/widget_box" android:paddingTop="6dp" android:paddingBottom="7dp">
+        <TextClock android:id="@+id/w_clock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:format12Hour="hh:mm" android:format24Hour="hh:mm"
+            android:fontFamily="monospace" android:textStyle="bold" android:textColor="#FFFFD36E" android:textSize="34sp" android:singleLine="true" android:shadowColor="#CCFFB840" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="8" />
+        <TextClock android:id="@+id/w_clock2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:format12Hour="a   ss" android:format24Hour="a   ss"
+            android:fontFamily="sans-serif" android:textStyle="bold" android:textColor="#FFFFD36E" android:textSize="14sp" android:singleLine="true" android:shadowColor="#CCFFB840" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="8" />
+      </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/w_cdrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/widget_pill" android:paddingStart="22dp" android:paddingEnd="22dp" android:paddingTop="2dp" android:paddingBottom="2dp" android:layoutDirection="ltr">
+      <ImageView android:layout_width="16dp" android:layout_height="22dp" android:src="@drawable/widget_glass" />
+      <TextView android:id="@+id/w_minus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFF0CC6A" android:textSize="24sp" android:text="−" />
+      <Chronometer android:id="@+id/w_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp"
+          android:fontFamily="serif" android:textStyle="bold" android:textColor="#FFF0CC6A" android:textSize="24sp" android:singleLine="true" android:shadowColor="#AA000000" android:shadowDx="0" android:shadowDy="1.5" android:shadowRadius="3" />
+    </LinearLayout>
   </LinearLayout>
-  <LinearLayout android:id="@+id/w_row" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-      <TextView android:id="@+id/w_n1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFBFD8CB" android:textSize="12sp" android:singleLine="true" android:text="—" />
-      <TextView android:id="@+id/w_t1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold" android:singleLine="true" android:text="" />
-    </LinearLayout>
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-      <TextView android:id="@+id/w_n2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFBFD8CB" android:textSize="12sp" android:singleLine="true" android:text="—" />
-      <TextView android:id="@+id/w_t2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold" android:singleLine="true" android:text="" />
-    </LinearLayout>
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-      <TextView android:id="@+id/w_n3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFBFD8CB" android:textSize="12sp" android:singleLine="true" android:text="—" />
-      <TextView android:id="@+id/w_t3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold" android:singleLine="true" android:text="" />
-    </LinearLayout>
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-      <TextView android:id="@+id/w_n4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFBFD8CB" android:textSize="12sp" android:singleLine="true" android:text="—" />
-      <TextView android:id="@+id/w_t4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold" android:singleLine="true" android:text="" />
-    </LinearLayout>
-    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:gravity="center_horizontal">
-      <TextView android:id="@+id/w_n5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFBFD8CB" android:textSize="12sp" android:singleLine="true" android:text="—" />
-      <TextView android:id="@+id/w_t5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold" android:singleLine="true" android:text="" />
-    </LinearLayout>
-  </LinearLayout>
-</LinearLayout>
+</FrameLayout>

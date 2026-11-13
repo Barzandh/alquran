@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -17,15 +18,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * Home-screen widget: the next prayer, a live countdown and the day's five prayer times.
+ * Home-screen widget, styled like a mosque display board: date, city, the next prayer and its time,
+ * a live clock and a countdown.
  * The web app sends two weeks of prayer times (already worked out and formatted in the user's
  * language) through the bridge; the widget refreshes itself at every prayer time.
  */
 public class PrayerWidget extends AppWidgetProvider {
     static final String ACTION_TICK = "com.barzandh.alquran.WIDGET_TICK";
-    static final int[] NAMES = {R.id.w_n1, R.id.w_n2, R.id.w_n3, R.id.w_n4, R.id.w_n5};
-    static final int[] TIMES = {R.id.w_t1, R.id.w_t2, R.id.w_t3, R.id.w_t4, R.id.w_t5};
-    static final int GOLD = 0xFFE8C873, WHITE = 0xFFFFFFFF, SOFT = 0xFFBFD8CB;
 
     static void save(Context c, String json) {
         Scheduler.prefs(c).edit().putString("widget", json == null ? "" : json).apply();
@@ -74,47 +73,69 @@ public class PrayerWidget extends AppWidgetProvider {
         return null;
     }
 
+    static void size(RemoteViews v, int id, float sp, float f) { v.setTextViewTextSize(id, TypedValue.COMPLEX_UNIT_SP, sp * f); }
+
     static RemoteViews build(Context c, AppWidgetManager m, int id) {
         RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget_prayer);
         Intent open = new Intent(c, MainActivity.class).putExtra("link", "prayer")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         v.setOnClickPendingIntent(R.id.w_root, PendingIntent.getActivity(c, 7701, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        int w = 0, h = 0;
         try {
             Bundle o = m.getAppWidgetOptions(id);
-            int h = o == null ? 0 : o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0);
-            v.setViewVisibility(R.id.w_row, h > 0 && h < 100 ? View.GONE : View.VISIBLE);
+            if (o != null) { w = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0); h = o.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0); }
         } catch (Exception ignored) {}
+        // scale the text with the widget width; drop the date and label rows when the widget is short
+        float f = w > 0 ? Math.max(0.8f, Math.min(1.5f, w / 300f)) : 1f;
+        if (h > 0) f = Math.min(f, Math.max(0.8f, h / 200f));
+        size(v, R.id.w_date, 11, f); size(v, R.id.w_label, 11, f); size(v, R.id.w_cityname, 28, f);
+        size(v, R.id.w_ar, 15, f); size(v, R.id.w_name, 19, f); size(v, R.id.w_time, 22, f);
+        size(v, R.id.w_clock, 34, f); size(v, R.id.w_clock2, 14, f); size(v, R.id.w_minus, 24, f); size(v, R.id.w_count, 24, f);
+        boolean tight = h > 0 && h < 170, tiny = h > 0 && h < 125;
+        v.setViewVisibility(R.id.w_date, tight ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_lblrow, tight ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_lanl, tight ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_lanr, tight ? View.GONE : View.VISIBLE);
+        v.setViewVisibility(R.id.w_city, tiny ? View.GONE : View.VISIBLE);
+
         long now = System.currentTimeMillis();
         JSONObject d = null;
         try { String s = Scheduler.prefs(c).getString("widget", ""); if (!s.isEmpty()) d = new JSONObject(s); } catch (Exception ignored) {}
         JSONArray days = d == null ? null : d.optJSONArray("days");
         int[] nx = days == null ? null : next(days, now);
-        if (d != null) v.setInt(R.id.w_root, "setLayoutDirection", d.optBoolean("rtl") ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+        if (d != null) {
+            v.setInt(R.id.w_root, "setLayoutDirection", d.optBoolean("rtl") ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+            String tz = d.optString("tz", "");
+            if (!tz.isEmpty()) { v.setString(R.id.w_clock, "setTimeZone", tz); v.setString(R.id.w_clock2, "setTimeZone", tz); }
+        }
         if (nx == null) {
-            v.setTextViewText(R.id.w_label, "AlQuran");
-            v.setTextViewText(R.id.w_name, d == null ? "Open AlQuran" : d.optString("refresh", "Open AlQuran"));
-            v.setTextViewText(R.id.w_time, "");
-            v.setViewVisibility(R.id.w_count, View.GONE);
-            v.setViewVisibility(R.id.w_row, View.GONE);
+            v.setTextViewText(R.id.w_date, "AlQuran");
+            v.setTextViewText(R.id.w_label, "");
+            v.setTextViewText(R.id.w_cityname, d == null ? "Open AlQuran" : d.optString("refresh", "Open AlQuran"));
+            v.setViewVisibility(R.id.w_boxes, View.GONE);
+            v.setViewVisibility(R.id.w_cdrow, View.GONE);
             return v;
         }
+        v.setViewVisibility(R.id.w_boxes, View.VISIBLE);
+        v.setViewVisibility(R.id.w_cdrow, View.VISIBLE);
         JSONArray day = days.optJSONArray(nx[0]), it = day.optJSONArray(nx[1]);
         long at = it.optLong(1);
-        String city = d.optString("city", "");
-        v.setTextViewText(R.id.w_label, d.optString("label", "Next prayer") + (city.isEmpty() ? "" : " · " + city));
-        v.setTextViewText(R.id.w_name, it.optString(0));
+        String ar = it.optString(3, ""), name = it.optString(0, "");
+        // today's date: the day whose start (midnight in the city) is the latest one before now
+        JSONArray dates = d.optJSONArray("dates"), starts = d.optJSONArray("starts");
+        String date = "";
+        if (dates != null && starts != null) for (int k = 0; k < starts.length() && k < dates.length(); k++) if (starts.optLong(k) <= now) date = dates.optString(k);
+        v.setTextViewText(R.id.w_date, date);
+        v.setViewVisibility(R.id.w_date, tight || date.isEmpty() ? View.GONE : View.VISIBLE);
+        String lbl = d.optString("label", "Next prayer");
+        v.setTextViewText(R.id.w_label, d.optBoolean("ar") ? lbl + " (" + ar + ")" : lbl.toUpperCase() + "  •  الصلاة القادمة (" + ar + ")");
+        v.setTextViewText(R.id.w_cityname, d.optString("city", ""));
+        v.setTextViewText(R.id.w_ar, ar);
+        v.setTextViewText(R.id.w_name, name);
+        v.setViewVisibility(R.id.w_name, name.isEmpty() ? View.GONE : View.VISIBLE);
         v.setTextViewText(R.id.w_time, it.optString(2));
-        v.setViewVisibility(R.id.w_count, View.VISIBLE);
         v.setChronometer(R.id.w_count, SystemClock.elapsedRealtime() + (at - now), null, true);
         v.setChronometerCountDown(R.id.w_count, true);
-        for (int k = 0; k < NAMES.length; k++) {
-            JSONArray p = k < day.length() ? day.optJSONArray(k) : null;
-            v.setTextViewText(NAMES[k], p == null ? "" : p.optString(0));
-            v.setTextViewText(TIMES[k], p == null ? "" : p.optString(2));
-            boolean on = k == nx[1];
-            v.setTextColor(NAMES[k], on ? GOLD : SOFT);
-            v.setTextColor(TIMES[k], on ? GOLD : WHITE);
-        }
         return v;
     }
 
