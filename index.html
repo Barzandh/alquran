@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261113.070311";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261113.073553";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -804,6 +804,7 @@ const EDITIONS = {
   tb: { label: 'تفسير الطبري', name: 'تفسير الطبري', short: 'Tafsir al-Tabari', dir: 'rtl', tafsir: true, options: [['ara-tabari', 'جامع البيان عن تأويل آي القرآن — للإمام ابن جرير الطبري']] },
   sa: { label: 'تفسير السعدي', name: 'تفسير السعدي', short: "Tafsir al-Sa'di", dir: 'rtl', tafsir: true, options: [['ara-saddi', 'تيسير الكريم الرحمن — للشيخ عبد الرحمن بن ناصر السعدي']] },
   tk: { label: 'تەفسیری کوردی', name: 'تەفسیری کوردی', short: 'Kurdish tafsir', dir: 'rtl', tafsir: true, options: [['kur-mukhtasar', 'ئەلموختەسەر لە تەفسیری قورئانی پیرۆز'], ['kur-rebar', 'تەفسیری ڕێبەر']] },
+  kd: { label: 'تەفسیرا بادینی', name: 'تەفسیرا بادینی', short: 'Kurdish tafsir (Badini)', dir: 'rtl', tafsir: true, options: [['kmr-ismail', 'وەرگێڕان و ڕاڤەکرنا د. ئیسماعیل سەگێری — QuranEnc v1.0.0']] },
   en: { label: 'English', name: 'English', short: 'English', dir: 'ltr', options: [
     ['eng-muftitaqiusmani', 'Mufti Taqi Usmani'], ['eng-ummmuhammad', 'Saheeh International'],
     ['eng-abdullahyusufal', 'Abdullah Yusuf Ali'], ['eng-mohammedmarmadu', 'M. M. Pickthall']] },
@@ -1066,8 +1067,8 @@ const LOGO = `<svg class="logo" viewBox="0 0 48 48"><g fill="none" stroke="#d8b5
 /* ============ SETTINGS ============ */
 const DEF = {
   theme: 'light', font: 'UthmanicHafs', qsize: 34, tsize: 17,
-  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', es: 'spa-juliocortes', sv: 'swe-knutbernstrom', no: 'nor-einarberg', nl: 'nld-sofianssiregar', pl: 'pol-jozefabielawski', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari', te: 'eng-mukhtasar', tf: 'fra-mukhtasar', tk: 'kur-mukhtasar', ts: 'spa-mukhtasar' },
-  show: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: true, sa: false, tb: false, te: false, tf: false, tk: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: false }, latAr: true, tafsir: false,
+  tr: { en: 'eng-muftitaqiusmani', fr: 'fra-muhammadhamidul', de: 'deu-asfbubenheimand', es: 'spa-juliocortes', sv: 'swe-knutbernstrom', no: 'nor-einarberg', nl: 'nld-sofianssiregar', pl: 'pol-jozefabielawski', ku: 'kur-burhanmuhammada', sa: 'ara-saddi', tb: 'ara-tabari', te: 'eng-mukhtasar', tf: 'fra-mukhtasar', tk: 'kur-mukhtasar', kd: 'kmr-ismail', ts: 'spa-mukhtasar' },
+  show: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: true, sa: false, tb: false, te: false, tf: false, tk: false, kd: false }, tafSize: 21, sheetH: 62, translit: false, latStyle: 'easy', lsize: 20, latShow: { en: true, fr: false, de: false, es: false, sv: false, no: false, nl: false, pl: false, ku: false }, latAr: true, tafsir: false,
   reciter: 'murattal', bismAudio: true, autoscroll: true, scrollMin: 24, lang: (l => /^ar\b/.test(l) ? 'ar' : /^(ckb|ku)\b/.test(l) ? 'ku' : /^(nb|nn|no)\b/.test(l) ? 'no' : (l.match(/^(fr|de|es|sv|nl|pl)\b/) || [0, 'en'])[1])((navigator.language || '').toLowerCase()), view: 'mushaf', repeat: 1, continuous: true,
   loc: null, ptOfficial: true, method: 'MWL', asr: 'Standard', highLat: 'AngleBased', h24: false,
   adj: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
@@ -2484,7 +2485,7 @@ function qItems(withLat) {
 }
 const LQ = { s: null, items: [], lat1: '' };
 const LQ_LANGS = ['en', 'fr', 'de'];
-const LQ_ORDER = ['tb', 'sa', 'tk', 'en', 'te', 'fr', 'tf', 'de', 'es', 'ts'];
+const LQ_ORDER = ['tb', 'sa', 'tk', 'kd', 'en', 'te', 'fr', 'tf', 'de', 'es', 'ts'];
 const lqKeys = () => [...LQ_ORDER.filter(k => EDITIONS[k]), ...Object.keys(EDITIONS).filter(k => !LQ_ORDER.includes(k))];
 const LP = { el: new Audio(), on: false, i: -1, phase: 'ayah', urls: [], ui: 0 };
 LP.el.preload = 'auto';
