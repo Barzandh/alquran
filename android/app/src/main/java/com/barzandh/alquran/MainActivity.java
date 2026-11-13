@@ -271,6 +271,10 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface public int schedule(String json) { return Scheduler.save(MainActivity.this, json); }
         @JavascriptInterface public boolean wasNotified(String key) { return Scheduler.wasNotified(MainActivity.this, key); }
+        @JavascriptInterface public void widget(String json) { PrayerWidget.save(MainActivity.this, json); }
+        @JavascriptInterface public void testAdhan(String mode, String title, String stop) {
+            AlarmReceiver.post(MainActivity.this, "adhan-test", title, "", "prayer", "prayer", mode, stop);
+        }
 
         @JavascriptInterface public String exactAlarms() {
             if (Build.VERSION.SDK_INT >= 31) {

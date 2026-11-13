@@ -35,6 +35,8 @@ public class Scheduler {
             i.putExtra("body", o.optString("body"));
             i.putExtra("link", o.optString("link"));
             i.putExtra("kind", o.optString("kind"));
+            i.putExtra("adhan", o.optString("adhan"));
+            i.putExtra("stop", o.optString("stop"));
         }
         return PendingIntent.getBroadcast(c, 1000 + n, i, flag | PendingIntent.FLAG_IMMUTABLE);
     }
