@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261114.062901";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261114.063901";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,6 +153,18 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .pc .btn.gold{position:relative}
 @media (min-width:700px){.hero.pc{max-width:680px;margin-inline:auto}}
 /* ---------- prayer board layer (full screen) ---------- */
+/* the same board as the Home card */
+.pb.pb-in{position:relative;inset:auto;display:block;container-type:inline-size;--u:1cqw;padding:6.5% 0 9%;border-radius:22px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.pb.pb-in .pb-stack{margin:0 auto}
+.pb.pb-in .pb-frame{inset:calc(1.3 * var(--u))}
+.pb.pb-in .pb-cor.tl,.pb.pb-in .pb-cor.tr{top:calc(1.3 * var(--u))}
+.pb.pb-in .pb-cor.bl,.pb.pb-in .pb-cor.br,.pb.pb-in .pb-mos{bottom:calc(1.3 * var(--u))}
+.pb.pb-in .pb-lan{top:calc(-5.2 * var(--u));height:calc(34 * var(--u));width:calc(8.6 * var(--u))}
+.pb.pb-in .pb-lan.l{left:calc(-10.4 * var(--u))}.pb.pb-in .pb-lan.r{right:calc(-10.4 * var(--u))}
+.pb.pb-in .pb-cor{width:calc(9.5 * var(--u))}
+.pb-off:not(:empty){margin:12px auto 0;text-align:center}
+.pb-off .offb{background:var(--paper);border:1px solid var(--line);color:var(--ink2)}.pb-off .offb.ok{color:#1f8a52}.pb-off .offb.bad{color:#c0392b}.pb-off .offb.saving{color:#a07b2c}
+@media (min-width:700px){.pb.pb-in{max-width:680px;margin-inline:auto}}
 #v-board.view{position:fixed;inset:0;z-index:300;margin:0;padding:0;max-width:none;background:#06361a}
 .pb{position:absolute;inset:0;overflow:hidden;container-type:size;color:#fff;text-align:center;
   background:radial-gradient(130% 90% at 50% 38%,#11703a 0%,#0b5a2c 40%,#08451f 72%,#05301a 100%);
@@ -172,7 +184,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
   background:rgba(4,40,20,.55);color:#e2bc66;display:grid;place-items:center;cursor:pointer;opacity:.75}
 .pb .pb-x svg{width:20px;height:20px}
 .pb .pb-stack{position:relative;z-index:2;width:calc(78 * var(--u));max-width:84cqw}
-.pb #pbBoxes{display:grid;grid-template-rows:1fr 1fr auto;gap:calc(2.6 * var(--u))}
+.pb .pbx{display:grid;grid-template-rows:1fr 1fr auto;gap:calc(2.6 * var(--u))}
 .pb .pb-lan{position:absolute;top:calc(50% - 50cqh + 1.3 * var(--u));height:calc(50cqh - 50% - 1.3 * var(--u) + 20 * var(--u));width:calc(9.6 * var(--u));display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:3}
 .pb .pb-lan.l{left:calc(-11.4 * var(--u))}.pb .pb-lan.r{right:calc(-11.4 * var(--u))}
 .pb .pb-chain{flex:1;width:max(1.5px,calc(.3 * var(--u)));background:repeating-linear-gradient(180deg,#e2bc66 0 calc(.9 * var(--u)),#8a6420 calc(.9 * var(--u)) calc(1.2 * var(--u)))}
@@ -1448,11 +1460,10 @@ RENDER.home = async () => {
   let khTxt = 'Plan a complete reading of the Quran';
   if (K) { const d = khDayIndex(K); const [a, b] = khRange(K, Math.min(d, K.days - 1)); khTxt = d >= K.days ? 'Plan finished — review days' : `Day ${d + 1}/${K.days} · pages ${a}–${b}`; }
   el.innerHTML = `
-  <div class="hero pc">${pcDecor()}
-    <div class="pc-date"><span>${pcDate()}</span></div>
-    <div class="pc-next" id="homeNext"></div>
-    <div id="offBadge" class="pc-off"></div>
+  <div class="pb pb-in" id="homePb">${pbDecor()}
+    <div class="pb-stack">${pbLantern('l')}${pbLantern('r')}<div class="pbx" id="homeNext"></div></div>
   </div>
+  <div id="offBadge" class="pb-off"></div>
   <form class="card homesr" id="homeSr"><span class="ic">${icon('search')}</span><input type="search" id="homeSrQ" dir="auto" placeholder="Search a word in the whole Quran… ابحث في القرآن"><button class="btn pri sm">Search</button></form>
   <div class="grid g3" style="margin-top:16px">
     <div class="card qcard" data-go="continue"><div class="ic">${icon('quran')}</div><div><b>${last ? 'Continue reading' : 'Open the Quran'}</b><span>${last ? `${esc(SURAHS[last.s - 1].en)} · ayah ${last.n}` : `114 surahs · ${Object.keys(EDITIONS).filter(k => !EDITIONS[k].tafsir).length} translations`}</span></div></div>
@@ -2219,19 +2230,8 @@ function nextPrayer() {
 const cdown = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return [Math.floor(s / 3600), Math.floor(s % 3600 / 60), s % 60].map(x => String(x).padStart(2, '0')).join(':'); };
 function tickHome() {
   const el = $('#homeNext'); if (!el) return;
-  const np = nextPrayer();
   el.onclick = e => { if (e.target.closest('[data-gop]')) go('prayer'); };
-  if (!np) { el.innerHTML = `<div class="pc-lbl"><i></i><span>Prayer times</span><i></i></div><div style="text-align:center;margin:10px 0 6px"><button class="btn gold" data-gop="1">${icon('pin')} Set your location</button></div>`; return; }
-  const ft = fmtT(np.at), fm = ft.match(/^([\d٠-٩۰-۹:.]+)\s*(.*)$/);
-  const tHTML = fm ? `${esc(fm[1])}${fm[2] ? ` <small>${esc(fm[2])}</small>` : ''}` : esc(ft);
-  const sub = S.lang === 'ar' ? '' : pName(np.k);
-  el.innerHTML = `<div class="pc-lbl"><i></i><span><span>Next prayer</span>${S.lang === 'ar' ? ` (${np.ar})` : ` <em class="pc-dot">•</em> <bdi class="pc-arl">الصلاة القادمة (${np.ar})</bdi>`}</span><i></i></div>
-    <div class="pc-city" data-gop="1"><div class="pc-cityin">${pcStar()}<span class="pc-pin">${icon('pin')}</span><b class="pc-gold" data-noi18n dir="ltr">${esc(locEn())}</b>${pcStar()}</div></div>
-    <div class="pc-row">
-      <div class="pc-box pc-pr"><div class="pc-ar">${np.ar}</div>${sub ? `<div class="pc-en" data-noi18n>${esc(sub)}</div>` : ''}<hr><div class="pc-time" data-noi18n dir="ltr">${tHTML}</div></div>
-      <div class="pc-box pc-clk">${clockBox()}</div>
-    </div>
-    <div class="pc-cd" dir="ltr">${pcGlass()}<span class="pc-gold">− ${cdown(np.at - new Date())}</span></div>`;
+  el.innerHTML = pbHTML();
 }
 /* ---------- PRAYER BOARD: a full-screen layer (date & city, current time, next prayer) ---------- */
 const pbCity = () => S.loc ? String(S.loc.name || '').split(' — ')[0].replace(/\s*\(nearest\)$/, '') : '';
@@ -2277,13 +2277,13 @@ RENDER.board = () => {
   const v = $('#v-board');
   v.innerHTML = `<div class="pb" id="pbRoot">${pbDecor()}
     <button class="pb-x" id="pbClose" aria-label="Close">${icon('x')}</button>
-    <div class="pb-stack">${pbLantern('l')}${pbLantern('r')}<div id="pbBoxes"></div></div></div>`;
+    <div class="pb-stack">${pbLantern('l')}${pbLantern('r')}<div class="pbx" id="pbBoxes"></div></div></div>`;
   $('#pbClose').onclick = () => { if (history.length > 1) history.back(); else go('home'); };
   $('#pbBoxes').onclick = e => { if (e.target.closest('[data-gop]')) go('prayer'); };
   tickBoard(); applyWake();
 };
-function tickBoard() {
-  const el = $('#pbBoxes'); if (!el) return;
+function tickBoard() { const el = $('#pbBoxes'); if (el) el.innerHTML = pbHTML(); }
+function pbHTML() {
   const now = new Date(), np = nextPrayer();
   let g = '';
   try { g = locFix(now.toLocaleDateString(UI_LOC() || 'en-GB', { timeZone: locTZ(), weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })); } catch (e) { g = now.toDateString(); }
@@ -2298,7 +2298,7 @@ function tickBoard() {
       <div class="pb-ar pb-gold">${np.ar}</div>${sub ? `<div class="pb-en" data-noi18n>${esc(sub)}</div>` : ''}
       <div class="pb-time" data-noi18n dir="${uiRTL() ? 'rtl' : 'ltr'}">${esc(ft)}</div></div>`;
   }
-  el.innerHTML = h;
+  return h;
 }
 /* ---- next-prayer card ornaments (gold on green, like a mosque display board) ---- */
 /* the location's English name only (official tables store "Erbil — هەولێر") */
