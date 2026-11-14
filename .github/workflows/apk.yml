@@ -3,7 +3,7 @@ name: Android APK
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'data/**', 'android/**', '.github/workflows/apk.yml']
+    paths: ['index.html', 'data/**', 'fonts/**', 'android/**', '.github/workflows/apk.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
         run: |
           W=android/app/src/main/assets/www
           rm -rf "$W"; mkdir -p "$W"
-          cp -r index.html data icons manifest.webmanifest "$W/"
+          cp -r index.html data fonts icons manifest.webmanifest "$W/"
           echo "WEB_BUILD=$(grep -o "BUILD = '[0-9.]*'" sw.js | grep -o '[0-9.]*')" >> "$GITHUB_ENV"
       - name: Check the app compiles
         run: gradle -p android assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
