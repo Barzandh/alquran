@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261114.074222";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261114.084329";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -174,7 +174,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold2);box-shadow:0 0
 .rb .rb-ar.rb-arx{margin-top:0}
 .rb [data-k=name].rb-arx{margin-top:.06em}
 .rb [data-k=time].rb-arx{margin-top:-.1em}
-.rb .rb-hm{font-size:186px;font-family:RBSerif,serif;transform:scaleX(1.12);transform-origin:0 0;font-variant-numeric:tabular-nums}
+.rb .rb-hm{font-size:170px;font-family:RBSerif,serif;transform:scaleX(1.12);transform-origin:0 0;font-variant-numeric:tabular-nums}
 .rb .rb-big{font-family:RBSerif,serif;transform:scaleX(1.04)}
 .rb .rb-city{position:absolute;left:160px;width:968px;height:124px;display:flex;align-items:center;justify-content:center;gap:24px}
 .rb .rb-city>i{flex:1;height:4px;background:linear-gradient(180deg,#ffe58a,#d9a52a);box-shadow:0 1px 3px rgba(0,0,0,.5);max-width:232px}
@@ -2235,16 +2235,16 @@ function rbHTML(extraCls) {
     <div class="rb-t rb-g" data-k="hijri" data-fs="60" data-max="960" style="top:176px"></div>
     <div class="rb-city" style="top:256px"><i></i>${RB_PIN(p)}<b class="rb-gg" data-k="city" data-fs="124" data-max="560" data-sx="1.08"></b><i></i></div>
     <div class="rb-t rb-w rb-cap" data-k="cur" data-fs="47" data-max="900" style="top:446px;letter-spacing:.2em"></div>
-    <div class="rb-t rb-w rb-hm" data-k="hm" style="top:486px;left:340px;right:auto"></div>
-    <div class="rb-t rb-w" data-k="sec" style="top:505px;left:848px;right:auto;font-size:64px;font-family:RBSerif,serif"></div>
-    <div class="rb-t rb-w" data-k="ap" style="top:570px;left:922px;right:auto;font-size:74px;font-family:RBSerif,serif"></div>
-    <div class="rb-t rb-w rb-cap" data-k="np" data-fs="39" data-max="700" style="top:700px;letter-spacing:.24em"></div>
-    <div class="rb-t rb-g rb-ar" data-k="arl" dir="rtl" data-fs="56" data-max="700" style="top:744px"></div>
-    <div class="rb-rule" style="left:300px;width:282px;top:829px"></div><div class="rb-rule" style="left:705px;width:282px;top:829px"></div>
-    <div style="position:absolute;left:613px;top:803px">${RB_ROS}</div>
-    <div class="rb-t rb-gg rb-ar" data-k="arn" dir="rtl" data-fs="116" data-max="700" style="top:836px"></div>
-    <div class="rb-t rb-w" data-k="name" data-fs="74" data-ars=".78" data-max="700" style="top:920px"></div>
-    <div class="rb-t rb-w rb-big" data-k="time" data-fs="136" data-ars=".8" data-max="600" data-sx="1.04" style="top:976px"></div>
+    <div class="rb-t rb-w rb-hm" data-k="hm" style="top:475px;left:340px;right:auto"></div>
+    <div class="rb-t rb-w" data-k="sec" style="top:494px;left:848px;right:auto;font-size:58px;font-family:RBSerif,serif"></div>
+    <div class="rb-t rb-w" data-k="ap" style="top:556px;left:922px;right:auto;font-size:68px;font-family:RBSerif,serif"></div>
+    <div class="rb-t rb-w rb-cap" data-k="np" data-fs="39" data-max="700" style="top:705px;letter-spacing:.24em"></div>
+    <div class="rb-t rb-g rb-ar" data-k="arl" dir="rtl" data-fs="56" data-max="700" style="top:749px"></div>
+    <div class="rb-rule" style="left:300px;width:282px;top:833px"></div><div class="rb-rule" style="left:705px;width:282px;top:833px"></div>
+    <div style="position:absolute;left:613px;top:807px">${RB_ROS}</div>
+    <div class="rb-t rb-gg rb-ar" data-k="arn" dir="rtl" data-fs="96" data-max="640" style="top:840px"></div>
+    <div class="rb-t rb-w" data-k="name" data-fs="58" data-ars=".8" data-max="640" style="top:940px"></div>
+    <div class="rb-t rb-w rb-big" data-k="time" data-fs="96" data-ars=".82" data-max="540" data-sx="1.04" style="top:998px"></div>
   </div></div>`;
 }
 /* width of an element's text in design pixels (the board is scaled with a transform) */
@@ -2285,8 +2285,8 @@ function rbFill(fit) {
   const capT = t => S.lang === 'ar' ? t.toUpperCase() : rtl ? tr(t) : tr(t).toUpperCase();
   rbSet(root, 'cur', capT('Current time'));
   rbSet(root, 'hm', h + ':' + m); rbSet(root, 'sec', sec);
-  { const he = root.querySelector('[data-k="hm"]'), x = 340 + rbTextW(he) * 1.12 + 22;
-    root.querySelector('[data-k="sec"]').style.left = x + 'px'; root.querySelector('[data-k="ap"]').style.left = (x + 74) + 'px'; } rbSet(root, 'ap', ap === 'AM' ? (P.am || 'AM') : (P.pm || 'PM'));
+  { const he = root.querySelector('[data-k="hm"]'), x = 340 + rbTextW(he) * 1.12 + 20;
+    root.querySelector('[data-k="sec"]').style.left = x + 'px'; root.querySelector('[data-k="ap"]').style.left = (x + 68) + 'px'; } rbSet(root, 'ap', ap === 'AM' ? (P.am || 'AM') : (P.pm || 'PM'));
   rbSet(root, 'np', capT('Next prayer'));
   if (!np) { rbSet(root, 'arl', '', true); rbSet(root, 'arn', '—'); rbSet(root, 'name', tr('Prayer times')); rbSet(root, 'time', '--:--'); return; }
   rbSet(root, 'arl', `الصلاة القادمة (${np.ar})`);
