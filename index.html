@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261114.180403";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261114.182511";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1281,8 +1281,34 @@ const S = (() => {
   return o;
 })();
 const save = () => LS.set('settings', S);
+/* the whole app takes a light version of the chosen window theme's colour */
+function appPalette(id) {
+  const k = String(id || 'green').replace(/^[cd]-/, '');
+  const P = {
+    midnight: { g9: '#0d1f45', g8: '#13306a', g7: '#1d4285', g6: '#2a56a3', g1: '#d1daea', bg: '#c1cce0', paper: '#f4f7fa', paper2: '#d9e1ed', line: '#b6c5dd' },
+    burgundy: { g9: '#3e0918', g8: '#5a0f24', g7: '#7a1733', g6: '#962445', g1: '#e7d0d7', bg: '#ddbfc8', paper: '#faf4f6', paper2: '#ebd9de', line: '#dab4bf' },
+    sand: { g9: '#5a3a12', g8: '#714a18', g7: '#8a5a1c', g6: '#a56d24', g1: '#ebdfd0', bg: '#e2d3c0', paper: '#faf8f4', paper2: '#eee4d9', line: '#dfccb5', gold: '#a8701c' },
+    turquoise: { g9: '#06464c', g8: '#0a5960', g7: '#0e737c', g6: '#139099', g1: '#cde6e8', bg: '#bbdbde', paper: '#f3f9fa', paper2: '#d6eaec', line: '#afd7da' },
+    black: { g9: '#111111', g8: '#1c1c1c', g7: '#2a2a2a', g6: '#3a3a3a', g1: '#d4d4d4', bg: '#c5c5c5', paper: '#f5f5f5', paper2: '#dcdcdc', line: '#bbbbbb' },
+    dusk: { g9: '#2a1450', g8: '#3b1a5e', g7: '#55276f', g6: '#6a2a72', g1: '#ded2e1', bg: '#d1c2d7', paper: '#f8f4f8', paper2: '#e4dae6', line: '#cbb7d0', gold: '#b5776a', gold2: '#e2a98f', goldbg: '#f8e6de' },
+    olive: { g9: '#2f3c15', g8: '#3e4f1c', g7: '#556b2f', g6: '#6b8338', g1: '#dee3d4', bg: '#d1d9c5', paper: '#f8f9f5', paper2: '#e4e8dc', line: '#ccd3bb', gold: '#a08a3c' },
+    sky: { g9: '#0f3a5c', g8: '#155682', g7: '#1f7fc4', g6: '#3a95d6', g1: '#d3e7f5', bg: '#c3def1', paper: '#f5fafd', paper2: '#dbebf7', line: '#bad9f0', gold: '#c68d14' },
+    copper: { g9: '#1f2226', g8: '#2b2f33', g7: '#8c4a20', g6: '#a85d2c', g1: '#ebdcd2', bg: '#e2cec1', paper: '#fbf7f4', paper2: '#efe2da', line: '#e0c7b7', gold: '#c87941', gold2: '#e0955a', goldbg: '#f8e8db' } };
+  return P[k] || null;
+}
+function applyAppColours() {
+  const r = document.documentElement.style, pal = appPalette(S.rbTheme);
+  const ACC = ['g9', 'g8', 'g7', 'g6', 'gold', 'gold2'], LIGHT = ['g1', 'bg', 'paper', 'paper2', 'line', 'goldbg'];
+  [...ACC, ...LIGHT].forEach(k => r.removeProperty('--' + k));
+  if (pal) {
+    ACC.forEach(k => pal[k] && r.setProperty('--' + k, pal[k]));
+    if (S.theme === 'light') LIGHT.forEach(k => pal[k] && r.setProperty('--' + k, pal[k]));   /* sepia and dark keep their own background */
+  }
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', (pal && pal.g9) || '#0b3527');
+}
 function applyLook() {
   document.documentElement.dataset.theme = S.theme;
+  applyAppColours();
   const r = document.documentElement.style;
   r.setProperty('--qfont', `'${S.font}','Amiri Quran','Scheherazade New',serif`);
   r.setProperty('--qsize', S.qsize + 'px');
@@ -2431,7 +2457,7 @@ function rbPicker() {
     <div class="muted" style="font-size:13px;margin-top:8px">Classic frame</div><div class="thgrid">${RB_THEMES.filter(t => t[2] === 'c').map(card).join('')}</div>
     <div class="muted" style="font-size:13px">New designs</div><div class="thgrid">${RB_THEMES.filter(t => t[2] === 'd').map(card).join('')}</div>
     <button class="btn" data-close style="width:100%">Close</button>`,
-    box => box.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => { S.rbTheme = b.dataset.pick; save(); closeModal(); rbRefresh(); }));
+    box => box.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => { S.rbTheme = b.dataset.pick; save(); closeModal(); applyAppColours(); rbRefresh(); }));
 }
 function rbRefresh() {
   const h = $('#homePb'); if (h) { h.innerHTML = rbWindow(); tickHome(); }
