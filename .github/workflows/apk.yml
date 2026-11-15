@@ -1,9 +1,8 @@
 # Builds AlQuran.apk on GitHub's servers and publishes it under Releases.
 name: Android APK
+# Built only on request (Actions → Android APK → Run workflow, or `gh workflow run apk.yml`),
+# for major releases — ordinary web updates reach phones as small patches without a new APK.
 on:
-  push:
-    branches: [main]
-    paths: ['index.html', 'data/**', 'fonts/**', 'android/**', '.github/workflows/apk.yml']
   workflow_dispatch:
 permissions:
   contents: write
