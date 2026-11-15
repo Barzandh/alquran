@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261115.071403";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261115.072245";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4979,6 +4979,7 @@ function moreOrdered() {
 RENDER.more = () => {
   const tiles = moreOrdered();
   $('#v-more').innerHTML = `<h1 class="vt">More <span class="arui">المزيد</span></h1><p class="sub">AlQuran ${APP_VERSION}</p>
+    <!--TEST-UPDATE--><div data-noi18n style="background:#fff3c4;color:#6b5200;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:14px">🧪 Update test arrived ✓ · build ${esc(BUILD_ID)}</div><!--/TEST-UPDATE-->
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px"><b>Language · اللغة</b>${langSwitch()}</div>
     <div class="more-bar">${moreEdit ? `<button class="btn ghost sm" id="moreReset">Reset order</button><span class="muted more-hint">Drag ≡ to move</span>` : '<span></span>'}<button class="btn sm ${moreEdit ? 'pri' : 'ghost'}" id="moreEditBtn">${moreEdit ? 'Done' : 'Edit'}</button></div>
     <div class="grid g2 more-grid${moreEdit ? ' editing' : ''}" id="moreGrid">${tiles.map(([k, t, d]) => `<a class="card qcard" data-k="${k}" href="#${k}" style="text-decoration:none;color:inherit"><div class="ic">${icon((VIEWS.find(v => v[0] === k) || [])[3])}</div><div class="qt"><b>${t}</b><span>${d}</span></div>${moreEdit ? `<span class="mh" role="button" aria-label="Move">${MH_SVG}</span>` : ''}</a>`).join('')}</div>`;
