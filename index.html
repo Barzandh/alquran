@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261115.121227";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261115.123529";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1491,6 +1491,7 @@ function route(arg) {
   const v = typeof arg === 'string' ? arg : ((location.hash || '#home').slice(1) || 'home');
   curView = VIEWS.some(x => x[0] === v) ? v : 'home';
   $$('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + curView));
+  if (curView === 'qibla') { try { autoCompass(); } catch (e) {} }
   if (curView !== 'quran' && curView !== 'latin' && typeof closeSheet === 'function') closeSheet();
   if (curView === 'quran' && SH.mode === 'latin' && typeof closeSheet === 'function') closeSheet();
   if (curView === 'latin' && SH.mode === 'q' && typeof closeSheet === 'function') closeSheet();
@@ -2909,7 +2910,7 @@ function onOrient(e) {
   const so = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
   CMP.heading = (h + so + 360) % 360; CMP.last = Date.now();
   if (!CMP.on) CMP.on = true;
-  const qs = $('#qStart'); if (qs && !qs.hidden) { qs.hidden = true; const t0 = $('#qTurn'); if (t0 && /enable|tap/i.test(t0.dataset.hint || 'enable')) t0.textContent = ''; }
+  const qs = $('#qStart'); if (qs && qs.style.display !== 'none') qs.style.display = 'none';
   const dial = $('#dial'); if (!dial || !S.loc) return;
   dial.style.transform = `rotate(${-CMP.heading}deg)`;
   const b = qiblaBearing(S.loc.lat, S.loc.lng), diff = ((b - CMP.heading + 540) % 360) - 180;
@@ -2917,33 +2918,35 @@ function onOrient(e) {
   if (w) { if (al && !w.classList.contains('aligned')) vibrate(60); w.classList.toggle('aligned', al); }
   const t = $('#qTurn'); if (t) t.innerHTML = al ? '<b style="color:#2fb36f">✓ You are facing the Qibla</b>' : `Turn <b>${Math.abs(diff).toFixed(0)}°</b> ${diff > 0 ? 'right ↻' : 'left ↺'}`;
 }
-/* Start the compass without the button where possible:
-   Android/desktop start straight away; on iPhone the listener goes on at once (readings arrive if access still holds),
-   and once access was given before, the first tap anywhere on the page turns it back on. */
-function autoCompass(el) {
-  const ask = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
-  if (!ask) { startCompass(); return; }
-  if (!CMP.passive) { CMP.passive = true; window.addEventListener('deviceorientation', onOrient, true); }
-  if (CMP.on) return;
-  if (LS.get('motionOK', false)) {
-    const t = $('#qTurn'); if (t) { t.textContent = 'Tap anywhere to turn on the live compass.'; t.dataset.hint = 'tap'; }
-    const go = e => { if (e.target.closest('#qStart')) return; el.removeEventListener('click', go, true); if (!CMP.on) startCompass(); };
-    el.addEventListener('click', go, true);
-  }
-}
-function startCompass() {
-  const attach = () => {
-    if (CMP.on) return; CMP.on = true;
+/* The live compass is always on: it starts by itself whenever the Qibla page opens, with no button.
+   Android / desktop need no permission. iPhone only answers the motion question during a tap, so there the tap
+   that opens the Qibla page starts it; if the app opened straight on the Qibla page, the first touch on it does. */
+const compassAsks = () => typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function';
+function compassAttach() {
+  if (!CMP.listening) {
+    CMP.listening = true;
     if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', onOrient, true);
     else window.addEventListener('deviceorientation', onOrient, true);
-    setTimeout(() => { if (!CMP.last) { const t = $('#qTurn'); if (t) t.textContent = 'No compass sensor detected on this device — use the bearing in degrees with a physical compass, or open this page on your phone.'; } }, 3000);
-  };
-  try {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function')
-      DeviceOrientationEvent.requestPermission().then(s => { LS.set('motionOK', s === 'granted'); if (s === 'granted') attach(); else toast('Compass permission denied'); }).catch(() => toast('Compass not available here'));
-    else attach();
-  } catch (e) { toast('Compass not available here'); }
+  }
+  if (CMP.on) return; CMP.on = true;
+  const q = $('#qStart'); if (q) q.style.display = 'none';
+  const t0 = $('#qTurn'); if (t0 && !CMP.last) t0.textContent = '';
+  setTimeout(() => { if (!CMP.last) { const t = $('#qTurn'); if (t) t.textContent = 'No compass sensor detected on this device — use the bearing in degrees with a physical compass, or open this page on your phone.'; } }, 3000);
 }
+/* quiet: started by the app, not by the button — say nothing if iPhone wants a tap first */
+function startCompass(quiet) {
+  if (CMP.on || CMP.asking) return;
+  if (!compassAsks()) { try { compassAttach(); } catch (e) { if (quiet !== true) toast('Compass not available here'); } return; }
+  CMP.asking = true;
+  let p; try { p = DeviceOrientationEvent.requestPermission(); } catch (e) { p = Promise.reject(e); }
+  Promise.resolve(p).then(st => {
+    CMP.asking = false; LS.set('motionOK', st === 'granted');
+    if (st === 'granted') { compassAttach(); return; }
+    CMP.denied = true; if (quiet !== true || !CMP.told) { CMP.told = true; toast('Compass permission denied'); }
+  }).catch(() => { CMP.asking = false; if (quiet !== true) toast('Compass not available here'); });
+}
+function autoCompass() { if (!CMP.on && !CMP.denied && S.loc) startCompass(true); }
+['touchend', 'click'].forEach(ev => document.addEventListener(ev, () => { if (!CMP.on && curView === 'qibla' && compassAsks()) autoCompass(); }, true));
 RENDER.qibla = async () => {
   const el = $('#v-qibla');
   if (!OPT.data) { try { await loadPT(); } catch (e) {} }
@@ -2956,14 +2959,14 @@ RENDER.qibla = async () => {
     <div><div class="card"><div class="muted" style="text-transform:uppercase;letter-spacing:1px;font-size:12px;font-weight:700">Qibla bearing</div>
       <div class="qdeg">${b.toFixed(1)}°</div><div class="muted">clockwise from true North · ${dirs[Math.round(b / 22.5) % 16]}</div><div class="sep"></div>
       <div class="row" style="justify-content:space-between"><span>Distance to the Kaaba</span><b>${Math.round(km).toLocaleString()} km</b></div><div class="sep"></div>
-      <div id="qTurn" class="muted" style="min-height:24px">Hold your phone flat, then enable the live compass.</div>
-      <button class="btn pri" style="margin-top:12px;width:100%" id="qStart">${icon('qibla')} Enable live compass</button>
+      <div id="qTurn" class="muted" style="min-height:24px">${CMP.on ? '' : compassAsks() ? 'Tap anywhere to turn on the live compass.' : 'Hold your phone flat, then enable the live compass.'}</div>
+      <button class="btn pri" style="margin-top:12px;width:100%${CMP.on ? ';display:none' : ''}" id="qStart">${icon('qibla')} Enable live compass</button>
       <p class="muted" style="font-size:12.5px;margin:10px 0 0">Move the phone in a figure-8 to calibrate. Keep away from metal and magnets. The live compass needs a phone with a magnetometer; on a computer, use the degrees above.</p></div>
       <div style="margin-top:14px">${locCard()}</div></div></div>`;
-  $('#qStart').onclick = startCompass;
+  $('#qStart').onclick = () => { CMP.denied = false; startCompass(); };
   bindLoc(el, RENDER.qibla);
   if (CMP.on && CMP.heading != null) onOrient({ webkitCompassHeading: CMP.heading });
-  else autoCompass(el);
+  autoCompass();
 };
 
 /* ============ AZKAR ============ */
