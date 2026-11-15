@@ -1,0 +1,40 @@
+# Manual helper: downloads ayah timings for a whole-surah reciter from mp3quran.net
+# (used by the player to highlight each ayah) and checks the audio CDN headers.
+name: Fetch ayah timings
+on:
+  workflow_dispatch:
+    inputs:
+      read: { description: 'mp3quran read id', default: '221' }
+      name: { description: 'output file stem', default: 'raad' }
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download timings for 114 surahs
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, time, os
+          rid, out = os.environ['READ'], {}
+          for s in range(1, 115):
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(f'https://mp3quran.net/api/v3/ayat_timing?surah={s}&read={rid}', timeout=30) as r:
+                          d = json.load(r); break
+                  except Exception as e:
+                      print('retry', s, e); time.sleep(3)
+              out[s] = [[x['ayah'], x['start_time'], x['end_time']] for x in d]
+          json.dump(out, open('timing.json', 'w'), separators=(',', ':'))
+          print('surahs', len(out), 'entries', sum(len(v) for v in out.values()))
+          PY
+        env: { READ: '${{ inputs.read }}' }
+      - name: Check audio CDN (CORS, size)
+        run: |
+          curl -sSI -H 'Origin: https://barzandh.github.io' https://cdn.mp3quran.net/audio/raad-kurdi/r1/001.mp3 | tee headers.txt
+          curl -sSI -H 'Origin: https://barzandh.github.io' https://cdn.mp3quran.net/audio/raad-kurdi/r1/002.mp3 | grep -i 'content-length' | tee -a headers.txt
+          curl -sSI -H 'Origin: https://barzandh.github.io' 'https://mp3quran.net/api/v3/ayat_timing?surah=1&read=221' | grep -i 'access-control' | tee -a headers.txt || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: timing-${{ inputs.name }}
+          path: |
+            timing.json
+            headers.txt
