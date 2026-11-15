@@ -506,6 +506,8 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-al
 .player .pb:hover{background:rgba(255,255,255,.08)}
 .player .pb svg{width:20px;height:20px}
 #plSub{cursor:pointer}
+.player .info{cursor:pointer;align-self:stretch;display:flex;flex-direction:column;justify-content:center;-webkit-tap-highlight-color:transparent}
+.player .info:active{opacity:.7}
 .player .pb.main{background:var(--gold);color:#fff;width:46px;height:46px;border-radius:50%}
 .player .info{flex:1;min-width:0}
 .player .info b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1987,7 +1989,7 @@ function buildPlayer() {
   p.innerHTML = `<button class="pb" id="plPrev" title="Previous ayah">${icon('prev')}</button>
     <button class="pb main" id="plPlay">${icon('play')}</button>
     <button class="pb" id="plNext" title="Next ayah">${icon('next')}</button>
-    <div class="info"><b id="plTitle">—</b><span id="plSub"></span><div class="prog"><i id="plProg"></i></div></div>
+    <div class="info" id="plInfo" role="button" tabindex="0" title="Reciter"><b id="plTitle">—</b><span id="plSub"></span><div class="prog"><i id="plProg"></i></div></div>
     <button class="pb" id="plRep" title="Repeat each ayah">${icon('repeat')}<span class="rep" id="plRepN"></span></button>
     <select id="plRec" class="hide-s" title="Reciter">${Object.entries(RECITERS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select>
     <button class="pb" id="plClose" title="Close">${icon('x')}</button>`;
@@ -1997,7 +1999,8 @@ function buildPlayer() {
   $('#plClose').onclick = stopAudio;
   $('#plRep').onclick = () => { S.repeat = REPS[(REPS.indexOf(S.repeat) + 1) % REPS.length]; A.rep = S.repeat; save(); updatePlayer(); toast(S.repeat === 0 ? 'Repeat ayah: ∞' : S.repeat === 1 ? 'Repeat off' : `Repeat each ayah ${S.repeat}×`); };
   $('#plRec').onchange = e => setReciter(e.target.value);
-  $('#plSub').onclick = () => openModal(`<h3 style="margin:0 0 12px">Reciter</h3><div class="reclist">${Object.entries(RECITERS).map(([k, v]) => `<button class="btn ${k === S.reciter ? 'pri' : 'ghost'}" data-rc="${k}" style="width:100%;justify-content:flex-start;margin-bottom:8px">${esc(v.name)}</button>`).join('')}</div>`,
+  $('#plInfo').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } };
+  $('#plInfo').onclick = () => openModal(`<h3 style="margin:0 0 12px">Reciter</h3><div class="reclist">${Object.entries(RECITERS).map(([k, v]) => `<button class="btn ${k === S.reciter ? 'pri' : 'ghost'}" data-rc="${k}" style="width:100%;justify-content:flex-start;margin-bottom:8px">${esc(v.name)}</button>`).join('')}</div>`,
     box => box.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => { closeModal(); setReciter(b.dataset.rc); }));
 }
 function updatePlayer() {
