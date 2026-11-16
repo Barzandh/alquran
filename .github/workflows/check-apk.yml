@@ -1,0 +1,23 @@
+# Manual helper: downloads published APKs and checks that they are valid, signed and installable as an update.
+name: Check APK
+on:
+  workflow_dispatch:
+    inputs:
+      tags: { description: 'release tags to check', default: 'android-51 android-50' }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          for T in ${{ inputs.tags }}; do
+            mkdir -p $T && gh release download $T -R ${{ github.repository }} -p AlQuran.apk -D $T
+            echo "CHK $T size $(stat -c %s $T/AlQuran.apk) sha256 $(sha256sum $T/AlQuran.apk | cut -c1-64)"
+            $BT/aapt2 dump badging $T/AlQuran.apk | grep -E "^package|^sdkVersion|^targetSdkVersion|native-code|testOnly" | sed "s/^/CHK $T /"
+            $BT/apksigner verify --verbose --print-certs --min-sdk-version 24 $T/AlQuran.apk 2>&1 | grep -E "Verifie|SHA-256|WARNING|ERROR|DOES NOT" | sed "s/^/CHK $T /"
+            unzip -tq $T/AlQuran.apk | tail -1 | sed "s/^/CHK $T zip: /"
+            $BT/zipalign -c -v 4 $T/AlQuran.apk | tail -1 | sed "s/^/CHK $T align: /"
+          done
