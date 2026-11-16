@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261116.074224";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261116.144736";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -661,6 +661,7 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 .kday.late{background:#fbe9e5;border-color:#efc1b6;color:#9a3b29}
 [data-theme=dark] .kday.late{background:#3a1d19;border-color:#5c2c25;color:#f3c2bb}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
+.recbtn{width:100%;justify-content:space-between;margin-bottom:10px;font-weight:600}
 .chip{padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--paper);font-weight:600;font-size:13px}
 .chip.on{background:var(--g7);color:#fff;border-color:var(--g7)}
 
@@ -2079,7 +2080,15 @@ function srcFor(s, n, g) {
 }
 function pauseAudio() { A.el.pause(); }
 /* switching reciter takes effect at once: the current ayah restarts in the new voice (or will, when resumed) */
+const recSorted = () => Object.entries(RECITERS).sort((a, b) => String(L(a[1].name)).localeCompare(String(L(b[1].name)), UI_LOC() || 'en'));   /* A–Z in the app's language */
+function reciterPicker() {
+  const ix = AIDX();
+  openModal(`<h3 style="margin:0 0 12px">Reciter</h3><div class="reclist">${recSorted().map(([k, v]) => { const sv = ix[k] || {}, full = Object.keys(sv).filter(n => sv[n] === SURAHS[n - 1].ayahs).length;
+    return `<button class="btn ${k === S.reciter ? 'pri' : 'ghost'}" data-rc="${k}" style="width:100%;justify-content:space-between;margin-bottom:8px"><span>${esc(v.name)}</span>${full ? `<small data-noi18n style="opacity:.8">${full === 114 ? '✓' : full + '/114'}</small>` : ''}</button>`; }).join('')}</div>`,
+    box => box.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => { closeModal(); setReciter(b.dataset.rc); }));
+}
 function setReciter(k) {
+  if (RECITERS[k] && !DL.busy && offRec !== k) { offRec = k; drawOfflineAudio(); }
   if (!RECITERS[k] || k === S.reciter) { updatePlayer(); return; }
   S.reciter = k; save();
   if (A.item && A.i >= 0) { if (A.on && !A.el.paused) playAt(A.i); else A.stale = true; }
@@ -2100,7 +2109,7 @@ function buildPlayer() {
     <button class="pb" id="plNext" title="Next ayah">${icon('next')}</button>
     <div class="info" id="plInfo" role="button" tabindex="0" title="Reciter"><b id="plTitle">—</b><span id="plSub"></span><div class="prog"><i id="plProg"></i></div></div>
     <button class="pb" id="plRep" title="Repeat each ayah">${icon('repeat')}<span class="rep" id="plRepN"></span></button>
-    <select id="plRec" class="hide-s" title="Reciter">${Object.entries(RECITERS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select>
+    <select id="plRec" class="hide-s" title="Reciter">${recSorted().map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('')}</select>
     <button class="pb" id="plClose" title="Close">${icon('x')}</button>`;
   $('#plPlay').onclick = togglePlay;
   $('#plPrev').onclick = () => A.i > 0 && playAt(A.i - 1);
@@ -2109,8 +2118,7 @@ function buildPlayer() {
   $('#plRep').onclick = () => { S.repeat = REPS[(REPS.indexOf(S.repeat) + 1) % REPS.length]; A.rep = S.repeat; save(); updatePlayer(); toast(S.repeat === 0 ? 'Repeat ayah: ∞' : S.repeat === 1 ? 'Repeat off' : `Repeat each ayah ${S.repeat}×`); };
   $('#plRec').onchange = e => setReciter(e.target.value);
   $('#plInfo').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } };
-  $('#plInfo').onclick = () => openModal(`<h3 style="margin:0 0 12px">Reciter</h3><div class="reclist">${Object.entries(RECITERS).map(([k, v]) => `<button class="btn ${k === S.reciter ? 'pri' : 'ghost'}" data-rc="${k}" style="width:100%;justify-content:flex-start;margin-bottom:8px">${esc(v.name)}</button>`).join('')}</div>`,
-    box => box.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => { closeModal(); setReciter(b.dataset.rc); }));
+  $('#plInfo').onclick = reciterPicker;
 }
 function updatePlayer() {
   const p = $('#player'); if (!p) return;
@@ -2152,7 +2160,7 @@ function openDrawer() {
     <div class="muted latnote">Read as recited (Hafs). Small grey letters at the end of a word, like raḥīm<span style="opacity:.5;font-size:.8em">i</span>, are said only if you go on without stopping.</div>
     </div>
   <div class="grp"><label class="f">Recitation</label>
-    <select data-k="reciter">${Object.entries(RECITERS).map(([k, v]) => `<option value="${k}" ${S.reciter === k ? 'selected' : ''}>${v.name} · ${v.ar}</option>`).join('')}</select>
+    <select data-k="reciter">${recSorted().map(([k, v]) => `<option value="${k}" ${S.reciter === k ? 'selected' : ''}>${v.name} · ${v.ar}</option>`).join('')}</select>
     <div class="opt"><span>Repeat each ayah</span><select data-k="repeat" style="width:auto">${REPS.map(r => `<option value="${r}" ${S.repeat === r ? 'selected' : ''}>${r === 0 ? '∞' : r + '×'}</option>`).join('')}</select></div>
     <div class="opt"><span>Continue to next ayah / surah</span>${sw('continuous', S.continuous)}</div>
     <div class="opt"><span>Recite Basmala before each surah</span>${sw('bismAudio', S.bismAudio)}</div>
@@ -5020,15 +5028,14 @@ function drawOfflineAudio(progressOnly) {
   box.innerHTML = `<div class="orn">Offline recitation</div>
     <p class="muted" style="margin:0 0 10px;font-size:13.5px">Download surahs once (needs internet), then listen anywhere. About 1 MB per minute of recitation; the whole Quran is roughly 1–1.5 GB.</p>
     <label class="f">Reciter</label>
-    <div class="chips" id="offRecs" style="margin-bottom:10px">${Object.entries(RECITERS).map(([k, v]) => { const ix = AIDX()[k] || {}, full = Object.keys(ix).filter(n => ix[n] === SURAHS[n - 1].ayahs).length;
-      return `<button class="chip ${k === offRec ? 'on' : ''}" data-rec="${k}" ${DL.busy ? 'disabled' : ''}>${esc(v.name)}${full ? ` <small class="muted">${full === 114 ? '✓' : full + '/114'}</small>` : ''}</button>`; }).join('')}</div>
+    <button class="btn recbtn" id="offRecBtn" type="button" ${DL.busy ? 'disabled' : ''}><span>${esc(RECITERS[offRec].name)}</span><span data-noi18n>▾</span></button>
     <div class="row"><select id="offSurah" style="width:auto;max-width:220px">${SURAHS.map(s => `<option value="${s.n}">${s.n}. ${esc(s.en)}</option>`).join('')}</select><button class="btn pri" id="offGo" ${DL.busy ? 'disabled' : ''}>${icon('download')} Download</button>
       <button class="btn pri" id="offAll" ${DL.busy ? 'disabled' : ''}>${icon('download')} Download all (114)</button></div>
     <small class="muted" style="display:block;margin-top:6px">${(() => { const full = saved.filter(n => idx[n] === SURAHS[n - 1].ayahs).length; return full === 114 ? '✓ The whole Quran is saved for this recitation' : `${full} of 114 surahs fully saved` + (full ? ' — “Download all” only fetches what is missing' : ''); })()}</small>
     <div class="chips" style="margin-top:10px">${AUDIO_SETS.map(([l, a], i) => `<button class="chip" data-set="${i}" ${DL.busy ? 'disabled' : ''}>${l}</button>`).join('')}</div>
     ${DL.busy ? `<div style="margin-top:12px"><div class="dlbar"><i id="dlBar" style="width:${DL.total ? DL.done / DL.total * 100 : 0}%"></i></div><div class="row" style="justify-content:space-between;margin-top:6px"><small id="dlTxt" class="muted">${dlText()}</small><button class="btn sm" id="offStop">Stop</button></div></div>` : ''}
     <div style="margin-top:12px">${saved.length ? `<label class="f">Saved on this phone</label><div class="chips">${saved.map(s => `<span class="chip">${s}. ${esc(SURAHS[s - 1].en)} <small class="muted">${idx[s] === SURAHS[s - 1].ayahs ? '✓' : idx[s] + '/' + SURAHS[s - 1].ayahs}</small> <button class="x" data-del="${s}" title="Delete">✕</button></span>`).join('')}</div>` : '<small class="muted">Nothing downloaded yet.</small>'}${saved.length && !DL.busy ? `<button class="btn sm" id="offDelAll" style="margin-top:10px">${icon('trash')} Delete all for this recitation</button>` : ''}</div>`;
-  box.querySelectorAll('[data-rec]').forEach(b => b.onclick = () => { offRec = b.dataset.rec; drawOfflineAudio(); });
+  $('#offRecBtn').onclick = reciterPicker;
   const start = list => { if (!navigator.onLine) { toast('You are offline — connect to download'); return; } downloadSurahs(offRec, list); };
   $('#offGo').onclick = () => start([+$('#offSurah').value]);
   $('#offAll').onclick = async () => {
