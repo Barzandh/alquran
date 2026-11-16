@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261115.202924";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261116.072125";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5064,11 +5064,11 @@ function drawOffBadge() {
   if (IS_APK) { el.innerHTML = '<span class="offb ok">✓ Android app — works offline</span>'; return; }
   if (!window.__PWA__ || !/^https?:$/.test(location.protocol)) { el.innerHTML = ''; return; }
   const r = offState();
-  if (OFFL.state === 'saving') el.innerHTML = `<span class="offb saving">⬇ Saving for offline ${OFFL.done}/${OFFL.total} — keep AlQuran open</span>`;
+  if (OFFL.state === 'saving') el.innerHTML = '';   /* saving happens quietly; progress is on More → Phone & offline */
   else if (OFFL.state === 'error') el.innerHTML = `<span class="offb bad">⚠ Offline copy not finished — will retry when online</span>`;
   else if (r && r.build === (navigator.serviceWorker && navigator.serviceWorker.controller ? r.build : '')) el.innerHTML = `<span class="offb ok">✓ Works offline</span>`;
   else if (r) el.innerHTML = `<span class="offb ok">✓ Works offline</span>`;
-  else el.innerHTML = `<span class="offb saving">⬇ Preparing offline copy…</span>`;
+  else el.innerHTML = '';
 }
 async function askOfflineStatus() {
   try {
