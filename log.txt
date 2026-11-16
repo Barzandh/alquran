@@ -1,0 +1,30 @@
+D/AndroidRuntime( 2410): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2410): CheckJNI is ON
+D/AndroidRuntime( 2410): Calling main entry com.android.commands.input.Input
+D/AndroidRuntime( 2410): Shutting down VM
+D/AndroidRuntime( 2426): 
+D/AndroidRuntime( 2426): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2426): CheckJNI is ON
+D/AndroidRuntime( 2426): Calling main entry com.android.commands.settings.SettingsCmd
+D/AndroidRuntime( 2426): Shutting down VM
+D/AndroidRuntime( 2439): 
+D/AndroidRuntime( 2439): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2439): CheckJNI is ON
+D/AndroidRuntime( 2439): Calling main entry com.android.commands.settings.SettingsCmd
+D/AndroidRuntime( 2439): Shutting down VM
+D/AndroidRuntime( 2452): 
+D/AndroidRuntime( 2452): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2452): CheckJNI is ON
+D/AndroidRuntime( 2452): Calling main entry com.android.commands.settings.SettingsCmd
+D/AndroidRuntime( 2452): Shutting down VM
+D/AndroidRuntime( 2469): 
+D/AndroidRuntime( 2469): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2469): CheckJNI is ON
+D/AndroidRuntime( 2469): Calling main entry com.android.commands.pm.Pm
+D/AndroidRuntime( 2469): Shutting down VM
+D/AndroidRuntime( 2519): 
+D/AndroidRuntime( 2519): >>>>>> AndroidRuntime START com.android.internal.os.RuntimeInit <<<<<<
+D/AndroidRuntime( 2519): CheckJNI is ON
+D/AndroidRuntime( 2519): Calling main entry com.android.commands.am.Am
+D/AndroidRuntime( 2519): Shutting down VM
+I/chromium( 2531): [INFO:CONSOLE(943)] "Uncaught SyntaxError: Unexpected token ILLEGAL", source: https://appassets.androidplatform.net/index.html (943)

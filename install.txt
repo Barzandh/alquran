@@ -1,0 +1,4 @@
+AlQuran.apk: 1 file pushed, 0 skipped. 351.5 MB/s (24269858 bytes in 0.066s)
+Performing Push Install
+	pkg: /data/local/tmp/AlQuran.apk
+Success

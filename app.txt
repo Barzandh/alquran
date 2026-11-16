@@ -1,0 +1,4 @@
+    versionCode=9000 targetSdk=34
+    versionName=2.0.test
+    versionName=37 (4174711-x86)
+/system/bin/sh: pidof: not found
