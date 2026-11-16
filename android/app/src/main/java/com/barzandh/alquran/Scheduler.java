@@ -59,7 +59,8 @@ public class Scheduler {
                 long at = o.optLong("at", 0);
                 if (at <= now) continue;
                 PendingIntent pi = pending(c, n, o, PendingIntent.FLAG_UPDATE_CURRENT);
-                if (exact) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+                if (Build.VERSION.SDK_INT < 23) am.setExact(AlarmManager.RTC_WAKEUP, at, pi);   // Android 5: no doze mode yet
+                else if (exact) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
                 else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
                 n++;
             }

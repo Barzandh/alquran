@@ -8,7 +8,7 @@ android {
   compileSdk 34
   defaultConfig {
     applicationId 'com.barzandh.alquran'
-    minSdk 24
+    minSdk 21   // Android 5.0 and newer (older systems have a web engine that cannot be updated)
     targetSdk 34
     versionCode vCode
     versionName vName
@@ -21,6 +21,9 @@ android {
       storePassword System.getenv('ALQURAN_KEY') ?: ''
       keyAlias 'alquran'
       keyPassword System.getenv('ALQURAN_KEY') ?: ''
+      enableV1Signing true   // old Android (5, 6) reads this signature; newer systems read v2/v3
+      enableV2Signing true
+      enableV3Signing true
     }
   }
   buildTypes {
@@ -28,5 +31,5 @@ android {
   }
   compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
   androidResources { noCompress 'bin', 'woff2', 'png' }
-  lint { abortOnError false; checkReleaseBuilds false }
+  lint { abortOnError false; checkReleaseBuilds false; checkOnly 'NewApi'; textReport true }
 }

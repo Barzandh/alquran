@@ -109,6 +109,15 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            @SuppressWarnings("deprecation")   // Android 5 and 6 call this older form
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Uri u = Uri.parse(url);
+                if (HOST.equals(u.getHost())) return false;
+                openExternal(u);
+                return true;
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
                 loaded = true;
                 if (pendingLink != null) { openLink(pendingLink); pendingLink = null; }
@@ -163,6 +172,7 @@ public class MainActivity extends Activity {
     }
 
     boolean hasLocation() {
+        if (Build.VERSION.SDK_INT < 23) return true;   // Android 5: permissions are given when the app is installed
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
             || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
@@ -178,6 +188,7 @@ public class MainActivity extends Activity {
             if (asked && !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) return "denied";
             return "default";
         }
+        if (Build.VERSION.SDK_INT < 24) return "granted";   // Android 5 and 6 cannot report this; notifications are on unless blocked in Settings
         return nm.areNotificationsEnabled() ? "granted" : "denied";
     }
 

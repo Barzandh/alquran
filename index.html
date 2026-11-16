@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261116.144736";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261116.184006";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -858,6 +858,27 @@ html[dir=rtl] .lsback svg{transform:scaleX(-1)}
 .pkitem .pkname{flex:1}
 select.langsel{min-width:200px;max-width:100%;font:600 16px/1.2 var(--ui);padding:10px 36px 10px 14px;border-radius:12px}
 </style>
+<script>
+/* Old phones: when the phone's web engine (Android System WebView / Chrome) is too old to run AlQuran, say so
+   instead of showing a blank page. Written in old-style JavaScript on purpose so that it runs everywhere. */
+(function () {
+  var ok = true;
+  try { new Function('var a = {}; return a?.b ?? 1')(); } catch (e) { ok = false; }
+  if (ok) return;
+  window.__OLD_ENGINE__ = true;
+  function show() {
+    var d = document.createElement('div'), b = 'display:block;margin:12px auto;max-width:320px;padding:14px 16px;border-radius:14px;background:#e9c25a;color:#0b3527;font-weight:bold;text-decoration:none';
+    d.setAttribute('style', 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;background:#0b3527;color:#fff;font:17px/1.6 sans-serif;padding:28px 22px;overflow:auto;text-align:center');
+    d.innerHTML = '<div style="font-size:28px;font-weight:bold;color:#e9c25a;margin:18px 0 14px">AlQuran \u0627\u0644\u0642\u0631\u0622\u0646</div>'
+      + '<p>This phone\u2019s web engine is too old to run AlQuran. Update <b>Android System WebView</b> and <b>Chrome</b> from Google Play, then open AlQuran again.</p>'
+      + '<p dir="rtl">\u0645\u062d\u0631\u0651\u0643 \u0627\u0644\u0648\u064a\u0628 \u0641\u064a \u0647\u0630\u0627 \u0627\u0644\u0647\u0627\u062a\u0641 \u0642\u062f\u064a\u0645 \u0648\u0644\u0627 \u064a\u0633\u062a\u0637\u064a\u0639 \u062a\u0634\u063a\u064a\u0644 \u0627\u0644\u062a\u0637\u0628\u064a\u0642. \u062d\u062f\u0651\u062b <b>Android System WebView</b> \u0648 <b>Chrome</b> \u0645\u0646 \u0645\u062a\u062c\u0631 Google Play \u062b\u0645 \u0627\u0641\u062a\u062d \u0627\u0644\u062a\u0637\u0628\u064a\u0642 \u0645\u0646 \u062c\u062f\u064a\u062f.</p>'
+      + '<a style="' + b + '" href="https://play.google.com/store/apps/details?id=com.google.android.webview">Android System WebView</a>'
+      + '<a style="' + b + '" href="https://play.google.com/store/apps/details?id=com.android.chrome">Google Chrome</a>';
+    document.body.appendChild(d);
+  }
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show);
+})();
+</script>
 </head>
 <body>
 <aside class="side">
@@ -2424,7 +2445,7 @@ function rbTextW(e) {
   const r = document.createRange(); r.selectNodeContents(e);
   const k = (e.closest('.rb')._k) || 1;
   const sx = e.classList.contains('rb-hm') ? 1.12 : (+e.dataset.sx || 1);
-  let us = 1; for (let x = e; x && !x.classList.contains('rb'); x = x.parentElement) us *= parseFloat(x.style.scale) || 1;
+  let us = 1; for (let x = e; x && !x.classList.contains('rb'); x = x.parentElement) us *= parseFloat(x.style.scale) || x._us || 1;
   return r.getBoundingClientRect().width / k / sx / us;
 }
 function rbSet(root, k, v, hide) {
@@ -2666,6 +2687,7 @@ function rbRefit() { document.querySelectorAll('.rb-fit').forEach(f => { f.query
 
 /* ---------- LAYOUT EDITOR: move / resize every line and box of the window; saved per design ---------- */
 const LAY_NAMES = { date: 'Date', hijri: 'Hijri date', city: 'City', cur: '“Current time”', hm: 'Clock', sec: 'Seconds', ap: 'AM / PM', np: '“Next prayer”', arl: 'Arabic heading', arn: 'Prayer in Arabic', name: 'Prayer name', time: 'Prayer time' };
+const LAY_IND = !!(window.CSS && CSS.supports && CSS.supports('translate', '1px') && CSS.supports('scale', '1'));
 const layFam = id => (id = id || rbTheme(), id.startsWith('d-') ? id : 'classic');
 const LE = { on: false, sel: null, work: null, fam: '', hist: [] };
 const layOf = fam => (LE.on && LE.fam === fam ? LE.work : (S.rbLay || {})[fam]) || {};
@@ -2699,9 +2721,12 @@ function layApply(fit) {
       if (el._ow == null) { el._bw = el.style.width; el._bh = el.style.height; el._ow = el.offsetWidth; el._oh = el.offsetHeight; }
       el.style.width = v.w ? (el._ow + v.w) + 'px' : el._bw; el.style.height = v.h ? (el._oh + v.h) + 'px' : el._bh;
     }
-    const tx = (v.x || 0) - (v.w || 0) / 2, ty = v.y || 0;
-    el.style.translate = tx || ty ? `${tx}px ${ty}px` : '';
-    el.style.scale = v.s && v.s !== 1 ? String(v.s) : '';
+    const tx = (v.x || 0) - (v.w || 0) / 2, ty = v.y || 0, sc = v.s && v.s !== 1 ? v.s : 1;
+    if (LAY_IND) { el.style.translate = tx || ty ? `${tx}px ${ty}px` : ''; el.style.scale = sc !== 1 ? String(sc) : ''; }
+    else {   /* older web engines */
+      if (el._bt == null) { el.style.transform = ''; const t = getComputedStyle(el).transform; el._bt = t && t !== 'none' ? t : ''; }
+      el._us = sc; el.style.transform = tx || ty || sc !== 1 ? `translate(${tx}px,${ty}px) scale(${sc}) ${el._bt}` : '';
+    }
     if (kind === 'text') el.querySelectorAll('[data-fit]').forEach(e => { e.dataset.fit = ''; });
     if (kind === 'text' && el.dataset.fit != null) el.dataset.fit = '';
   });
