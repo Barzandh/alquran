@@ -1,0 +1,28 @@
+11-16 18:43:03.441  1278  1278 D AndroidRuntime: >>>>>> START com.android.internal.os.ZygoteInit uid 0 <<<<<<
+11-16 18:43:03.445  1278  1278 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:06.447  1755  1755 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+11-16 18:43:18.169  2534  2534 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:18.170  2534  2534 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:18.196  2534  2534 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-16 18:43:18.271  2534  2534 D AndroidRuntime: Shutting down VM
+11-16 18:43:18.564  2544  2544 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:18.565  2544  2544 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:18.585  2544  2544 D AndroidRuntime: Calling main entry com.android.commands.settings.SettingsCmd
+11-16 18:43:18.590  2544  2544 D AndroidRuntime: Shutting down VM
+11-16 18:43:18.869  2555  2555 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:18.870  2555  2555 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:18.887  2555  2555 D AndroidRuntime: Calling main entry com.android.commands.settings.SettingsCmd
+11-16 18:43:18.888  2555  2555 D AndroidRuntime: Shutting down VM
+11-16 18:43:19.158  2565  2565 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:19.159  2565  2565 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:19.174  2565  2565 D AndroidRuntime: Calling main entry com.android.commands.settings.SettingsCmd
+11-16 18:43:19.176  2565  2565 D AndroidRuntime: Shutting down VM
+11-16 18:43:19.518  2578  2578 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:19.518  2578  2578 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:19.534  2578  2578 D AndroidRuntime: Calling main entry com.android.commands.pm.Pm
+11-16 18:43:19.722  2578  2578 I AndroidRuntime: VM exiting with result code 0.
+11-16 18:43:19.841  2628  2628 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 0 <<<<<<
+11-16 18:43:19.842  2628  2628 D AndroidRuntime: CheckJNI is OFF
+11-16 18:43:19.858  2628  2628 D AndroidRuntime: Calling main entry com.android.commands.am.Am
+11-16 18:43:19.864  2628  2628 D AndroidRuntime: Shutting down VM
+11-16 18:43:20.451  2637  2637 I chromium: [INFO:CONSOLE(1057)] "Uncaught SyntaxError: missing ) after argument list", source: https://appassets.androidplatform.net/index.html (1057)
