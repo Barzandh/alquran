@@ -13,7 +13,7 @@
    Cron (every minute): sends every event due in the next 60 s, each at its exact second.            */
 import { b64u, vapidKeys, buildPush } from './webpush.js';
 
-export const WORKER_VERSION = '2026.11.19-1';
+export const WORKER_VERSION = '2026.11.19-2';
 const MAX_BODY = 512 * 1024, MAX_EVENTS = 1500, MAX_DIAG = 200 * 1024;
 const PUSH_HOSTS = ['fcm.googleapis.com', 'android.googleapis.com', 'push.apple.com', 'push.services.mozilla.com', 'notify.windows.com', 'push.api.chrome.google.com'];
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -124,20 +124,27 @@ async function sendOne(env, keys, row, fetchImpl) {
 }
 
 export async function runCron(env, opts = {}) {
-  const keys = await init(env), now = opts.now ?? Date.now(), wait = opts.sleep ?? sleep;
-  /* recover rows a crashed run left in 'sending'; drop ones too late to matter */
-  await env.DB.batch([
+  const now = opts.now ?? Date.now(), wait = opts.sleep ?? sleep;
+  if (!env || !env.DB) throw new HttpError(500, 'database binding DB is missing');
+  /* An idle minute must stay far below the free plan's 10 ms CPU: one D1 round trip, no key loading.
+     1) recover rows a crashed run left in 'sending'  2) drop ones too late to matter  3) claim what is due */
+  const minute = () => env.DB.batch([
     env.DB.prepare("UPDATE events SET status = 'pending', claimed = NULL WHERE status = 'sending' AND claimed < ?").bind(now - 5 * 6e4),
     env.DB.prepare("UPDATE events SET status = 'expired' WHERE status = 'pending' AND exp < ?").bind(now),
+    env.DB.prepare(
+      `UPDATE events SET status = 'sending', claimed = ?1 WHERE id IN (
+         SELECT e.id FROM events e JOIN devices d ON d.id = e.device
+         WHERE e.status = 'pending' AND e.at <= ?2 AND d.status = 'active' AND d.endpoint IS NOT NULL
+         ORDER BY e.at LIMIT ?3) RETURNING id`).bind(now, now + 60e3, PER_RUN),
   ]);
-  const claimed = await env.DB.prepare(
-    `UPDATE events SET status = 'sending', claimed = ?1 WHERE id IN (
-       SELECT e.id FROM events e JOIN devices d ON d.id = e.device
-       WHERE e.status = 'pending' AND e.at <= ?2 AND d.status = 'active' AND d.endpoint IS NOT NULL
-       ORDER BY e.at LIMIT ?3) RETURNING id`).bind(now, now + 60e3, PER_RUN).all();
+  let out;
+  try { out = await minute(); }
+  catch (e) { if (!/no such table/i.test(String(e && e.message))) throw e; await init(env); out = await minute(); }   /* brand-new database */
+  const claimed = out[2] || {};
   const ids = (claimed.results || []).map(r => r.id);
   let results = [];
   if (ids.length) {
+    const keys = { ...(await init(env)) };
     const self = await env.DB.prepare("SELECT v FROM meta WHERE k = 'self'").first();
     keys.self = self ? self.v : null;
     const rows = (await env.DB.prepare(`SELECT e.*, d.endpoint, d.p256dh, d.auth FROM events e JOIN devices d ON d.id = e.device WHERE e.id IN (${ids.map(() => '?').join(',')}) ORDER BY e.at`).bind(...ids).all()).results || [];

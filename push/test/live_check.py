@@ -85,6 +85,12 @@ with sync_playwright() as p:
         stat = until(lambda: (lambda s: s if any(r.get('k', '').startswith('test') and r.get('shown_at') for r in s.get('recent', [])) else None)(pg.evaluate("PUSH.status()")), 60, 3)
         step('4c shown receipt on server', bool(stat) and [ {k: r.get(k) for k in ('k', 'status', 'http', 'shown_at')} for r in stat['recent'][:3]])
         if not stat: step('4c status', pg.evaluate("PUSH.status().then(r => r, e => ({ error: e.message }))"))
+        # 4d. a reminder delivered by the minute timer (cron), like a real Fajr reminder
+        pg.evaluate("navigator.serviceWorker.ready.then(r => r.getNotifications()).then(n => n.forEach(x => x.close()))")
+        cr = pg.evaluate("PUSH.test(70).then(r => r, e => ({ error: e.message }))"); step('4d timed reminder requested (70 s)', cr)
+        cn = until(lambda: pg.evaluate("navigator.serviceWorker.ready.then(r => r.getNotifications()).then(n => n.filter(x => /test/i.test(x.title)).length)"), 200, 3)
+        late = (pg.evaluate('Date.now()') - cr.get('at', 0)) / 1000 if cn and isinstance(cr, dict) else None
+        step('4e timed reminder shown', {'shown': bool(cn), 'seconds_after_due': late})
 
     # 5. clean up
     pg.goto(APP + '#reminders'); pg.wait_for_timeout(1500)
@@ -93,7 +99,7 @@ with sync_playwright() as p:
     b.close()
 
 passed = res['steps'].get('1 build live', {}).get('ok') and res['steps'].get('2a diagnostics code') and isinstance(res['steps'].get('2b report sent'), dict) and res['steps']['2b report sent'].get('ok') \
-    and res['steps'].get('4b notification shown in Chrome') and res['steps'].get('4c shown receipt on server') and not res['steps'].get('page errors')
+    and res['steps'].get('4b notification shown in Chrome') and res['steps'].get('4c shown receipt on server') and (res['steps'].get('4e timed reminder shown') or {}).get('shown') and not res['steps'].get('page errors')
 res['passed'] = bool(passed)
 open(f'{OUT}/result.json', 'w').write(json.dumps(res, ensure_ascii=False, indent=1))
 print('\nLIVE CHECK', 'PASSED' if passed else 'FAILED')
