@@ -33,11 +33,17 @@ INIT = """(() => { if (!localStorage.getItem('nur.__live')) { localStorage.setIt
   localStorage.setItem('nur.reminders', JSON.stringify([{ id: 'p-fajr', kind: 'prayer', on: true }, { id: 'az-m', kind: 'azkar', on: true }])); } })();"""
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel='chrome', headless=False, args=['--no-first-run', '--no-default-browser-check'])
-    ctx = b.new_context(viewport={'width': 412, 'height': 900}, timezone_id='Asia/Baghdad', locale='en-US')
-    ctx.grant_permissions(['notifications'], origin='https://barzandh.github.io')
+    # A real "Allow" for notifications, stored in Chrome's profile the way tapping Allow stores it.
+    # (Playwright's grant_permissions only fakes Notification.permission; Chrome's push service checks the profile.)
+    import tempfile
+    prof = tempfile.mkdtemp(prefix='chrome-live-'); os.makedirs(prof + '/Default', exist_ok=True)
+    json.dump({'profile': {'content_settings': {'exceptions': {'notifications': {'https://barzandh.github.io:443,*': {'setting': 1}}}}}}, open(prof + '/Default/Preferences', 'w'))
+    ctx = p.chromium.launch_persistent_context(prof, channel='chrome', headless=False, args=['--no-first-run', '--no-default-browser-check'],
+                                               viewport={'width': 412, 'height': 900}, timezone_id='Asia/Baghdad', locale='en-US')
+    b = ctx
     ctx.add_init_script(INIT)
-    pg = ctx.new_page()
+    pg = ctx.pages[0] if ctx.pages else ctx.new_page()
+    step('0 permission', None)
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
 
@@ -46,7 +52,7 @@ with sync_playwright() as p:
         pg.goto(APP + '?live=' + str(time.time()), wait_until='domcontentloaded'); pg.wait_for_timeout(2500)
         return pg.evaluate('BUILD_ID') == WANT or not WANT
     ok = until(live, 600, 15)
-    step('1 build live', {'ok': bool(ok), 'page_build': pg.evaluate('BUILD_ID')})
+    step('1 build live', {'ok': bool(ok), 'page_build': pg.evaluate('BUILD_ID'), 'notif': pg.evaluate('Notification.permission')})
     pg.reload(); pg.wait_for_timeout(4000)   # service worker now controls the page
 
     # 2. diagnostics
@@ -63,7 +69,7 @@ with sync_playwright() as p:
     if pg.query_selector('[data-px="on"]'):
         pg.click('[data-px="on"]')
     st = until(lambda: (lambda s: s if s.get('ok') and s.get('total') else None)(pg.evaluate('PUSH.st()')), 60)
-    step('3b subscribed + schedule', st or pg.evaluate('PUSH.st()'))
+    step('3b subscribed + schedule', st or {'st': pg.evaluate('PUSH.st()'), 'log': pg.evaluate("LS.get('log', []).filter(e => e.type === 'push').slice(-3).map(e => e.msg)")})
     try:
         ep = pg.evaluate("navigator.serviceWorker.ready.then(r => r.pushManager.getSubscription()).then(s => s && new URL(s.endpoint).hostname)")
     except Exception as e: ep = 'error ' + str(e)
