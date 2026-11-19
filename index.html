@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261119.104302";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261119.142834";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -600,6 +600,8 @@ table.month td.hj{font-family:'Amiri',serif;color:var(--ink2)}
 /* ---------- qibla ---------- */
 .qwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:center}
 .compass{position:relative;width:min(380px,82vw);aspect-ratio:1;margin:0 auto}
+.qwrap>.card:first-child{overflow:hidden}   /* the turning dial's square corners reach past the screen edge */
+#v-qibla{overflow-x:hidden;overflow-x:clip}
 .compass .dial{position:absolute;inset:0;transition:transform .25s ease-out}
 .compass .fixed{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:16px solid var(--gold);z-index:2}
 .qdeg{font-family:var(--serif);font-size:64px;font-weight:600;line-height:1;color:var(--g8)}
@@ -2953,8 +2955,9 @@ function useMyLocation(after, fail) {
   if (!navigator.geolocation) { toast('Location is not available in this browser'); fail && fail(); return; }
   toast('Finding your location…');
   navigator.geolocation.getCurrentPosition(p => {
-    GEO.at = Date.now(); LOG('permission', 'Location: granted');
+    GEO.at = Date.now(); GEO.paused = false; LOG('permission', 'Location: granted');
     applyGeo(p.coords.latitude, p.coords.longitude); after && after();
+    locWatch();   /* "always" mode can follow again now that the user allowed it */
   }, err => { LOG('permission', 'Location: ' + (err.code === 1 ? 'denied' : 'error ' + err.message)); toast(err.code === 1 ? 'Location isn’t allowed here — please choose your city from the list' : 'Could not get location — choose a city instead'); fail && fail(); }, { enableHighAccuracy: true, timeout: 12000 });
 }
 /* "Use my location" asks how: once, every time the app opens, always (follows you while the app is open), or not at all
@@ -2983,8 +2986,8 @@ function locWatch() {
   const want = S.locMode === 'live' && document.visibilityState === 'visible' && !!navigator.geolocation;
   if (!want) { if (GEO.watch != null) { try { navigator.geolocation.clearWatch(GEO.watch); } catch (e) {} GEO.watch = null; } if (GEO.timer) { clearTimeout(GEO.timer); GEO.timer = null; } return; }
   if (GEO.watch != null) return;
-  loadPT().then(() => {
-    if (GEO.watch != null || S.locMode !== 'live') return;
+  loadPT().then(geoGranted).then(ok => {
+    if (!ok || GEO.watch != null || S.locMode !== 'live') return;
     const run = () => { GEO.timer = null; GEO.seen = GEO.at = Date.now(); if (GEO.last && S.locMode === 'live') locMoved(GEO.last[0], GEO.last[1]); };
     GEO.watch = navigator.geolocation.watchPosition(p => {
       GEO.last = [p.coords.latitude, p.coords.longitude];   /* at most one check every 20 seconds; the newest position is never dropped */
@@ -2994,9 +2997,18 @@ function locWatch() {
     { enableHighAccuracy: false, maximumAge: 6e4, timeout: 30000 });
   }).catch(() => {});
 }
+/* iPhone forgets a web app's location permission after a while. Asking again by itself would pop the system question
+   on every launch, so automatic updates run only while permission is still granted; otherwise the saved city stays
+   until the user taps "Use my location". */
+async function geoGranted() {
+  try { if (navigator.permissions && navigator.permissions.query) return (await navigator.permissions.query({ name: 'geolocation' })).state === 'granted'; } catch (e) {}
+  return !IS_IOS;
+}
 async function autoLocate() {
   locWatch();
   if ((S.locMode !== 'always' && S.locMode !== 'live') || GEO.busy || !navigator.geolocation || Date.now() - GEO.at < (S.locMode === 'live' ? 3e4 : 5 * 6e4)) return;
+  if (!(await geoGranted())) { if (!GEO.paused) { GEO.paused = true; LOG('location', 'Automatic update paused: the phone needs a tap on “Use my location” to share it again'); } return; }
+  GEO.paused = false;
   GEO.busy = true;
   try { await loadPT(); } catch (e) { GEO.busy = false; return; }
   navigator.geolocation.getCurrentPosition(p => {
@@ -3195,12 +3207,16 @@ function compassAttach() {
 function startCompass(quiet) {
   if (CMP.on || CMP.asking) return;
   if (!compassAsks()) { try { compassAttach(); } catch (e) { if (quiet !== true) toast('Compass not available here'); } return; }
+  /* iPhone answers "denied" to any request made outside a tap (app opened on this page, or after a delay).
+     So: automatic attempts only run during a tap, and their "no" never blocks later taps. */
+  if (quiet === true && navigator.userActivation && !navigator.userActivation.isActive) return;
   CMP.asking = true;
   let p; try { p = DeviceOrientationEvent.requestPermission(); } catch (e) { p = Promise.reject(e); }
   Promise.resolve(p).then(st => {
-    CMP.asking = false; LS.set('motionOK', st === 'granted');
+    CMP.asking = false; LS.set('motionOK', st === 'granted'); LOG('permission', 'Motion: ' + st + (quiet === true ? ' (auto)' : ''));
     if (st === 'granted') { compassAttach(); return; }
-    CMP.denied = true; if (quiet !== true || !CMP.told) { CMP.told = true; toast('Compass permission denied'); }
+    if (quiet !== true) { CMP.denied = true; toast('Compass permission denied'); }
+    else { const t = $('#qTurn'); if (t && curView === 'qibla') t.textContent = 'Tap “Enable live compass” and choose Allow.'; }
   }).catch(() => { CMP.asking = false; if (quiet !== true) toast('Compass not available here'); });
 }
 function autoCompass() { if (!CMP.on && !CMP.denied && S.loc) startCompass(true); }
