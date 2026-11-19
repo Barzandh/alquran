@@ -5,7 +5,7 @@ Cloudflare Worker + D1 (free plan). Code: `src/`. Tests: `npm test` (unit + simu
 
 ## Resources (Cloudflare account of Barzandh)
 - D1 database `alquran-push`, id `068dccbe-b39b-43fd-8685-0a7e2db2d880` (EEUR). Schema is created by the Worker itself.
-- Worker `alquran-push` — not deployed yet.
+- Worker `alquran-push` — live at https://alquran-push.barzandh.workers.dev (account workers.dev subdomain: barzandh). Cron * * * * *.
 
 ## Deploy (fully automated, through the "Cloudflare API" connector = https://mcp.cloudflare.com/mcp)
 Use its `execute()` with the Workers API (JSON, no wrangler needed):

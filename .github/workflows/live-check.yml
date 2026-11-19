@@ -1,0 +1,21 @@
+name: live-check
+# Production check: published app (GitHub Pages) in real Google Chrome + deployed Worker + Google's push service.
+# Started by Claude after each deploy (workflow_dispatch). Free: public repository.
+on:
+  workflow_dispatch:
+    inputs:
+      build: { description: 'BUILD id that must be live', required: false, default: '' }
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install playwright && google-chrome --version
+      - name: Live check
+        run: xvfb-run -a python3 push/test/live_check.py "${{ inputs.build }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: live-check, path: /tmp/live, retention-days: 14 }

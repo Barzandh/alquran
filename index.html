@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261119.085309";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261119.094856";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5685,7 +5685,7 @@ if (IS_APK) {
    - PUSH: Web Push subscription + the next 14 days of reminders, synced to the server, which sends
      each one at its exact second — so they arrive with the phone locked and the app closed.
    ===================================================================== */
-const PUSH_URL_DEFAULT = '';   /* the Worker's address, set once it is deployed */
+const PUSH_URL_DEFAULT = 'https://alquran-push.barzandh.workers.dev';   /* Cloudflare Worker (code in push/) */
 const PUSH_URL = () => String(LS.get('pushUrl', '') || PUSH_URL_DEFAULT).replace(/\/+$/, '');
 const tzName = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } };
 const dxPlatform = () => IS_APK ? 'apk' : IS_IOS ? (IS_STANDALONE() ? 'ios-app' : 'ios-safari') : /Android/i.test(navigator.userAgent) ? (IS_STANDALONE() ? 'android-app' : 'android-browser') : (IS_STANDALONE() ? 'desktop-app' : 'desktop');
