@@ -282,3 +282,15 @@ test('every query the cron runs each minute uses an index (so D1 reads stay tiny
   ];
   for (const sql of q) { const p = plan(sql); assert.doesNotMatch(p, /SCAN (events|diag)\b(?! USING)/, sql + '\n  → ' + p); }
 });
+
+test('no promise is shared between requests (Cloudflare forbids settling one request\'s promise in another)', async () => {
+  const src = (await import('node:fs')).readFileSync(new URL('../src/index.js', import.meta.url), 'utf8');
+  const globals = [...src.matchAll(/^let ([^;]+);/gm)].flatMap(m => m[1].split(',').map(x => x.trim().split(/\s*=/)[0]));
+  assert.ok(globals.length, 'found module-level variables');
+  for (const g of globals) assert.doesNotMatch(src, new RegExp('\\b' + g + '\\s*=\\s*(\\(async|[^;\\n]*\\.then\\(|new Promise)'), `module-level "${g}" must hold values, not promises`);
+  /* and overlapping first requests on a cold isolate all succeed */
+  resetForTests();
+  const rs = await Promise.all([call('POST', '/v1/register', {}), call('GET', '/v1/vapid'), call('POST', '/v1/register', {}), call('GET', '/v1/health')]);
+  assert.deepEqual(rs.map(r => r.status), [200, 200, 200, 200]);
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM meta WHERE k IN ('vapid','ack')").get().n, 2);
+});

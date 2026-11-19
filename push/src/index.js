@@ -13,7 +13,7 @@
    Cron (every minute): sends every event due in the next 60 s, each at its exact second.            */
 import { b64u, vapidKeys, buildPush } from './webpush.js';
 
-export const WORKER_VERSION = '2026.11.19-2';
+export const WORKER_VERSION = '2026.11.19-3';
 const MAX_BODY = 512 * 1024, MAX_EVENTS = 1500, MAX_DIAG = 200 * 1024;
 const PUSH_HOSTS = ['fcm.googleapis.com', 'android.googleapis.com', 'push.apple.com', 'push.services.mozilla.com', 'notify.windows.com', 'push.api.chrome.google.com'];
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -57,22 +57,25 @@ async function readJSON(req) {
   catch (e) { throw new HttpError(400, 'body must be a JSON object'); }
 }
 
-let ready = null, selfSeen = null;
-export function resetForTests() { ready = null; selfSeen = null; }
+/* Cache the finished keys, never a pending promise: on Cloudflare a promise started by one request cannot
+   settle inside another one ("This promise was created by a request that has since ended"), so two
+   overlapping requests sharing one init promise made the second one fail. Racing inits are harmless:
+   INSERT OR IGNORE + re-read means every request ends up with the same stored keys. */
+let keysCache = null, selfSeen = null;
+export function resetForTests() { keysCache = null; selfSeen = null; }
 async function init(env) {
   if (!env || !env.DB) throw new HttpError(500, 'database binding DB is missing');
-  if (!ready) ready = (async () => {
-    await env.DB.batch(SCHEMA.map(s => env.DB.prepare(s)));
-    const get = async k => (await env.DB.prepare('SELECT v FROM meta WHERE k = ?').bind(k).first()) || null;
-    if (!(await get('vapid'))) {
-      const v = await vapidKeys();
-      await env.DB.prepare('INSERT OR IGNORE INTO meta (k, v) VALUES (?, ?)').bind('vapid', JSON.stringify(v)).run();
-    }
-    if (!(await get('ack'))) await env.DB.prepare('INSERT OR IGNORE INTO meta (k, v) VALUES (?, ?)').bind('ack', rnd(32)).run();
-    const vapid = JSON.parse((await get('vapid')).v), ack = (await get('ack')).v;   /* re-read: another isolate may have won the race */
-    return { vapid, ack };
-  })().catch(e => { ready = null; throw e; });
-  return ready;
+  if (keysCache) return keysCache;
+  await env.DB.batch(SCHEMA.map(s => env.DB.prepare(s)));
+  const get = async k => (await env.DB.prepare('SELECT v FROM meta WHERE k = ?').bind(k).first()) || null;
+  if (!(await get('vapid'))) {
+    const v = await vapidKeys();
+    await env.DB.prepare('INSERT OR IGNORE INTO meta (k, v) VALUES (?, ?)').bind('vapid', JSON.stringify(v)).run();
+  }
+  if (!(await get('ack'))) await env.DB.prepare('INSERT OR IGNORE INTO meta (k, v) VALUES (?, ?)').bind('ack', rnd(32)).run();
+  const vapid = JSON.parse((await get('vapid')).v), ack = (await get('ack')).v;   /* re-read: another request may have won the race */
+  keysCache = { vapid, ack };
+  return keysCache;
 }
 
 async function ackToken(secret, id) {
