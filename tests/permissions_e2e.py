@@ -72,6 +72,18 @@ with sync_playwright() as p:
     check(pg.evaluate('CMP.on') is True and pg.evaluate('__calls.motion') == 1, 'the tap that opens Qibla starts the compass (one tap, one question)')
     check(pg.evaluate('__calls.motionNoTap') == 0, 'never asked outside a tap')
 
+    print('Whole session: how many system questions does the user see?')
+    c2, pg2, errs2 = page('granted', hash='home')
+    for step in ["document.querySelector('[data-go=\"qibla\"]').click()", "go('home')", "go('prayer')", "go('qibla')", "document.dispatchEvent(new Event('visibilitychange'))", "go('home')", "go('qibla')"]:
+        if 'click' in step: pg2.click('[data-go="qibla"]')
+        else: pg2.evaluate(step)
+        pg2.wait_for_timeout(250)
+        if pg2.evaluate("curView") == 'qibla': pg2.mouse.click(200, 300); pg2.wait_for_timeout(150)
+    n = pg2.evaluate('__calls.motion')
+    check(n == 1, f'one session (open Qibla, leave, come back, background/foreground, tap around): motion question shown {n}× — must be exactly 1')
+    check(pg2.evaluate('__calls.geo + __calls.watch') <= 2 and pg2.evaluate("__calls.motionNoTap") == 0, 'no location question, nothing asked outside a tap')
+    c2.close()
+
     print('Qibla page width')
     for hd in (0, 45, 135, 315):
         pg.evaluate(f'onOrient({{ webkitCompassHeading: {hd} }})'); pg.wait_for_timeout(350)
