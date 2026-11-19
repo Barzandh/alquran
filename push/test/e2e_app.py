@@ -177,6 +177,17 @@ with sync_playwright() as p:
         notes = until(lambda: pg.evaluate("navigator.serviceWorker.ready.then(r => r.getNotifications()).then(n => n.map(x => ({ t: x.title, b: x.body, tag: x.tag, silent: x.silent, data: x.data })))"), 8)
         check(bool(notes) and notes[-1]['t'] == msg['t'], f"notification shown: {notes[-1]['t'] if notes else '—'} / {notes[-1]['b'] if notes else ''}")
         check(notes and notes[-1]['silent'] is True, 'app is open on screen → notification is silent (the app rings itself)')
+        # the iPhone case: right after locking, the page is frozen but still reports 'visible' → the notification must ring
+        r2 = pg.evaluate("PUSH.test(0)"); sent2 = until(lambda: len(adm('/__admin/sent')) >= 2 and adm('/__admin/sent'), 8)
+        pg.evaluate("setTimeout(() => { const t = Date.now() + 3000; while (Date.now() < t) {} }, 50)")   # page can't answer, like a frozen one
+        time.sleep(0.3)
+        cdp.send('ServiceWorker.deliverPushMessage', {'origin': AURL + '/', 'registrationId': reg[0]['registrationId'], 'data': sent2[-1]['json']})
+        time.sleep(3.5)
+        tag2 = json.loads(sent2[-1]['json'])
+        n2 = pg.evaluate("navigator.serviceWorker.ready.then(r => r.getNotifications()).then(n => n.map(x => ({ tag: x.tag, silent: x.silent })))")
+        mine = [x for x in n2 if x['tag'].endswith('@' + str(tag2['ts']))]
+        check(mine and mine[0]['silent'] is False, 'page frozen (phone just locked) → notification rings, not silent')
+        check(len({x['tag'] for x in n2}) == len(n2) >= 2, 'every notification has its own tag (iPhone silences replacements)')
         shown = until(lambda: sql('SELECT shown_at FROM events WHERE id = ?', msg['i'])[0]['shown_at'], 8)
         check(bool(shown), "'shown' receipt reached the server")
         # a reminder for the scheduler: cron at the time of the next one sends exactly that one

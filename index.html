@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261119.102150";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261119.104302";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4749,12 +4749,17 @@ function remBody(r, at) {
   return r.note || (r.ar ? r.ar : '');
 }
 let remCtx, remUnlocked = false;
+function remAudio() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (remCtx && remCtx.state !== 'running') { try { remCtx.close(); } catch (e) {} remCtx = null; }   /* after a screen lock the old one stays dead; resume() doesn't revive it */
+  if (!remCtx) { remCtx = new AC(); try { remCtx.resume(); } catch (e) {} }
+  return remCtx;
+}
 function remSound(kind) {
   const snd = S.remSound || 'chime'; if (snd === 'silent') return;
   try {
-    remCtx = remCtx || new (window.AudioContext || window.webkitAudioContext)();
+    remAudio();
     const notes = snd === 'bell' ? [[523.25, 0], [659.25, .35], [783.99, .7], [1046.5, 1.05]] : [[880, 0], [1174.66, .22], [1318.51, .44]];
-    if (remCtx.state !== 'running') remCtx.resume().catch(() => {});
     notes.forEach(([f, t0]) => { const o = remCtx.createOscillator(), g = remCtx.createGain(), t = remCtx.currentTime + t0; o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.6, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + (snd === 'bell' ? 1.6 : .9)); o.connect(g).connect(remCtx.destination); o.start(t); o.stop(t + 1.7); });
   } catch (e) {}
 }
@@ -4762,7 +4767,7 @@ function remSound(kind) {
 try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
 ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
   /* the phone pauses web audio when the app goes to the background: wake it on every tap, not only the first */
-  try { remCtx = remCtx || new (window.AudioContext || window.webkitAudioContext)(); if (remCtx.state !== 'running') remCtx.resume(); } catch (e) {}
+  try { remAudio(); } catch (e) {}
   if (remUnlocked) return; remUnlocked = true;
   try { if (!A.el.src) { A.el.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA='; A.el.play().then(() => A.el.pause()).catch(() => {}); } } catch (e) {}
 }, { once: false, passive: true }));
@@ -6007,7 +6012,11 @@ function pushInit() {
   setTimeout(() => PUSH.check(), 4000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => PUSH.sync(), 1500); });
   setInterval(() => PUSH.sync(), 10 * 6e4);
-  if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'push') LOG('push', 'Received: ' + (e.data.m && e.data.m.t)); });
+  if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => {
+    const d = e.data; if (!d) return;
+    if (d.type === 'onscreen?' && e.ports && e.ports[0]) { e.ports[0].postMessage({ onScreen: document.visibilityState === 'visible' }); return; }   /* a running page answers; a frozen (locked) one can't */
+    if (d.type === 'push') { LOG('push', 'Received: ' + (d.m && d.m.t)); if (d.open && d.m && d.m.k === 'test' && d.m.s !== 'silent') { remSound(); vibrate([200, 100, 200]); } }
+  });
 }
 
 init();
