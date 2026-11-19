@@ -1,0 +1,2 @@
+{ "name": "alquran-push", "private": true, "type": "module",
+  "scripts": { "test": "node --test --experimental-sqlite test/*.test.js" } }

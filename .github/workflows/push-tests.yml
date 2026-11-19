@@ -1,0 +1,39 @@
+name: push-tests
+# Tests for the lock-screen notification server (push/) and the app side of it.
+# Free: public repository. Deployment itself is done by Cloudflare (Workers Builds) from this repo.
+on:
+  push:
+    branches: [main]
+    paths: ['push/**', 'index.html', 'sw.js', '.github/workflows/push-tests.yml']
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Python deps
+        run: pip install cryptography playwright && python -m playwright install --with-deps chromium
+      - name: Worker tests (RFC 8291 vector, independent decoder, simulated week, bad input)
+        working-directory: push
+        run: npm test
+      - name: Syntax check of the app scripts
+        run: |
+          python3 - <<'PY'
+          import re, subprocess
+          s = open('index.html', encoding='utf-8').read()
+          for i, b in enumerate(re.findall(r'<script>(.*?)</script>', s, re.S)):
+              open(f'/tmp/b{i}.js', 'w').write(b)
+              subprocess.run(['node', '--check', f'/tmp/b{i}.js'], check=True)
+          subprocess.run(['node', '--check', 'sw.js'], check=True)
+          print('ok')
+          PY
+      - name: End-to-end (real app in Chromium ↔ Worker on Node)
+        run: python3 push/test/e2e_app.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: e2e-screenshots, path: /tmp/e2e, retention-days: 7 }
