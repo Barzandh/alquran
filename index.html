@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="AlQuran">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<script>window.__PWA__=1;window.__BUILD__="20261120.082951";</script>
+<script>window.__PWA__=1;window.__BUILD__="20261120.085545";</script>
 <meta name="theme-color" content="#0b3527">
 <title>AlQuran — Quran, Prayer & Azkar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2036,8 +2036,7 @@ async function openSheet(i) {
     <div class="sar">${esc(it.ar)} <span class="amark">${toAr(it.n)}</span></div>
     <div style="padding:0 0 10px">${pickBtn('shPick', qItems(true))}</div>
     <div id="shTr">${on.length || S.translit ? '<div class="loading" style="padding:16px"><div class="spin"></div></div>' : '<div class="muted" style="padding:6px 0 10px">Choose a language above to see the translation.</div>'}</div>
-    <div class="row shact"><button class="btn sm pri" data-sh="play">${icon('play')} Play from here</button>
-      <button class="btn sm" data-sh="bm">${icon(bm ? 'bmf' : 'bm')} ${bm ? 'Bookmarked' : 'Bookmark'}</button>
+    <div class="row shact"><button class="btn sm" data-sh="bm">${icon(bm ? 'bmf' : 'bm')} ${bm ? 'Bookmarked' : 'Bookmark'}</button>
       <button class="btn sm" data-sh="copy">${icon('copy')} Copy</button></div>`;
   $('#sheet').classList.add('on');
   if (on.length || S.translit) {
@@ -6167,7 +6166,7 @@ let qhT = 0;
 function qhSoon() { clearTimeout(qhT); qhT = setTimeout(() => qhDraw(), 120); }
 document.addEventListener('click', e => {
   const b = e.target.closest('#qHead button'); if (!b) return;
-  if (b.id === 'qhPlay') { if (A.on && !A.el.paused) pauseAudio(); else if (A.on && A.el.paused && A.i >= 0) A.el.play().catch(() => {}); else playAt(Math.max(0, R.visible || 0)); setTimeout(() => qhDraw(true), 60); }
+  if (b.id === 'qhPlay') { if (A.on && !A.el.paused) pauseAudio(); else if (SH.i >= 0 && SH.i !== A.i) { const i = SH.i; closeSheet(); playAt(i); } else if (A.on && A.el.paused && A.i >= 0) A.el.play().catch(() => {}); else playAt(Math.max(0, R.visible || 0)); setTimeout(() => qhDraw(true), 60); }
   if (b.id === 'qhSet') openDrawer();
   if (b.id === 'qhGo') qgoOpen();
 });

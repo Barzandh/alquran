@@ -45,6 +45,12 @@ with sync_playwright() as p:
     check(pg.evaluate("document.querySelectorAll('#qGo .qgo-row').length") == 114, 'surah tab lists 114 surahs')
     pg.go_back(); pg.wait_for_timeout(300)
     check(not pg.evaluate("document.querySelector('#qGo').classList.contains('on')") and pg.evaluate("curView") == 'quran', 'phone back button closes the panel only')
+    pg.evaluate("openSurah(67)"); pg.wait_for_timeout(1500)
+    pg.click('.ma[data-i="4"]'); pg.wait_for_timeout(500)
+    check(pg.evaluate("document.querySelector('#sheet').classList.contains('on')") and not pg.evaluate("document.querySelector('#sheet [data-sh=play]')"), 'ayah sheet has no separate play button')
+    pg.evaluate("window.__pl=[]; playAt=i=>{__pl.push(i)}; 0")  # trailing 0: evaluate would call a returned function
+    pg.click('#qhPlay'); pg.wait_for_timeout(200)
+    check(pg.evaluate("__pl") == [4] and not pg.evaluate("document.querySelector('#sheet').classList.contains('on')"), 'top-left play starts from the tapped ayah')
     check(pg.evaluate("document.documentElement.scrollWidth") <= 390, 'no sideways scrolling')
     check(not errs, 'no page errors ' + ' | '.join(errs))
     b.close()
