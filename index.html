@@ -878,6 +878,60 @@ html[dir=rtl] .lsback svg{transform:scaleX(-1)}
 .mutecard.on{border-color:var(--gold)}
 .pushwarn{color:#b4552a;font-size:12.5px}
 [data-theme=dark] .pushwarn{color:#f0a37a}
+/* reader header — classic mushaf style */
+.qhead{position:sticky;top:0;z-index:30;margin:-26px -34px 14px}
+.qhead[hidden]{display:none}
+.qh-band{--qh-a:#cdd3ec;--qh-b:#aab4dc;--qh-ink:#2b3566;--qh-navy:#3b4a8c;position:relative;height:64px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;
+  background:radial-gradient(circle at 12px 12px,rgba(255,255,255,.45) 2px,transparent 2.5px) 0 0/24px 24px,radial-gradient(circle at 0 0,rgba(255,255,255,.25) 6px,transparent 6.5px) 0 0/24px 24px,linear-gradient(180deg,var(--qh-a),var(--qh-b));
+  border-bottom:3px solid var(--qh-navy);box-shadow:0 2px 6px rgba(20,30,70,.25)}
+.qh-band::before,.qh-band::after{content:"";position:absolute;bottom:-3px;width:96px;height:58px;background:var(--qh-navy);pointer-events:none}
+.qh-band::before{left:0;border-top-right-radius:58px 58px;clip-path:polygon(0 0,62% 0,100% 100%,0 100%)}
+.qh-band::after{right:0;border-top-left-radius:58px 58px;clip-path:polygon(38% 0,100% 0,100% 100%,0 100%)}
+.qh-btn{position:relative;z-index:1;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:3px solid #1f2a5c;background:radial-gradient(circle at 35% 30%,#fff,#d9dce6 60%,#b9bdcb);color:#1d2340;box-shadow:0 1px 3px rgba(0,0,0,.35),inset 0 1px 0 #fff;padding:0;cursor:pointer}
+.qh-btn svg{width:22px;height:22px}
+.qh-cart{position:relative;z-index:1;flex:0 1 230px;height:52px;gap:1px;border-radius:24px/50%;border:1.5px solid #8d8f99;outline:2px solid rgba(255,255,255,.75);outline-offset:-5px;background:linear-gradient(180deg,#f4f4f6,#d9dadf);color:#1d1f2b;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;cursor:pointer;padding:0 18px;font-family:Amiri,'Scheherazade New',serif}
+.qh-cart small{font-size:12px;opacity:.85;line-height:1.3}
+.qh-cart b{font-size:20px;font-weight:700}
+.qh-cart:active,.qh-btn:active{filter:brightness(.92)}
+body.qh-on .qbar{display:none}
+@media (max-width:820px){ body.qh-on .topbar{display:none!important} .qhead{margin:-14px -14px 10px;padding-top:env(safe-area-inset-top);background:linear-gradient(180deg,#cdd3ec,#cdd3ec)} }
+[data-theme=dark] .qh-band{--qh-a:#3a4372;--qh-b:#2a3260;--qh-navy:#141a3d}
+[data-theme=dark] .qh-cart{background:linear-gradient(180deg,#e9e9ee,#c9cad3)}
+/* go-to panel */
+.qgo{position:fixed;inset:0;z-index:90;display:none;flex-direction:column;background:linear-gradient(180deg,#e3e6f3,#c3c9e6);color:#1d2340;padding-top:env(safe-area-inset-top)}
+.qgo.on{display:flex;animation:qgoIn .22s ease-out}
+@keyframes qgoIn{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+body.qgo-open{overflow:hidden}
+.qgo-top{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.qgo-back{display:flex;align-items:center;gap:2px;border:0;background:none;color:#2e4fb5;font:600 18px Amiri,serif;padding:6px 2px;cursor:pointer}
+.qgo-back svg{width:20px;height:20px}
+.qgo-mic{width:40px;height:36px;border-radius:9px;border:0;background:#d2d6e8;color:#3d58b8;display:grid;place-items:center}
+.qgo-mic svg{width:20px;height:20px}.qgo-mic.on{background:#3d58b8;color:#fff}
+.qgo-seg{display:flex;background:#d2d6e8;border-radius:10px;padding:3px;gap:2px}
+.qgo-seg button{border:0;background:none;padding:6px 16px;border-radius:8px;font:700 17px Amiri,serif;color:#1d2340;cursor:pointer}
+.qgo-seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.qgo-body{flex:1;overflow:auto;padding:0 8px 16px;-webkit-overflow-scrolling:touch}
+.qgo-fields,.qgo-wheels{display:grid;grid-template-columns:17% 41% 19% 23%}
+.qgo-fields{border:1.5px solid #5a6bb0;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.35)}
+.qgo-fields>div{border-inline-start:1.5px solid #5a6bb0;padding:8px 6px;color:#8a90a8;font-size:14px;text-align:start}
+.qgo-fields>div:first-child{border-inline-start:0}
+.qgo-fields input{width:100%;border:0;background:none;padding:0;font-size:16px;color:#1d2340;outline:none}
+.qgo-wheels{position:relative;margin-top:8px;background:#fff;border-radius:12px;height:200px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.qgo-band{position:absolute;left:8px;right:8px;top:80px;height:40px;border-radius:9px;background:#eef0f5;pointer-events:none}
+.qw{position:relative;height:200px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent)}
+.qw::-webkit-scrollbar{display:none}
+.qw .qi,.qw .qpad{height:40px;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;font-size:19px;color:#9a9eb0;white-space:nowrap;overflow:hidden;cursor:pointer}
+.qw .qi.sel{color:#14182b;font-weight:600}
+.qw.f-s .qi{justify-content:center}
+.qgo-goto{display:block;margin:16px auto 0;min-width:120px;padding:7px 26px;border-radius:7px;border:1.5px solid #3d4f99;background:linear-gradient(180deg,#f7f8fc,#d7dbeb);color:#1d2340;font:700 17px Amiri,serif;cursor:pointer}
+.qgo-list{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.qgo-row{display:flex;align-items:center;gap:12px;width:100%;text-align:start;background:rgba(255,255,255,.75);border:1px solid rgba(60,80,160,.18);border-radius:12px;padding:9px 12px;color:#1d2340;cursor:pointer}
+.qgo-row.cur{border-color:#3d58b8;background:#fff}
+.qgo-row .no{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#d8dcf0;font-weight:700;flex:none}
+.qgo-row .nm{flex:1;display:flex;flex-direction:column}
+.qgo-row .nm b{font:700 19px Amiri,serif}.qgo-row .nm small{color:#666c85;font-size:13px}
+.qgo-row .pg{color:#666c85;font-size:13px}
+
 select.langsel{min-width:200px;max-width:100%;font:600 16px/1.2 var(--ui);padding:10px 36px 10px 14px;border-radius:12px}
 </style>
 <script>
@@ -920,6 +974,7 @@ select.langsel{min-width:200px;max-width:100%;font:600 16px/1.2 var(--ui);paddin
   <div class="topbar"><span class="logoSlot"></span><b><span class="rtl-hide">AlQuran </span><span style="font-family:Amiri,serif;color:#d8b56a;font-size:17px">القرآن</span></b><button class="btn icon sm" data-theme-btn></button></div>
   <section class="view" id="v-home"></section>
   <section class="view" id="v-quran">
+    <div class="qhead" id="qHead" hidden></div>
     <div class="qbar"><div class="inner">
       <button class="btn sm" id="qIndex" title="Surah index"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Index</button>
       <select id="selSurah"></select>
@@ -1567,6 +1622,7 @@ function route(arg) {
   curView = VIEWS.some(x => x[0] === v) ? v : 'home';
   $$('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + curView));
   if (curView === 'qibla') { try { autoCompass(); } catch (e) {} }
+  try { qhDraw(); } catch (e) {}
   if (curView !== 'quran' && curView !== 'latin' && typeof closeSheet === 'function') closeSheet();
   if (curView === 'quran' && SH.mode === 'latin' && typeof closeSheet === 'function') closeSheet();
   if (curView === 'latin' && SH.mode === 'q' && typeof closeSheet === 'function') closeSheet();
@@ -1874,7 +1930,7 @@ RENDER.quran = async () => {
     return `<div class="navpn">${p ? `<button class="btn" data-nav="${p}">${icon('left')} ${esc(lab(p))}</button>` : '<span></span>'}${n ? `<button class="btn" data-nav="${n}">${esc(lab(n))} ${icon('right')}</button>` : '<span></span>'}</div>`;
   };
   body.innerHTML = kh + readingHTML() + (kh ? kh.replace('khbanner', 'khbanner" style="margin-top:14px') : '') + prevNext();
-  bindReading(); syncQbar();
+  bindReading(); syncQbar(); qhDraw(true);
   if (A.i >= 0 && A.on) { const it = A.item; const k = it && R.items.findIndex(x => x.s === it.s && x.n === it.n); A.i = k >= 0 ? k : -1; if (k >= 0) markCur(k, false); }
   resolve();
   scrollTarget();
@@ -6046,6 +6102,144 @@ function pushInit() {
     if (d.type === 'onscreen?' && e.ports && e.ports[0]) { e.ports[0].postMessage({ onScreen: document.visibilityState === 'visible' }); return; }   /* a running page answers; a frozen (locked) one can't */
     if (d.type === 'push') { LOG('push', 'Received: ' + (d.m && d.m.t)); if (d.open && d.m && d.m.k === 'test' && d.m.s !== 'silent') { remSound(); vibrate([200, 100, 200]); } }
   });
+}
+
+/* =====================================================================
+   READER HEADER (classic mushaf style): play/pause · surah cartouche (tap = Go to) · settings
+   ===================================================================== */
+const JUZ_AR = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع', 'العاشر', 'الحادي عشر', 'الثاني عشر', 'الثالث عشر', 'الرابع عشر', 'الخامس عشر', 'السادس عشر', 'السابع عشر', 'الثامن عشر', 'التاسع عشر', 'العشرون', 'الحادي والعشرون', 'الثاني والعشرون', 'الثالث والعشرون', 'الرابع والعشرون', 'الخامس والعشرون', 'السادس والعشرون', 'السابع والعشرون', 'الثامن والعشرون', 'التاسع والعشرون', 'الثلاثون'];
+const QH_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+const QH_PAUSE = '<svg viewBox="0 0 24 24"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"/></svg>';
+const QH_GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+const qhNorm = s => String(s || '').replace(/[ً-ٰٟۖ-ۭـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/^ال/, '').replace(/\s+/g, '').toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, '');
+function qhCur() {
+  const it = R.items && R.items[R.visible >= 0 ? R.visible : 0];
+  if (it) return { s: it.s, n: it.n };
+  const r = R.range;
+  if (r && r.type === 'surah') return { s: r.s, n: 1 };
+  if (r && r.type === 'juz') { const [s, n] = JUZ_START[r.j - 1]; return { s, n }; }
+  if (r && r.type === 'pages') { const g = META.pageStart[r.from - 1]; return { s: SUR[g], n: AYA[g] }; }
+  return { s: 1, n: 1 };
+}
+function qhDraw(force) {
+  const el = $('#qHead'); if (!el) return;
+  const on = curView === 'quran' && !!R.range;
+  document.body.classList.toggle('qh-on', on); el.hidden = !on; if (!on) return;
+  const c = qhCur(), j = JUZ[gIndex(c.s, c.n)], playing = A.on && !A.el.paused;
+  const key = c.s + ':' + j + ':' + playing;
+  if (!force && el.dataset.k === key) return; el.dataset.k = key;
+  el.innerHTML = `<div class="qh-band" dir="ltr"><button class="qh-btn" id="qhPlay" type="button" aria-label="${playing ? 'Pause' : 'Play'}">${playing ? QH_PAUSE : QH_PLAY}</button>
+    <button class="qh-cart" id="qhGo" type="button" aria-label="Go to surah, ayah, juz or page"><small data-noi18n>الجزء ${JUZ_AR[j - 1]}</small><b data-noi18n>سورة ${SURAHS[c.s - 1].ar}</b></button>
+    <button class="qh-btn" id="qhSet" type="button" aria-label="Settings">${QH_GEAR}</button></div>`;
+}
+let qhT = 0;
+function qhSoon() { clearTimeout(qhT); qhT = setTimeout(() => qhDraw(), 120); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('#qHead button'); if (!b) return;
+  if (b.id === 'qhPlay') { if (A.on && !A.el.paused) pauseAudio(); else if (A.on && A.el.paused && A.i >= 0) A.el.play().catch(() => {}); else playAt(Math.max(0, R.visible || 0)); setTimeout(() => qhDraw(true), 60); }
+  if (b.id === 'qhSet') openDrawer();
+  if (b.id === 'qhGo') qgoOpen();
+});
+window.addEventListener('scroll', () => { if (curView === 'quran') qhSoon(); }, { passive: true });
+['play', 'pause', 'ended'].forEach(ev => A.el.addEventListener(ev, () => qhSoon()));
+
+/* ---------- "Go to" panel: wheels for ayah · surah · juz · page, plus juz and surah lists ---------- */
+const QG = { tab: 'go', s: 1, n: 1, busy: false };
+const QG_ROW = 40;
+function qgoOpen() {
+  const c = qhCur(); QG.s = c.s; QG.n = c.n; QG.tab = 'go';
+  let el = $('#qGo');
+  if (!el) { el = document.createElement('div'); el.id = 'qGo'; el.className = 'qgo'; el.setAttribute('role', 'dialog'); el.dir = 'rtl'; document.body.appendChild(el); }
+  el.innerHTML = `<div class="qgo-top">
+      <button class="qgo-back" type="button" data-qg="close" aria-label="Back to the Quran"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-noi18n>القرآن</span></button>
+      <span style="flex:1"></span>
+      ${('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) ? `<button class="qgo-mic" type="button" data-qg="mic" aria-label="Say a surah name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>` : ''}
+      <div class="qgo-seg" data-noi18n><button type="button" data-tab="go" class="on">أذهب</button><button type="button" data-tab="juz">الجزء</button><button type="button" data-tab="sura">سورة</button></div>
+    </div><div class="qgo-body" id="qgoBody"></div>`;
+  el.classList.add('on'); document.body.classList.add('qgo-open');
+  try { history.pushState({ qgo: 1 }, '', location.hash); } catch (e) {}
+  qgoTab('go');
+}
+function qgoClose(fromPop) {
+  const el = $('#qGo'); if (!el || !el.classList.contains('on')) return;
+  el.classList.remove('on'); document.body.classList.remove('qgo-open');
+  if (!fromPop) { try { if (history.state && history.state.qgo) history.back(); } catch (e) {} }
+}
+window.addEventListener('popstate', () => qgoClose(true));
+function qgoTab(t) {
+  QG.tab = t;
+  $$('#qGo .qgo-seg button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  const body = $('#qgoBody');
+  if (t === 'go') {
+    body.innerHTML = `<div class="qgo-fields" data-noi18n><div class="f-a">الآية</div><div class="f-s"><input id="qgoQ" type="search" inputmode="search" autocomplete="off" enterkeyhint="go" placeholder="سورة" aria-label="Surah name or number"></div><div class="f-j">الجزء</div><div class="f-p">الصفحة</div></div>
+      <div class="qgo-wheels" data-noi18n><div class="qgo-band"></div>
+        <div class="qw f-a" data-w="a"></div><div class="qw f-s" data-w="s"></div><div class="qw f-j" data-w="j"></div><div class="qw f-p" data-w="p"></div></div>
+      <button class="qgo-goto" type="button" data-qg="goto" data-noi18n>انتقل</button>`;
+    const pad = '<div class="qpad"></div><div class="qpad"></div>';
+    $('[data-w="s"]', body).innerHTML = pad + SURAHS.map(x => `<div class="qi">${toAr(x.n)} ${x.ar}</div>`).join('') + pad;
+    $('[data-w="j"]', body).innerHTML = pad + JUZ_START.map((_, i) => `<div class="qi">${toAr(i + 1)}</div>`).join('') + pad;
+    $('[data-w="p"]', body).innerHTML = pad + Array.from({ length: 604 }, (_, i) => `<div class="qi">${toAr(i + 1)}</div>`).join('') + pad;
+    qgoAyahs();
+    $$('.qw', body).forEach(w => w.addEventListener('scroll', () => { if (QG.busy) return; clearTimeout(w._t); w._t = setTimeout(() => qgoPicked(w.dataset.w, Math.round(w.scrollTop / QG_ROW)), 110); }, { passive: true }));
+    requestAnimationFrame(() => qgoSync());
+    const q = $('#qgoQ');
+    q.addEventListener('input', () => qgoFind(q.value));
+    q.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); qgoGo(); } });
+  } else if (t === 'juz') {
+    body.innerHTML = `<div class="qgo-list" data-noi18n>${JUZ_START.map(([s, n], i) => `<button type="button" class="qgo-row" data-j="${i + 1}"><span class="no">${toAr(i + 1)}</span><span class="nm"><b>الجزء ${JUZ_AR[i]}</b><small>${SURAHS[s - 1].ar}، آية ${toAr(n)}</small></span><span class="pg">ص ${toAr(JUZ_PAGES[i])}</span></button>`).join('')}</div>`;
+  } else {
+    body.innerHTML = `<div class="qgo-list" data-noi18n>${SURAHS.map(x => `<button type="button" class="qgo-row" data-s="${x.n}"><span class="no">${toAr(x.n)}</span><span class="nm"><b>${x.ar}</b><small>${x.type === 'Meccan' ? 'مكية' : 'مدنية'}، ${toAr(x.ayahs)} آية</small></span><span class="pg">ص ${toAr(PAGE[gIndex(x.n, 1)])}</span></button>`).join('')}</div>`;
+    const cur = $(`.qgo-row[data-s="${QG.s}"]`, body); if (cur) { cur.classList.add('cur'); requestAnimationFrame(() => cur.scrollIntoView({ block: 'center' })); }
+  }
+}
+function qgoAyahs() {
+  const w = $('#qGo [data-w="a"]'); if (!w) return;
+  const pad = '<div class="qpad"></div><div class="qpad"></div>';
+  w.innerHTML = pad + Array.from({ length: SURAHS[QG.s - 1].ayahs }, (_, i) => `<div class="qi">${toAr(i + 1)}</div>`).join('') + pad;
+}
+function qgoSync() {   /* put every wheel on QG.s / QG.n */
+  const g = gIndex(QG.s, QG.n), set = (k, i) => { const w = $(`#qGo [data-w="${k}"]`); if (!w) return; w.scrollTop = i * QG_ROW; $$('.qi', w).forEach((x, j) => x.classList.toggle('sel', j === i)); };
+  QG.busy = true;
+  set('a', QG.n - 1); set('s', QG.s - 1); set('j', JUZ[g] - 1); set('p', PAGE[g] - 1);
+  setTimeout(() => { QG.busy = false; }, 160);
+}
+function qgoPicked(k, i) {
+  if (k === 's') { const s = Math.min(114, Math.max(1, i + 1)); if (s === QG.s) return qgoSync(); QG.s = s; QG.n = 1; qgoAyahs(); }
+  else if (k === 'a') { QG.n = Math.min(SURAHS[QG.s - 1].ayahs, Math.max(1, i + 1)); }
+  else if (k === 'j') { const [s, n] = JUZ_START[Math.min(29, Math.max(0, i))]; const ch = s !== QG.s; QG.s = s; QG.n = n; if (ch) qgoAyahs(); }
+  else if (k === 'p') { const g = META.pageStart[Math.min(603, Math.max(0, i))]; const ch = SUR[g] !== QG.s; QG.s = SUR[g]; QG.n = AYA[g]; if (ch) qgoAyahs(); }
+  qgoSync();
+}
+function qgoFind(v) {
+  const t = qhNorm(v); if (!t) return;
+  const num = /^\d+$/.test(String(v).trim().replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))) ? +String(v).trim().replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)) : 0;
+  const hit = num >= 1 && num <= 114 ? SURAHS[num - 1] : SURAHS.find(x => qhNorm(x.ar).startsWith(t) || qhNorm(x.en).startsWith(t)) || SURAHS.find(x => qhNorm(x.ar).includes(t) || qhNorm(x.en).includes(t));
+  if (!hit) return;
+  if (hit.n !== QG.s) { QG.s = hit.n; QG.n = 1; qgoAyahs(); qgoSync(); }
+}
+function qgoGo() { const s = QG.s, n = QG.n; qgoClose(); setTimeout(() => openSurah(s, n), 30); }
+document.addEventListener('click', e => {
+  const el = e.target.closest('#qGo'); if (!el) return;
+  const tb = e.target.closest('[data-tab]'); if (tb) { qgoTab(tb.dataset.tab); return; }
+  const a = e.target.closest('[data-qg]');
+  if (a && a.dataset.qg === 'close') { qgoClose(); return; }
+  if (a && a.dataset.qg === 'goto') { qgoGo(); return; }
+  if (a && a.dataset.qg === 'mic') { qgoMic(a); return; }
+  const qi = e.target.closest('.qw .qi'); if (qi) { const w = qi.parentElement; w.scrollTo({ top: ([...w.children].indexOf(qi) - 2) * QG_ROW, behavior: 'smooth' }); return; }
+  const r = e.target.closest('.qgo-row'); if (!r) return;
+  qgoClose();
+  if (r.dataset.j) { const [s, n] = JUZ_START[+r.dataset.j - 1]; setTimeout(() => openSurah(s, n), 30); }
+  if (r.dataset.s) setTimeout(() => openSurah(+r.dataset.s), 30);
+});
+function qgoMic(btn) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+  try {
+    const r = new SR(); r.lang = 'ar'; r.interimResults = false; r.maxAlternatives = 3;
+    btn.classList.add('on');
+    r.onresult = ev => { const t = ev.results[0][0].transcript; if (QG.tab !== 'go') qgoTab('go'); const q = $('#qgoQ'); if (q) { q.value = t; qgoFind(t); } };
+    r.onend = () => btn.classList.remove('on'); r.onerror = () => btn.classList.remove('on');
+    r.start();
+  } catch (e) { btn.classList.remove('on'); }
 }
 
 init();
