@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AlQuran page tuner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+__FONT__
+:root{--ui:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0b1416;font-family:var(--ui);-webkit-text-size-adjust:100%}
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* ---------- phone preview ---------- */
+#phone{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;max-width:480px;width:100%;margin:0 auto;overflow:hidden}
+.topbar{flex:none;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:var(--hdr);color:#d8b56a;font:700 20px 'Amiri',serif}
+.topbar small{font:600 11px var(--ui);color:#cfe5e3;opacity:.8;margin-left:auto}
+#scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--pagebg)}
+.mushaf{position:relative;padding:18px var(--side);color:var(--ink)}
+.mtext{font-family:'UthmanicHafs','Amiri',serif;font-size:var(--qsize);line-height:var(--lh);text-align:justify;text-align-last:center;direction:rtl;overflow-wrap:break-word;text-shadow:var(--tshadow)}
+.ma{padding:0 2px}
+.amark{display:inline-grid;place-items:center;min-width:1.25em;height:1.25em;padding:0 .12em;margin:0 .15em;font-size:.68em;line-height:1;vertical-align:middle;font-family:'Amiri',serif;color:var(--mark);border-radius:50%;position:relative;text-shadow:none}
+.amark::before{content:'';position:absolute;inset:-1px;border:1.5px solid #b98b2f;border-radius:50%}
+.amark::after{content:'';position:absolute;inset:2.5px;border:1px solid rgba(185,139,47,.45);border-radius:50%}
+.pbreak{display:flex;align-items:center;gap:10px;justify-content:center;margin:14px 0;color:#b98b2f;font:700 12px var(--ui);direction:ltr}
+.pbreak::before,.pbreak::after{content:'';flex:1;height:1px;background:var(--pline)}
+.shead{margin:22px calc(var(--side) * -1) 12px;padding:10px 20px 14px;border-top:1px solid var(--bandline);border-bottom:1px solid var(--bandline);background:var(--band);text-align:center}
+.shead .frame,.shead .nmen,.shead .meta{display:none}
+.shead .nmar{font-family:'UthmanicHafs','Amiri',serif;font-size:calc(var(--qsize) * 1.41);line-height:1.7;color:var(--title)}
+.bism{font-family:'UthmanicHafs','Amiri',serif;font-size:calc(var(--qsize) * 1.05);text-align:center;color:var(--bism);margin:6px 0 18px;line-height:2}
+.navbar{flex:none;display:flex;justify-content:space-around;padding:8px 0 calc(env(safe-area-inset-bottom) + 8px);background:var(--nav);border-top:1px solid rgba(255,255,255,.08);font:600 10px var(--ui);color:var(--navtx)}
+.navbar b{color:#d8b56a}
+
+/* ---------- control sheet ---------- */
+#sheet{flex:none;max-height:46dvh;display:flex;flex-direction:column;background:#f6f7f8;color:#13201f;border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.35);max-width:480px;width:100%;margin:0 auto;transition:max-height .25s ease}
+#sheet.min{max-height:58px}
+.sh-head{flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #e3e6e8}
+.sh-head h1{font-size:15px;margin:0;flex:1}
+.pill{border:0;border-radius:999px;padding:8px 13px;font:600 13px var(--ui);background:#e4ecec;color:#0d4f55}
+.pill.pri{background:#0e6f78;color:#fff}
+#body{overflow-y:auto;padding:4px 14px calc(env(safe-area-inset-bottom) + 14px)}
+fieldset{border:0;margin:0;padding:10px 0;border-bottom:1px solid #e6e9eb}
+legend{font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:#6b7b7b;padding:0;margin-bottom:6px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#e4e8ea;border-radius:10px;padding:3px}
+.seg button{border:0;border-radius:8px;padding:8px 2px;background:transparent;font:600 12px var(--ui);color:#33494a}
+.seg button.on{background:#fff;color:#0e6f78;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.row{display:grid;grid-template-columns:118px 1fr 46px;align-items:center;gap:8px;margin:9px 0;font-size:13px}
+.row output{font:600 12px var(--ui);text-align:right;color:#0e6f78;font-variant-numeric:tabular-nums}
+.row.hide{display:none}
+input[type=range]{width:100%;accent-color:#0e6f78;height:28px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #c9d1d3}
+.sw.on{box-shadow:0 0 0 2px #0e6f78}
+input[type=color]{width:38px;height:32px;border:0;padding:0;background:none}
+#cr{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:6px}
+#cr span{font-weight:700;padding:3px 8px;border-radius:6px}
+.ok{background:#d9f2e3;color:#13693a}.meh{background:#fff2cc;color:#7a5a00}.bad{background:#fde0de;color:#9b1c13}
+#code{width:100%;font:12px ui-monospace,Menlo,monospace;border:1px solid #d5dbdd;border-radius:8px;padding:8px;margin-top:8px;resize:none;background:#fff}
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#0e6f78;color:#fff;padding:8px 14px;border-radius:999px;font:600 13px var(--ui);opacity:0;transition:.2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+.hint{font-size:12px;color:#6b7b7b;margin:4px 0 0}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="topbar">☪ AlQuran <span style="font-family:'Amiri'">القرآن</span><small id="modeTag">Dark preview</small></div>
+  <div id="scroll"><div class="mushaf" id="mushaf">__SNIP__</div></div>
+  <div class="navbar"><span>Home</span><b>Quran</b><span>Latin</span><span>Prayer</span><span>Azkar</span><span>More</span></div>
+</div>
+
+<div id="sheet">
+  <div class="sh-head">
+    <h1>Adjust the page</h1>
+    <button class="pill" id="toggle">Hide</button>
+    <button class="pill pri" id="copy">Copy settings</button>
+  </div>
+  <div id="body">
+    <fieldset>
+      <legend>Mode</legend>
+      <div class="seg" style="grid-template-columns:1fr 1fr" id="mode">
+        <button data-v="dark" class="on">Dark</button><button data-v="light">Light</button>
+      </div>
+    </fieldset>
+
+    <fieldset id="bgset">
+      <legend>Background style</legend>
+      <div class="seg" id="style">
+        <button data-v="solid">Solid</button><button data-v="vert">Top→bottom</button><button data-v="glow">Soft glow</button><button data-v="diag">Diagonal</button>
+      </div>
+      <div class="row" style="grid-template-columns:118px 1fr"><label>Theme colour</label>
+        <div class="swatches" id="sws"><input type="color" id="base" value="#124f55" aria-label="Custom colour"></div></div>
+      <div class="row"><label for="lift">Lighter part</label><input type="range" id="lift" min="0" max="25" step="1"><output></output></div>
+      <div class="row" id="r-deep"><label for="deep">Deeper part</label><input type="range" id="deep" min="-8" max="12" step="1"><output></output></div>
+      <div class="row"><label for="rich">Colour richness</label><input type="range" id="rich" min="60" max="160" step="5"><output></output></div>
+      <div class="row" id="r-ang"><label for="ang">Direction</label><input type="range" id="ang" min="0" max="360" step="5"><output></output></div>
+      <div class="row" id="r-gy"><label for="gy">Glow height</label><input type="range" id="gy" min="0" max="100" step="5"><output></output></div>
+      <div class="row" id="r-gs"><label for="gs">Glow size</label><input type="range" id="gs" min="40" max="200" step="5"><output></output></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Words</legend>
+      <div class="row"><label for="tb">Text brightness</label><input type="range" id="tb" min="0" max="100" step="5"><output></output></div>
+      <div class="row"><label for="ts">Text glow</label><input type="range" id="ts" min="0" max="10" step="1"><output></output></div>
+      <div id="cr">Readability: <span id="crv"></span><em id="crt" style="font-style:normal;color:#6b7b7b"></em></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Layout</legend>
+      <div class="row"><label for="qsize">Text size</label><input type="range" id="qsize" min="24" max="48" step="1"><output></output></div>
+      <div class="row"><label for="lh">Line spacing</label><input type="range" id="lh" min="16" max="30" step="1"><output></output></div>
+      <div class="row"><label for="side">Side margin</label><input type="range" id="side" min="2" max="40" step="1"><output></output></div>
+      <div class="row"><label for="band">Title band</label><input type="range" id="band" min="0" max="30" step="1"><output></output></div>
+    </fieldset>
+
+    <fieldset style="border:0">
+      <legend>Send me your settings</legend>
+      <p class="hint">Tap “Copy settings” and paste it in the chat, or long-press the box below to copy. I’ll apply exactly these values.</p>
+      <textarea id="code" rows="3" readonly></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="pill" id="reset">Reset to current app</button></div>
+    </fieldset>
+  </div>
+</div>
+<div id="toast">Copied</div>
+
+<script>
+/* ---- colour maths: sRGB <-> OKLCH, so "lighter" keeps the hue instead of adding white ---- */
+const hex2rgb=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16)/255)};
+const lin=c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4), delin=c=>c<=.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-.055;
+function rgb2oklch(rgb){const [r,g,b]=rgb.map(lin);
+  const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+  const L=.2104542553*l+.793617785*m-.0040720468*s,A=1.9779984951*l-2.428592205*m+.4505937099*s,B=.0259040371*l+.7827717662*m-.808675766*s;
+  return [L,Math.hypot(A,B),Math.atan2(B,A)]}
+function oklch2rgb([L,C,H]){const A=C*Math.cos(H),B=C*Math.sin(H);
+  const l=(L+.3963377774*A+.2158037573*B)**3,m=(L-.1055613458*A-.0638541728*B)**3,s=(L-.0894841775*A-1.291485548*B)**3;
+  return [4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s].map(delin)}
+function inGamut(rgb){return rgb.every(v=>v>=-.001&&v<=1.001)}
+function shade(base,dL,cMul){const [L,C,H]=rgb2oklch(hex2rgb(base));let l=Math.min(.97,Math.max(.05,L+dL)),c=C*cMul,rgb=oklch2rgb([l,c,H]);
+  for(let i=0;i<30&&!inGamut(rgb);i++){c*=.92;rgb=oklch2rgb([l,c,H])}return rgb.map(v=>Math.round(Math.min(1,Math.max(0,v))*255))}
+const css=a=>`rgb(${a.join(',')})`, lum=a=>{const [r,g,b]=a.map(v=>lin(v/255));return .2126*r+.7152*g+.0722*b};
+const contrast=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+
+/* ---- settings ---- */
+const DEF={mode:'dark',style:'solid',base:'#124f55',lift:0,deep:0,rich:100,ang:180,gy:45,gs:120,tb:0,ts:0,qsize:34,lh:23,side:16,band:11};
+const THEMES=[['#124f55','Turquoise'],['#0f3d2c','Green'],['#13264f','Midnight'],['#4a1424','Burgundy'],['#3a2b4f','Dusk'],['#2a2f33','Stone']];
+let S;try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem('aqTuner')||'{}'))}catch(e){S=Object.assign({},DEF)}
+const $=id=>document.getElementById(id), R=document.documentElement.style;
+const sws=$('sws');THEMES.forEach(([c,n])=>{const b=document.createElement('button');b.className='sw';b.style.background=c;b.title=n;b.dataset.c=c;b.onclick=()=>{S.base=c;$('base').value=c;draw()};sws.insertBefore(b,$('base'))});
+$('base').oninput=e=>{S.base=e.target.value;draw()};
+['lift','deep','rich','ang','gy','gs','tb','ts','qsize','lh','side','band'].forEach(k=>{$(k).value=S[k];$(k).oninput=e=>{S[k]=+e.target.value;draw()}});
+document.querySelectorAll('#style button').forEach(b=>b.onclick=()=>{S.style=b.dataset.v;if(S.style!=='solid'&&S.lift===0)S.lift=10,$('lift').value=10;draw()});
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{S.mode=b.dataset.v;draw()});
+const fmt={lift:v=>'+'+v,deep:v=>(v>0?'+':'')+v,rich:v=>v+'%',ang:v=>v+'°',gy:v=>v+'%',gs:v=>v+'%',tb:v=>v+'%',ts:v=>v,qsize:v=>v+'px',lh:v=>(v/10).toFixed(1),side:v=>v+'px',band:v=>v};
+
+function draw(){
+  document.querySelectorAll('#style button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.style));
+  document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.mode));
+  document.querySelectorAll('.sw').forEach(b=>b.classList.toggle('on',b.dataset.c===S.base));
+  document.querySelectorAll('.row output').forEach(o=>{const k=o.previousElementSibling.id;o.textContent=fmt[k](S[k])});
+  const dark=S.mode==='dark', st=S.style;
+  $('bgset').style.display=dark?'':'none';
+  $('r-deep').classList.toggle('hide',st==='solid');$('r-ang').classList.toggle('hide',!(st==='vert'||st==='diag'));
+  $('r-gy').classList.toggle('hide',st!=='glow');$('r-gs').classList.toggle('hide',st!=='glow');
+  $('modeTag').textContent=dark?'Dark preview':'Light preview';
+  const rich=S.rich/100, light=shade(S.base,S.lift/100,rich*(S.lift?1.15:1)), deep=shade(S.base,-S.deep/100,rich);
+  const mid=shade(S.base,(S.lift-S.deep)/200,rich*1.07);
+  let bg, lightest=light;
+  if(!dark){bg='#fff';lightest=[255,255,255]}
+  else if(st==='solid'){bg=css(light)}
+  else if(st==='vert'||st==='diag'){const a=st==='vert'&&S.ang===180?180:S.ang;bg=`linear-gradient(${a}deg,${css(light)} 0%,${css(mid)} 50%,${css(deep)} 100%)`}
+  else bg=`radial-gradient(${S.gs}% ${S.gs*.62}% at 50% ${S.gy}%,${css(light)} 0%,${css(mid)} 55%,${css(deep)} 100%)`;
+  const ink=dark?mix([233,227,209],[255,255,255],S.tb/100):mix([29,38,33],[0,0,0],S.tb/100);
+  R.setProperty('--pagebg',bg);R.setProperty('--ink',css(ink));
+  R.setProperty('--tshadow',S.ts&&dark?`0 0 ${S.ts}px rgba(0,0,0,${.06*S.ts})`:'none');
+  R.setProperty('--mark',dark?'#ead9a8':'#0e737c');R.setProperty('--bism',dark?'#ead9a8':'#0a5960');R.setProperty('--title',dark?'#ead9a8':'#111');
+  R.setProperty('--pline',dark?'rgba(255,255,255,.14)':'#9fcfd3');
+  const bw=S.band/100;
+  R.setProperty('--band',dark?`linear-gradient(90deg,rgba(255,255,255,${(bw*.18).toFixed(3)}) 0%,rgba(255,255,255,${bw.toFixed(3)}) 10%,rgba(255,255,255,${bw.toFixed(3)}) 90%,rgba(255,255,255,${(bw*.18).toFixed(3)}) 100%)`
+    :`linear-gradient(90deg,#f5f5f5 0%,rgb(${Array(3).fill(Math.round(245-bw*370)).join(',')}) 10%,rgb(${Array(3).fill(Math.round(245-bw*370)).join(',')}) 90%,#f5f5f5 100%)`);
+  R.setProperty('--bandline',dark?'rgba(255,255,255,.28)':'#9b9b9b');
+  R.setProperty('--hdr',dark?css(shade(S.base,-.08,1)):'#06464c');R.setProperty('--nav',dark?css(shade(S.base,0,1)):'#f4f8f8');R.setProperty('--navtx',dark?'#9fb8b8':'#5b6b6b');
+  R.setProperty('--qsize',S.qsize+'px');R.setProperty('--lh',S.lh/10);R.setProperty('--side',S.side+'px');
+  const c=contrast(ink,lightest), cls=c>=7?'ok':c>=4.5?'meh':'bad';
+  $('crv').className=cls;$('crv').textContent=c.toFixed(1);
+  $('crt').textContent=c>=7?'very clear':c>=4.5?'clear':'too faint — raise text brightness or lower “Lighter part”';
+  const out={};Object.keys(DEF).forEach(k=>{if(S[k]!==DEF[k])out[k]=S[k]});
+  $('code').value='AlQuran page: '+JSON.stringify(Object.assign({mode:S.mode},out));
+  try{localStorage.setItem('aqTuner',JSON.stringify(S))}catch(e){}
+}
+$('toggle').onclick=()=>{const m=$('sheet').classList.toggle('min');$('toggle').textContent=m?'Adjust':'Hide'};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('code').value);toast('Copied — paste it in the chat')}catch(e){$('code').focus();$('code').select();toast('Long-press the box to copy')}};
+$('reset').onclick=()=>{S=Object.assign({},DEF);Object.keys(DEF).forEach(k=>{const el=$(k);if(el&&el.type==='range')el.value=S[k]});$('base').value=S.base;draw()};
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)}
+draw();
+</script>
+</body>
+</html>
