@@ -19,7 +19,7 @@ native alarms) + Cloudflare Worker for lock-screen notifications and diagnostics
 1. Edit with exact-match patches (assert match counts). New UI strings: `tools/i18n_add.py` (`add(html, {en: {ar, ku, kb, fr, de, es}})`).
 2. Bump `BUILD` (sw.js) and `__BUILD__` (index.html) to the same `YYYYMMDD.HHMMSS`, then regenerate fingerprints
    (`HASH` in sw.js + `version.json`): `python3 tools/swhash.py .`
-3. Tests: `cd push && npm test`; `python3 push/test/e2e_app.py` (Chromium, local Worker); `python3 tests/permissions_e2e.py` (simulated iPhone permissions, page width); syntax-check every inline script.
+3. Tests: `cd push && npm test`; `python3 push/test/e2e_app.py` (Chromium, local Worker); `python3 tests/permissions_e2e.py` (simulated iPhone permissions, page width); `python3 tests/reader_header_e2e.py` (reader header, Go-to wheels); syntax-check every inline script.
 4. `git fetch`; require `HEAD..origin/main` = 0; commit; push `main` and `main:gh-pages`. Never force-push.
 5. Worker changes: deploy through the Cloudflare API connector (download live modules, patch, verify SHA, upload with
    `keep_triggers`), then run the `live-check` workflow with the new BUILD.
