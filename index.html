@@ -249,6 +249,21 @@ body.lay-on #player,body.lay-on .rb-bar{display:none!important}
 .more-grid .mh:active{cursor:grabbing;background:var(--hl)}
 .more-grid .qcard.drag{z-index:5;box-shadow:0 14px 30px rgba(0,0,0,.22);border-color:var(--gold, #c9a14a);opacity:.97}
 @media (prefers-reduced-motion:reduce){.more-grid .qcard{transition:none!important}}
+.bottom .bedit{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:600;font-family:inherit;color:var(--ink2);background:none;border:0;padding:4px 2px;flex:1;cursor:pointer}
+.bottom .bedit svg{width:22px;height:22px}
+.bottom .bedit span{font-size:inherit}
+.bed-list{display:flex;flex-direction:column}
+.bed-row{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.bed-row.off{opacity:.55}
+.bed-ic{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:var(--hl);flex:none}
+.bed-ic svg{width:20px;height:20px}
+.bed-nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.bed-nm small{color:var(--ink2);font-size:12px}
+.bed-row .btn:disabled{opacity:.35}
+.bed-tg{border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--paper);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.bed-tg.on{background:var(--g7);color:#fff;border-color:var(--g7)}
+.bed-tg:disabled{opacity:.6;cursor:default}
+
 /* ---------- home ---------- */
 .hero{position:relative;overflow:hidden;border-radius:22px;padding:28px 30px;color:#f3ead0;
   background:linear-gradient(130deg,var(--g9) 0%,var(--g7) 70%,#2a7a59 100%);box-shadow:var(--shadow)}
@@ -4147,10 +4162,66 @@ RENDER.latin = () => { if (!LQ.s || !$('#lBody')) latIndex(); };
 window.addEventListener('hashchange', () => pickClose());
 
 /* ============ INIT ============ */
+
+/* ---------- bottom bar: choose and order tabs (max 6, More always stays) ---------- */
+const BOTTOM_ALLOW = ['home', 'quran', 'latin', 'search', 'khatma', 'prayer', 'qibla', 'azkar', 'tasbih', 'hifz', 'calendar', 'more'];
+const BOTTOM_DEF = ['home', 'quran', 'latin', 'prayer', 'azkar', 'more'];
+const BOTTOM_MAX = 6, BOTTOM_MIN = 2;
+const BOTTOM_PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+function bottomCfg() {
+  const c = LS.get('bottomCfg', null) || {};
+  const order = (Array.isArray(c.order) ? c.order : []).filter((k, i, a) => BOTTOM_ALLOW.includes(k) && a.indexOf(k) === i);
+  BOTTOM_ALLOW.forEach(k => { if (!order.includes(k)) order.push(k); });
+  const on = (Array.isArray(c.on) ? c.on : BOTTOM_DEF).filter(k => BOTTOM_ALLOW.includes(k));
+  if (!on.includes('more')) on.push('more');
+  return { order, on };
+}
+function bottomVisible() { const { order, on } = bottomCfg(); return order.filter(k => on.includes(k)).slice(0, BOTTOM_MAX); }
+function renderBottom() {
+  const lab = k => k === 'latin' ? 'Latin' : VIEWS.find(v => v[0] === k)[1];
+  $('#bottom').innerHTML = bottomVisible().map(k => { const v = VIEWS.find(x => x[0] === k); return `<a href="#${k}" data-v="${k}">${icon(v[3])}<span>${lab(k)}</span></a>`; }).join('')
+    + `<button type="button" class="bedit" id="bottomEdit" aria-label="Edit bottom bar">${BOTTOM_PENCIL}<span>Edit</span></button>`;
+  $$('[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === curView || (a.dataset.v === 'more' && MORE_TILES.some(t => t[0] === curView))));
+}
+function bottomSave(cfg) { LS.set('bottomCfg', cfg); renderBottom(); }
+function openBottomEditor() {
+  const { order, on } = bottomCfg();
+  const rows = order.map((k, i) => {
+    const v = VIEWS.find(x => x[0] === k), isOn = on.includes(k);
+    return `<div class="bed-row${isOn ? '' : ' off'}" data-k="${k}"><span class="bed-ic">${icon(v[3])}</span>
+      <span class="bed-nm"><b>${v[1]}</b><small class="arui">${v[2]}</small></span>
+      <button class="btn ghost sm" data-mv="-1" aria-label="Move up" ${i === 0 ? 'disabled' : ''}>▲</button>
+      <button class="btn ghost sm" data-mv="1" aria-label="Move down" ${i === order.length - 1 ? 'disabled' : ''}>▼</button>
+      <button class="bed-tg${isOn ? ' on' : ''}" data-tg="${k}" aria-pressed="${isOn}" ${k === 'more' ? 'disabled' : ''}>${isOn ? 'On' : 'Off'}</button></div>`;
+  }).join('');
+  openModal(`<div class="row" style="justify-content:space-between;margin-bottom:6px"><b style="font-family:var(--serif);font-size:24px">Bottom bar</b><button class="btn sm" data-close>Done</button></div>
+    <p class="muted" style="margin:0 0 10px;font-size:13px">Up to ${BOTTOM_MAX} tabs. More always stays. Use ▲ ▼ to move a tab.</p>
+    <div class="bed-list">${rows}</div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn ghost sm" id="bedReset">Reset</button></div>`, box => {
+      box.onclick = e => {
+        const cfg = bottomCfg();
+        const mv = e.target.closest('[data-mv]'), tg = e.target.closest('[data-tg]');
+        if (e.target.closest('#bedReset')) { LS.set('bottomCfg', {}); renderBottom(); openBottomEditor(); return; }
+        if (mv) {
+          const k = mv.closest('.bed-row').dataset.k, i = cfg.order.indexOf(k), j = i + +mv.dataset.mv;
+          if (j < 0 || j >= cfg.order.length) return;
+          [cfg.order[i], cfg.order[j]] = [cfg.order[j], cfg.order[i]];
+          bottomSave(cfg); openBottomEditor(); return;
+        }
+        if (tg) {
+          const k = tg.dataset.tg;
+          if (cfg.on.includes(k)) { if (cfg.on.length <= BOTTOM_MIN) return toast(`Keep at least ${BOTTOM_MIN} tabs`); cfg.on = cfg.on.filter(x => x !== k); }
+          else { if (cfg.on.length >= BOTTOM_MAX) return toast(`Up to ${BOTTOM_MAX} tabs — turn one off first`); cfg.on.push(k); }
+          bottomSave(cfg); openBottomEditor();
+        }
+      };
+    });
+}
 function buildShell() {
   const sideSep = { reminders: 'Tools' };
   $('#nav').innerHTML = VIEWS.filter(v => v[0] !== 'more').map(([k, en, ar, ic]) => `${sideSep[k] ? `<div class="navsep">${sideSep[k]}</div>` : ''}<a href="#${k}" data-v="${k}">${icon(ic)}<span>${en}</span><span class="na">${ar}</span></a>`).join('');
-  $('#bottom').innerHTML = ['home', 'quran', 'latin', 'prayer', 'azkar', 'more'].map(k => VIEWS.find(v => v[0] === k)).map(([k, en, ar, ic]) => `<a href="#${k}" data-v="${k}">${icon(ic)}<span>${k === 'latin' ? 'Latin' : en}</span></a>`).join('');
+  renderBottom();
+  $('#bottom').onclick = e => { if (e.target.closest('#bottomEdit')) openBottomEditor(); };
   $$('.logoSlot').forEach(s => s.innerHTML = LOGO);
   $$('[data-theme-btn]').forEach(b => { b.innerHTML = icon('theme'); b.onclick = () => { S.theme = { light: 'sepia', sepia: 'dark', dark: 'light' }[S.theme]; save(); applyLook(); }; });
 }
